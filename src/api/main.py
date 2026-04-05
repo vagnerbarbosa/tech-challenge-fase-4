@@ -5,14 +5,15 @@ e handlers de exceção.
 """
 
 from contextlib import asynccontextmanager
+from typing import Any
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes import health
 from src.core.config import settings
-from src.core.logging_config import configure_logging, get_logger
 from src.core.exceptions import AppException
+from src.core.logging_config import configure_logging, get_logger
 
 # Configura logging
 configure_logging()
@@ -20,7 +21,7 @@ logger = get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> Any:
     """Gerenciador de contexto do lifespan da aplicação.
 
     Gerencia eventos de startup e shutdown.
@@ -60,7 +61,7 @@ app.add_middleware(
 
 # Handlers de exceção
 @app.exception_handler(AppException)
-async def app_exception_handler(request, exc: AppException):
+async def app_exception_handler(request: Request, exc: AppException) -> Any:
     """Trata exceções customizadas da aplicação."""
     from fastapi.responses import JSONResponse
 
@@ -85,7 +86,7 @@ app.include_router(health.router, tags=["Health"])
 
 
 @app.get("/", tags=["Root"])
-async def root():
+async def root() -> dict[str, Any]:
     """Endpoint raiz."""
     return {
         "name": settings.app_name,

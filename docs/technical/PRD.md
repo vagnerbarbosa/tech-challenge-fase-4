@@ -321,8 +321,8 @@ class FusionService:
 
 | Task | Feature | Pontos | Dependências | Status |
 |------|---------|--------|--------------|--------|
-| **001** | Bootstrap (Poetry, Docker, Config) | 8 | - | 🔴 Não iniciado |
-| **002** | Health Endpoint | 3 | 001 | 🔴 Não iniciado |
+| **001** | Bootstrap (Poetry, Docker, Config) | 8 | - | ✅ **Concluída** |
+| **002** | Health Endpoint | 3 | 001 | 🟡 Em progresso |
 | **003** | Text Analysis (Azure AI Language) | 8 | 001, 002 | 🔴 Não iniciado |
 | **004** | Audio Analysis (Azure AI Speech) | 8 | 001, 002 | 🔴 Não iniciado |
 | **005** | Image Analysis (Azure AI Vision) | 8 | 001, 002 | 🔴 Não iniciado |
@@ -497,13 +497,15 @@ MAX_FILE_SIZE_MB=50
 
 ## 9. Critérios de Aceite por Task
 
-### Task 001: Bootstrap
-- [ ] `poetry install` funciona sem erros
-- [ ] `docker-compose up --build` inicia a aplicação
-- [ ] `pytest` executa (mesmo sem testes ainda)
-- [ ] `ruff check .` passa
-- [ ] `mypy src/` passa
-- [ ] Estrutura de diretórios completa
+### Task 001: Bootstrap ✅
+- [x] `poetry install` funciona sem erros
+- [x] `docker-compose up --build` inicia a aplicação
+- [x] `pytest` executa (mesmo sem testes ainda)
+- [x] `ruff check .` passa
+- [x] `mypy src/` passa
+- [x] Estrutura de diretórios completa
+
+**Status**: Concluída em 2026-04-05 (PR #7)
 
 ### Task 002: Health Endpoint
 - [ ] GET `/health` retorna 200

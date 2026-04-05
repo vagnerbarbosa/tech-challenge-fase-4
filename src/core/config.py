@@ -6,9 +6,9 @@ e carregamento de variáveis de ambiente.
 """
 
 from functools import lru_cache
-from typing import Literal, Optional
+from typing import Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -61,7 +61,7 @@ class Settings(BaseSettings):
         default="X-API-Key",
         description="Nome do header para autenticação via API key",
     )
-    api_key: Optional[str] = Field(
+    api_key: str | None = Field(
         default=None,
         description="API key para autenticação (opcional em dev)",
     )
@@ -69,12 +69,12 @@ class Settings(BaseSettings):
     # ===========================================
     # Azure AI Language (Text Analytics)
     # ===========================================
-    azure_text_key: Optional[str] = Field(
+    azure_text_key: str | None = Field(
         default=None,
         description="Chave da API Azure AI Language",
         alias="AZURE_TEXT_KEY",
     )
-    azure_text_endpoint: Optional[str] = Field(
+    azure_text_endpoint: str | None = Field(
         default=None,
         description="URL do endpoint Azure AI Language",
         alias="AZURE_TEXT_ENDPOINT",
@@ -83,7 +83,7 @@ class Settings(BaseSettings):
     # ===========================================
     # Azure AI Speech Services
     # ===========================================
-    azure_speech_key: Optional[str] = Field(
+    azure_speech_key: str | None = Field(
         default=None,
         description="Chave da API Azure AI Speech",
         alias="AZURE_SPEECH_KEY",
@@ -97,12 +97,12 @@ class Settings(BaseSettings):
     # ===========================================
     # Azure AI Vision (Image Analysis)
     # ===========================================
-    azure_vision_key: Optional[str] = Field(
+    azure_vision_key: str | None = Field(
         default=None,
         description="Chave da API Azure AI Vision",
         alias="AZURE_VISION_KEY",
     )
-    azure_vision_endpoint: Optional[str] = Field(
+    azure_vision_endpoint: str | None = Field(
         default=None,
         description="URL do endpoint Azure AI Vision",
         alias="AZURE_VISION_ENDPOINT",
@@ -111,7 +111,7 @@ class Settings(BaseSettings):
     # ===========================================
     # Azure Blob Storage
     # ===========================================
-    azure_storage_connection_string: Optional[str] = Field(
+    azure_storage_connection_string: str | None = Field(
         default=None,
         description="String de conexão do Azure Storage",
         alias="AZURE_STORAGE_CONNECTION_STRING",
@@ -222,7 +222,7 @@ class Settings(BaseSettings):
     # ===========================================
     @field_validator("azure_text_endpoint", "azure_vision_endpoint")
     @classmethod
-    def validate_azure_endpoint(cls, v: Optional[str]) -> Optional[str]:
+    def validate_azure_endpoint(cls, v: str | None) -> str | None:
         """Garante que URLs de endpoint Azure são válidas."""
         if v is None:
             return v
@@ -235,7 +235,7 @@ class Settings(BaseSettings):
 
     @field_validator("secret_key")
     @classmethod
-    def validate_secret_key(cls, v: str, info) -> str:
+    def validate_secret_key(cls, v: str, info: ValidationInfo) -> str:
         """Alerta se a secret key padrão for usada em produção."""
         values = info.data
         if values.get("environment") == "production" and v == "change-me-in-production":
@@ -243,7 +243,7 @@ class Settings(BaseSettings):
         return v
 
     @model_validator(mode="after")
-    def validate_azure_credentials(self):
+    def validate_azure_credentials(self) -> "Settings":
         """Valida se credenciais Azure estão configuradas em produção."""
         if self.environment == "production":
             missing = []
@@ -283,7 +283,7 @@ class Settings(BaseSettings):
         return [ext.strip().lower() for ext in self.allowed_video_extensions.split(",")]
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Obtém instância cacheada de configurações.
 

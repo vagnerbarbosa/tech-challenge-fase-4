@@ -3,7 +3,6 @@
 Estes testes verificam se a infraestrutura de testes está funcionando corretamente.
 """
 
-import pytest
 
 
 class TestPlaceholder:

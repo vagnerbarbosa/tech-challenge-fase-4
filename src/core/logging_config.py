@@ -77,7 +77,9 @@ def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
     Returns:
         BoundLogger com capacidades de logging estruturado
     """
-    return structlog.get_logger(name)
+    from typing import cast
+
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
 
 
 class RequestContextMiddleware:

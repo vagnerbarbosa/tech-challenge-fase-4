@@ -3,7 +3,6 @@
 Estes testes verificam se a infraestrutura de testes de integração está funcionando.
 """
 
-import pytest
 
 
 class TestIntegrationSetup:
