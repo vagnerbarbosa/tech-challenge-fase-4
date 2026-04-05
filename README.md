@@ -435,18 +435,6 @@ tech-challenge-fase-4/
 
 ---
 
-## Requisitos de Avaliação
-
-| Critério | Peso | Status |
-|----------|------|--------|
-| Funcionalidade | 30% | API multimodal funciona |
-| Código | 25% | Clean code, type hints |
-| Containerização | 20% | Docker + Azure |
-| Testes | 15% | >70% cobertura |
-| Documentação | 10% | README + vídeo |
-
----
-
 ## Licença
 
 MIT License - Copyright (c) 2026 Equipe Tech Challenge
