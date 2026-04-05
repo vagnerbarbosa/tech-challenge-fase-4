@@ -32,12 +32,36 @@ Completar a documentação do projeto e produzir vídeo demonstrativo conforme r
   - Deploy Azure
 - [ ] Link no README.md
 
-### CA4: Coleção de API Clients
-- [ ] **Postman**: Coleção exportada em `docs/postman_collection.json`
-- [ ] **Insomnia**: Coleção exportada em `docs/insomnia_collection.json`
-- [ ] **Bruno** (https://www.usebruno.com/): Coleção em `docs/bruno_collection/`
-- [ ] Ambiente com variáveis configuradas
-- [ ] Exemplos de todas as rotas
+### CA4: Coleções de API Clients (3 formatos compatíveis)
+Criar coleções separadas para cada cliente, garantindo importação nativa:
+
+- [ ] **Postman** (`docs/collections/postman/`)
+  - `collection.json` - Coleção completa exportada
+  - `environment.json` - Ambiente com variáveis
+
+- [ ] **Insomnia** (`docs/collections/insomnia/`)
+  - `collection.json` - Coleção exportada do Insomnia
+  - `environment.json` - Ambiente com variáveis
+
+- [ ] **Bruno** (`docs/collections/bruno/`)
+  - Estrutura de pastas nativa do Bruno:
+    ```
+    bruno/
+    ├── bruno.json          # Config do workspace
+    ├── environments/
+    │   └── local.bru       # Variáveis de ambiente
+    └── analyze/
+        ├── text.bru        # POST /analyze/text
+        ├── audio.bru       # POST /analyze/audio
+        ├── image.bru       # POST /analyze/image
+        └── multimodal.bru  # POST /analyze/multimodal
+    ```
+
+- [ ] Todas as coleções devem incluir:
+  - Todas as rotas da API
+  - Exemplos de request/response
+  - Variáveis: `{{base_url}}`, `{{api_key}}`
+  - Documentação dos campos obrigatórios (`risco_violencia`, `risco_saude_mental`)
 
 ## Estimativa
 
