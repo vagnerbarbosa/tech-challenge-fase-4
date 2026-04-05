@@ -1,0 +1,96 @@
+# ===========================================
+# Docker Compose com Mocks Azure
+# ===========================================
+# Uso: docker-compose -f docker-compose.mock.yml up
+#
+# Este arquivo sobe a API com mocks dos serviços Azure,
+# permitindo desenvolvimento local sem conta Azure.
+
+version: "3.8"
+
+services:
+  # -------------------------------------------
+  # Mock Server - Simula Azure AI Services
+  # -------------------------------------------
+  mock-azure:
+    build:
+      context: ./mock/azure
+      dockerfile: Dockerfile
+    container_name: mock-azure
+    ports:
+      - "3001:3001"  # Text Analytics
+      - "3002:3002"  # Speech Services
+      - "3003:3003"  # Vision
+    environment:
+      - PORT_TEXT=3001
+      - PORT_SPEECH=3002
+      - PORT_VISION=3003
+      - LOG_LEVEL=debug
+    volumes:
+      - ./mock/azure:/app
+    networks:
+      - health-network
+
+  # -------------------------------------------
+  # API FastAPI (modo desenvolvimento com mocks)
+  # -------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: health-api-mock
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # App
+      - APP_NAME=Multimodal Health Analysis API (Mock Mode)
+      - APP_VERSION=1.0.0
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      # Azure - Apontando para mocks
+      - AZURE_TEXT_KEY=fake-key-for-local-dev
+      - AZURE_TEXT_ENDPOINT=http://mock-azure:3001/
+      - AZURE_SPEECH_KEY=fake-key-for-local-dev
+      - AZURE_SPEECH_REGION=local
+      - AZURE_VISION_KEY=fake-key-for-local-dev
+      - AZURE_VISION_ENDPOINT=http://mock-azure:3003/
+      # Database
+      - DATABASE_URL=sqlite+aiosqlite:///./data/health_analysis.db
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_ENABLED=false
+      # Rate Limiting (desabilitado em dev)
+      - RATE_LIMIT_ENABLED=false
+      # Security
+      - SECRET_KEY=dev-secret-key
+      - API_KEY=test-api-key
+      # LGPD
+      - ANONYMIZE_PII=true
+      - CONSENT_REQUIRED=true
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - health-network
+    depends_on:
+      - mock-azure
+      - redis
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # -------------------------------------------
+  # Redis (para cache/rate limiting)
+  # -------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: health-redis-mock
+    ports:
+      - "6379:6379"
+    networks:
+      - health-network
+
+networks:
+  health-network:
+    driver: bridge

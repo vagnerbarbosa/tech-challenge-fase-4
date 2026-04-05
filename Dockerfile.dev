@@ -1,0 +1,43 @@
+# Dockerfile para Desenvolvimento com Hot Reload
+FROM python:3.11-slim
+
+# Evitar buffering do Python
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1
+
+# Instalar dependências de sistema
+RUN apt-get update \
+    && apt-get install -y --no-recommends \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        libgomp1 \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copiar requirements e instalar
+COPY pyproject.toml .
+RUN pip install --no-cache-dir \
+    fastapi>=0.104.0 \
+    uvicorn[standard]>=0.24.0 \
+    python-multipart \
+    pydantic>=2.5.0 \
+    pydantic-settings>=2.1.0 \
+    python-dotenv \
+    structlog \
+    httpx
+
+# Criar diretórios necessários
+RUN mkdir -p data logs uploads
+
+# Expor porta
+EXPOSE 8000
+
+# Comando default (será sobrescrito no docker-compose)
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
