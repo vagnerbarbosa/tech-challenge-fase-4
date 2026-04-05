@@ -173,6 +173,10 @@ Estabelecer a fundação do projeto com estrutura de diretórios, dependências 
 - Task 003: Implementar análise de áudio
 - Task 004: Implementar análise de imagem
 - Task 005: Implementar fusão multimodal
+- Task 007: Rate limiting
+- Task 008: Security hardening
+- Task 009: Testes
+- Task 010: Deploy Azure
 
 ## Notas
 

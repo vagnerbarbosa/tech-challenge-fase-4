@@ -154,8 +154,17 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 ```
 
+## Dependências
+
+⚠️ **NÃO INICIAR SEM:**
+- [ ] Task 008 (Security Hardening) completada
+- [ ] Todas vulnerabilidades CRITICAL e HIGH corrigidas ([security-audit.md](../docs/technical/security-audit.md))
+- [ ] Testes de segurança passando
+
 ## Checklist Final de Deploy
 
+- [ ] Task 008 (Security Hardening) completada
+- [ ] Vulnerabilidades CRITICAL e HIGH corrigidas
 - [ ] Recursos Azure criados no Free Tier
 - [ ] API deployada e acessível publicamente
 - [ ] Todas as variáveis de ambiente configuradas

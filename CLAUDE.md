@@ -259,6 +259,7 @@ open http://localhost:8000/docs
 - ✅ Swagger em `/docs`
 - ✅ LGPD compliance (anonimização, consentimento)
 - ✅ **Hard Stop**: Sistema interrompe automaticamente quando quotas forem atingidas ([ver estratégia](docs/technical/azure-free-tier-hard-stop.md))
+- ✅ **Segurança**: Correções das vulnerabilidades em [security-audit.md](docs/technical/security-audit.md) antes do deploy
 
 ### MUST NOT:
 - ❌ Exceder quotas do Azure Free Tier
@@ -296,9 +297,10 @@ RATE_LIMITS = {
 5. **005-image-analysis**: Integração Azure Computer Vision
 6. **006-multimodal-fusion**: Combinação de 3 modalidades
 7. **007-rate-limiting**: Proteção de quotas Azure
-8. **008-tests**: Unit + integration + load tests
-9. **009-deploy-azure**: Deploy em produção Azure App Service (Free Tier) - **OBRIGATÓRIO**
-10. **010-documentation**: Final README and video
+8. **008-security-hardening**: Correções de segurança (CRITICAL - [ver security-audit.md](docs/technical/security-audit.md))
+9. **009-tests**: Unit + integration + load tests
+10. **010-deploy-azure**: Deploy em produção Azure App Service (Free Tier) - **OBRIGATÓRIO**
+11. **011-documentation**: Final README and video
 
 ---
 
