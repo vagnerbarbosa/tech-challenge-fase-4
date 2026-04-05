@@ -32,35 +32,25 @@ Completar a documentação do projeto e produzir vídeo demonstrativo conforme r
   - Deploy Azure
 - [ ] Link no README.md
 
-### CA4: Coleções de API Clients (3 formatos compatíveis)
-Criar coleções separadas para cada cliente, garantindo importação nativa:
+### CA4: Coleção de API Client (Formato Universal)
+Criar **um único par de arquivos** compatível com Postman, Insomnia e Bruno:
 
-- [ ] **Postman** (`docs/collections/postman/`)
-  - `collection.json` - Coleção completa exportada
-  - `environment.json` - Ambiente com variáveis
+- [ ] **Coleção**: `docs/collection.json`
+  - Formato: Postman Collection v2.1 (padrão universal)
+  - Compatível com: Postman, Insomnia, Bruno
 
-- [ ] **Insomnia** (`docs/collections/insomnia/`)
-  - `collection.json` - Coleção exportada do Insomnia
-  - `environment.json` - Ambiente com variáveis
+- [ ] **Ambiente**: `docs/environment.json`
+  - Formato: Postman Environment v2.1
+  - Variáveis: `{{base_url}}`, `{{api_key}}`
 
-- [ ] **Bruno** (`docs/collections/bruno/`)
-  - Estrutura de pastas nativa do Bruno:
-    ```
-    bruno/
-    ├── bruno.json          # Config do workspace
-    ├── environments/
-    │   └── local.bru       # Variáveis de ambiente
-    └── analyze/
-        ├── text.bru        # POST /analyze/text
-        ├── audio.bru       # POST /analyze/audio
-        ├── image.bru       # POST /analyze/image
-        └── multimodal.bru  # POST /analyze/multimodal
-    ```
+- [ ] **Como importar**:
+  - **Postman**: File → Import → Upload Files
+  - **Insomnia**: Application → Preferences → Data → Import Data → From File
+  - **Bruno**: Collections → Import Collection → Postman Collection
 
-- [ ] Todas as coleções devem incluir:
+- [ ] A coleção deve incluir:
   - Todas as rotas da API
   - Exemplos de request/response
-  - Variáveis: `{{base_url}}`, `{{api_key}}`
   - Documentação dos campos obrigatórios (`risco_violencia`, `risco_saude_mental`)
 
 ## Estimativa
