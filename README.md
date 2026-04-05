@@ -27,27 +27,35 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 
 ### Tecnologias Multimodais:
 
-| Tipo | Tecnologia Azure | Uso |
-|------|------------------|-----|
-| **Texto** | Azure Text Analytics | Análise de sentimento, extração de entidades |
-| **Áudio** | Azure Speech Services | Transcrição + análise de entonação/padrões |
-| **Vídeo** | Azure Computer Vision | Análise de expressões faciais |
+| Tipo | Tecnologia Azure | SDK Python | Uso |
+|------|------------------|------------|-----|
+| **Texto** | Azure AI Language (Text Analytics) | `azure-ai-textanalytics` | Análise de sentimento, NLP |
+| **Áudio** | Azure AI Speech | `azure-cognitiveservices-speech` | Transcrição + análise de voz |
+| **Vídeo** | Azure AI Vision | `azure-ai-vision-imageanalysis` | Análise de expressões faciais |
+
+> **Nota**: Azure Cognitive Services foi renomeado para **Azure AI Services** (2024) e agora faz parte do **Azure AI Foundry** (2025). O SDK `azure-cognitiveservices-vision-computervision` foi deprecated; usar `azure-ai-vision-imageanalysis`.
 
 ---
 
 ## Tecnologias
 
 - **Framework**: FastAPI (Python 3.11+)
-- **Cloud**: Azure (Free Tier) - **Deploy em produção obrigatório**
-  - App Service: Hospedagem API
-  - Speech Services: Transcrição (5h/mês free)
-  - Text Analytics: NLP (5k requests/mês free)
-  - Computer Vision: Análise de imagem (5k requests/mês free)
-  - SQL Database: Metadados (250GB free)
+- **Cloud**: Azure AI Services (Free Tier) - **Deploy em produção obrigatório**
+  - Azure App Service: Hospedagem API
+  - Azure AI Speech: Transcrição (5h/mês free)
+  - Azure AI Language: NLP (5k requests/mês free)
+  - Azure AI Vision: Análise de imagem (5k requests/mês free)
+  - Azure SQL Database: Metadados (250GB free)
+- **SDKs Azure**:
+  - `azure-ai-textanalytics` 5.4.0 (Texto)
+  - `azure-cognitiveservices-speech` 1.48.x (Áudio)
+  - `azure-ai-vision-imageanalysis` 1.0.x (Imagem/Vídeo)
 - **ML**: scikit-learn, transformers
 - **Vídeo**: FFmpeg/OpenCV (extração de frames)
 - **Container**: Docker + Docker Compose
 - **Testes**: pytest
+
+> **ℹ️ Sobre o Rebranding**: Os serviços anteriormente chamados "Azure Cognitive Services" foram renomeados para **Azure AI Services** em 2024 e agora fazem parte do **Azure AI Foundry**. Os SDKs Python foram atualizados conforme lista acima.
 
 ---
 

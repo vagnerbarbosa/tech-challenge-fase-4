@@ -29,17 +29,23 @@ Estabelecer a fundação do projeto com estrutura de diretórios, dependências 
   - fastapi (>=0.104.0)
   - uvicorn (>=0.24.0)
   - python-multipart (upload de arquivos)
-  - azure-ai-textanalytics (Azure Text Analytics)
-  - azure-cognitiveservices-speech (Azure Speech Services)
-  - azure-cognitiveservices-vision-computervision (Azure Computer Vision)
-  - azure-storage-blob (Azure Blob Storage)
-  - opencv-python (extração de frames de vídeo)
+  - **azure-ai-textanalytics** >=5.4.0 (Azure AI Language - Text Analytics)
+  - **azure-cognitiveservices-speech** >=1.48.0 (Azure AI Speech)
+  - **azure-ai-vision-imageanalysis** >=1.0.0 (Azure AI Vision - **NOVO SDK**)
+  - azure-storage-blob (>=12.0.0) (Azure Blob Storage)
+  - opencv-python (>=4.8.0) (extração de frames de vídeo)
   - sqlalchemy + aiosqlite (banco local/dev)
 - [ ] Dependências dev:
   - pytest, pytest-asyncio, pytest-cov, httpx
   - ruff, mypy
   - python-dotenv
 - [ ] `poetry.lock` gerado
+
+> **⚠️ IMPORTANTE - ATUALIZAÇÃO 2025**:
+> O SDK `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**.
+> Usar `azure-ai-vision-imageanalysis` (novo SDK Azure AI Vision).
+>
+> **Azure AI Services Rebranding**: Azure Cognitive Services → Azure AI Services → Azure AI Foundry
 
 ### CA3: Configuração de Ambiente
 - [ ] `.env.example` com todas as variáveis Azure:

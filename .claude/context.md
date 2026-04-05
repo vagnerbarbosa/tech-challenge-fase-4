@@ -45,10 +45,12 @@
 ## Restrições CRÍTICAS (Não-negociáveis)
 
 ### Modalidades Obrigatórias:
-1. **Texto** (Azure Text Analytics)
-2. **Áudio** (Azure Speech Services)
-3. **Imagem/Vídeo** (Azure Computer Vision)
+1. **Texto** (Azure AI Language / Text Analytics)
+2. **Áudio** (Azure AI Speech)
+3. **Imagem/Vídeo** (Azure AI Vision)
 4. **Fusão multimodal** (combinação das 3)
+
+> **⚠️ REBRANDING 2025**: Azure Cognitive Services → Azure AI Services → Azure AI Foundry. SDKs atualizados na seção de Tecnologias.
 
 ### Campos Obrigatórios em TODAS Respostas:
 - ✅ `risco_violencia`: baixo | medio | alto
@@ -77,11 +79,17 @@
 - **Python**: 3.11+
 - **Package Manager**: Poetry
 
-### Azure Cognitive Services:
-- **Azure AI Text Analytics**: Sentiment analysis, NLP
-- **Azure Speech Services**: Speech-to-text, análise de voz
-- **Azure Computer Vision**: Análise de imagem, expressões
-- **Azure Blob Storage**: Armazenamento temporário
+### Azure AI Services (Foundry Tools):
+> **Nota**: Rebranding 2024-2025: Azure Cognitive Services → Azure AI Services → Azure AI Foundry
+
+| Serviço | SDK Python | Versão | Propósito |
+|---------|------------|--------|-----------|
+| **Azure AI Language** (Text Analytics) | `azure-ai-textanalytics` | 5.4.0 | Sentiment analysis, NLP |
+| **Azure AI Speech** | `azure-cognitiveservices-speech` | 1.48.x | Speech-to-text, análise de voz |
+| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x | Análise de imagem, expressões |
+| **Azure Blob Storage** | `azure-storage-blob` | 12.x | Armazenamento temporário |
+
+> **⚠️ IMPORTANTE**: O SDK antigo `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**. Usar `azure-ai-vision-imageanalysis`.
 
 ### Infrastructure:
 - **Container**: Docker multi-stage
