@@ -226,8 +226,9 @@ class Settings(BaseSettings):
         """Garante que URLs de endpoint Azure são válidas."""
         if v is None:
             return v
-        if not v.startswith("https://"):
-            raise ValueError("Azure endpoint deve usar HTTPS")
+        # Permitir HTTP em desenvolvimento (para mocks locais)
+        if not v.startswith(("https://", "http://")):
+            raise ValueError("Azure endpoint deve começar com http:// ou https://")
         if not v.endswith("/"):
             v = v + "/"
         return v

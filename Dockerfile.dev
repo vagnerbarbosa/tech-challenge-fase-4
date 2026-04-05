@@ -6,23 +6,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1
 
-# Instalar dependências de sistema
+# Instalar dependências de sistema mínimas
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        libgl1-mesa-glx \
-        libglib2.0-0 \
-        libsm6 \
-        libxext6 \
-        libxrender-dev \
-        libgomp1 \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Diretório de trabalho
 WORKDIR /app
 
-# Copiar requirements e instalar
-COPY pyproject.toml .
+# Copiar requirements e instalar dependências Python
 RUN pip install --no-cache-dir \
     fastapi>=0.104.0 \
     uvicorn[standard]>=0.24.0 \
@@ -31,7 +24,9 @@ RUN pip install --no-cache-dir \
     pydantic-settings>=2.1.0 \
     python-dotenv \
     structlog \
-    httpx
+    httpx \
+    pytest \
+    pytest-asyncio
 
 # Criar diretórios necessários
 RUN mkdir -p data logs uploads
