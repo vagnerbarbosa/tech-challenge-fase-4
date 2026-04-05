@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-Sistema **multimodal** que processa **texto, áudio e vídeo** usando **Azure Cognitive Services** para identificar sinais de violência doméstica e riscos à saúde mental feminina.
+Sistema **multimodal** que processa **texto, áudio e vídeo** usando **Azure AI Services** para identificar sinais de violência doméstica e riscos à saúde mental feminina.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -232,7 +232,7 @@ from pathlib import Path
 from typing import List
 
 class VideoFrameExtractor:
-    """Extrai frames de vídeos para análise com Azure Computer Vision"""
+    """Extrai frames de vídeos para análise com Azure AI Vision"""
 
     def __init__(self, interval_seconds: int = 5):
         self.interval = interval_seconds
@@ -271,7 +271,8 @@ class VideoFrameExtractor:
 # src/infrastructure/azure_clients.py
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.cognitiveservices.speech import SpeechConfig
-from azure.cognitiveservices.vision.computervision import ComputerVisionClient
+from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.core.credentials import AzureKeyCredential
 
 class AzureClientFactory:
     def __init__(self, config: AzureConfig):
@@ -290,10 +291,11 @@ class AzureClientFactory:
             region=self.config.speech_region
         )
 
-    def create_computer_vision_client(self) -> ComputerVisionClient:
-        return ComputerVisionClient(
+    def create_vision_client(self) -> ImageAnalysisClient:
+        """Cria cliente Azure AI Vision usando o novo SDK (azure-ai-vision-imageanalysis)."""
+        return ImageAnalysisClient(
             endpoint=self.config.vision_endpoint,
-            credentials=CognitiveServicesCredentials(self.config.vision_key)
+            credential=AzureKeyCredential(self.config.vision_key)
         )
 ```
 

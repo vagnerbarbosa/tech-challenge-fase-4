@@ -154,7 +154,7 @@
   "servicos_azure": {
     "text_analytics": "disponível",
     "speech": "disponível",
-    "computer_vision": "disponível"
+    "azure_ai_vision": "disponível"
   },
   "quota_restante": {
     "text_requests": "4800/5000",

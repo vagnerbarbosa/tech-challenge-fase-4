@@ -4,7 +4,7 @@
 
 ```
 Desenvolvimento: http://localhost:8000
-Produção: https://diabetes-analysis-api.azurewebsites.net (exemplo)
+Produção: https://multimodal-health-api.azurewebsites.net (exemplo)
 ```
 
 ---

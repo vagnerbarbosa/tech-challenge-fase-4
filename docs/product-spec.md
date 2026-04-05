@@ -43,7 +43,7 @@ Sistema **multimodal** que processa **texto, áudio e vídeo** para identificar 
 
 ## 4. Solução Proposta
 
-API REST **multimodal** integrada com **Azure Cognitive Services** (free tier) que:
+API REST **multimodal** integrada com **Azure AI Services** (free tier) que:
 
 1. **Processa texto**: Análise de sentimento, extração de padrões de violência
 2. **Processa áudio**: Transcrição + análise de entonação, pausas, voz tremida
@@ -124,12 +124,12 @@ API REST **multimodal** integrada com **Azure Cognitive Services** (free tier) q
 - [ ] Endpoint POST `/analyze/image`
 - [ ] Aceita imagens (JPEG, PNG) e vídeos curtos (MP4, max 30s)
 - [ ] Para vídeos: extrair frames automaticamente (1 frame a cada 5s)
-- [ ] Analisar frames com Azure Computer Vision
+- [ ] Analisar frames com Azure AI Vision
 - [ ] Retorna obrigatoriamente: **risco_violencia**, **risco_saude_mental**
 - [ ] Também retorna: emoção_principal, expressoes, sinais_alertas
-- [ ] Usa Azure Computer Vision (free tier: 5k transactions/mês)
+- [ ] Usa Azure AI Vision (free tier: 5k transactions/mês)
 
-**Nota Técnica:** Azure Computer Vision (free tier) só aceita imagens. Para vídeos:
+**Nota Técnica:** Azure AI Vision (free tier) só aceita imagens. Para vídeos:
 1. Receber arquivo de vídeo (MP4, max 30s, max 50MB)
 2. Extrair frames automaticamente (FFmpeg ou OpenCV)
 3. Analisar frames como imagens
@@ -247,7 +247,7 @@ API REST **multimodal** integrada com **Azure Cognitive Services** (free tier) q
 ### Incluído (Obrigatório):
 - [ ] Análise de texto (Azure Text Analytics)
 - [ ] Análise de áudio (Azure Speech Services)
-- [ ] Análise de imagem (Azure Computer Vision)
+- [ ] Análise de imagem (Azure AI Vision)
 - [ ] Fusão multimodal (combinação de 3)
 - [ ] Health check
 - [ ] Docker + Docker Compose
@@ -298,7 +298,7 @@ API REST **multimodal** integrada com **Azure Cognitive Services** (free tier) q
 ## 11. Glossário
 
 - **Multimodal**: Combinação de texto, áudio e imagem
-- **Azure Cognitive Services**: Serviços de AI da Microsoft
+- **Azure AI Services**: Serviços de AI da Microsoft
 - **Late Fusion**: Combinação de resultados após processamento individual
 - **Free Tier**: Nível gratuito de serviços cloud
 - **LGPD**: Lei Geral de Proteção de Dados (Brasil)

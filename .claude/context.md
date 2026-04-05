@@ -37,7 +37,7 @@
   - [x] tasks/001-bootstrap.md (atualizado Azure)
   - [x] CLAUDE.md atualizado
   - [x] .claude/context.md (este arquivo)
-- [ ] Bootstrap técnico (PENDING - aguardando aprovação)
+- [x] Bootstrap técnico (COMPLETED)
 - [ ] Implementação de features (não iniciada)
 
 ---
