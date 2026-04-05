@@ -345,7 +345,7 @@ Toda implementação de código deve ser validada com MCP Context7 para:
 - Fase 1: https://github.com/vagnerbarbosa/tech-challenge-fase-1
 - Fase 2: https://github.com/vagnerbarbosa/tech-challenge-fase-2
 - Fase 3: https://github.com/vagnerbarbosa/tech-challenge-fase-3
-- Documentação PDF: d:\OneDrive\vagner-desktop\Downloads\POSTECH - IADT - Tech Challenge - Fase 4.pdf
+- Documentação PDF: `POSTECH - IADT - Tech Challenge - Fase 4.pdf` (arquivo local)
 - Azure Free Tier: https://azure.microsoft.com/free
 - Azure Cognitive Services: https://azure.microsoft.com/services/cognitive-services/
 - Melhores Práticas: `docs/technical/best-practices.md`
