@@ -321,7 +321,7 @@ poetry run locust -f locustfile.py
 
 ## Vídeo de Demonstração
 
-📹 [Assista ao vídeo de demonstração no YouTube](LINK_AQUI)
+📹 [Assista ao vídeo de demonstração no YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 O vídeo demonstra:
 - Arquitetura multimodal
