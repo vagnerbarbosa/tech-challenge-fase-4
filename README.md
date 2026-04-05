@@ -110,6 +110,33 @@ poetry shell
 poetry run uvicorn src.api.main:app --reload
 ```
 
+### Executar com Mocks (sem conta Azure)
+
+Para desenvolvimento local sem precisar de credenciais Azure:
+
+```bash
+# Usando Docker Compose com mocks
+./scripts/run-mock.sh
+
+# Ou diretamente
+docker-compose -f docker-compose.mock.yml up --build
+```
+
+**Serviços disponíveis:**
+
+| Serviço | URL | Descrição |
+|---------|-----|-----------|
+| API | http://localhost:8000 | API FastAPI |
+| Docs | http://localhost:8000/docs | Swagger UI |
+| Mock Text | http://localhost:3001 | Azure Text Analytics mock |
+| Mock Speech | http://localhost:3002 | Azure Speech Services mock |
+| Mock Vision | http://localhost:3003 | Azure Computer Vision mock |
+
+**Para Windows (PowerShell):**
+```powershell
+.\scripts\run-mock.ps1
+```
+
 ---
 
 ## Endpoints
