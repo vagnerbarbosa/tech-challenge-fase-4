@@ -1,0 +1,99 @@
+name: Validar Conventional Commits
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  validate-commits:
+    name: Validar mensagens de commit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+
+      - name: Validar commits da PR
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "Validando commits de $BASE_SHA até $HEAD_SHA"
+
+          # Obter lista de commits da PR
+          COMMITS=$(git rev-list $BASE_SHA..$HEAD_SHA)
+
+          # Validar cada commit
+          EXIT_CODE=0
+          for commit in $COMMITS; do
+            echo "Validando commit: $commit"
+            COMMIT_MSG=$(git log --format=%B -n 1 $commit)
+            echo "Mensagem: $COMMIT_MSG"
+
+            if ! echo "$COMMIT_MSG" | npx commitlint; then
+              echo "❌ Commit $commit não segue o padrão Conventional Commits"
+              EXIT_CODE=1
+            else
+              echo "✅ Commit $commit está correto"
+            fi
+            echo "---"
+          done
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo ""
+            echo "❌ Alguns commits não seguem o padrão Conventional Commits!"
+            echo ""
+            echo "📖 Formato esperado:"
+            echo "   <tipo>[escopo opcional]: <descrição>"
+            echo ""
+            echo "   Tipos válidos: feat, fix, docs, style, refactor, test, chore, ci, build, perf"
+            echo ""
+            echo "   Exemplos:"
+            echo "   - feat: adiciona nova funcionalidade"
+            echo "   - fix: corrige bug na autenticação"
+            echo "   - docs: atualiza README"
+            echo ""
+            echo "📚 Mais informações: https://www.conventionalcommits.org/pt-br/"
+            exit 1
+          fi
+
+          echo "✅ Todos os commits seguem o padrão Conventional Commits!"
+
+  validate-pr-title:
+    name: Validar título da PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validar título
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            ci
+            build
+            perf
+          requireScope: false
+          subjectPattern: ^[A-Z].+$
+          subjectPatternError: |
+            O título da PR deve começar com letra maiúscula.
+            Exemplo: "feat: Adiciona nova funcionalidade"
