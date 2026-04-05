@@ -3,10 +3,10 @@ name = "multimodal-health-analysis"
 version = "1.0.0"
 description = "Tech Challenge Fase 4 - Sistema multimodal de análise de saúde da mulher usando Azure AI Services"
 authors = [
-    "Vagner Barbosa <vagnerbarbosasantos@gmail.com>",
-    "Leticia Nepomucena <leticianepomucena@gmail.com>",
-    "Marcelo Pucciarelli <marcelo.pucciarelli@gmail.com>",
-    "Anderson Leite <anderson.leite@gmail.com>",
+    "Vagner Barbosa Dantas <contato@vagnerbarbosa.com>",
+    "Adriel Felipe Cândido Santos <12.adriel@gmail.com>",
+    "Lucas Felipe Silva <lucfsilva@gmail.com>",
+    "Letícia Rodrigues Nepomucena Lopes <lehnep2@gmail.com>",
 ]
 readme = "README.md"
 license = "MIT"
