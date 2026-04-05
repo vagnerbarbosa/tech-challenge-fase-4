@@ -38,7 +38,7 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 ## Tecnologias
 
 - **Framework**: FastAPI (Python 3.11+)
-- **Cloud**: Azure (Free Tier)
+- **Cloud**: Azure (Free Tier) - **Deploy em produção obrigatório**
   - App Service: Hospedagem API
   - Speech Services: Transcrição (5h/mês free)
   - Text Analytics: NLP (5k requests/mês free)

@@ -63,6 +63,7 @@
 ### Obrigatórios (Avaliação):
 - [ ] API REST multimodal
 - [ ] Integração Azure Cognitive Services
+- [ ] **Deploy em produção Azure** (Free Tier - obrigatório)
 - [ ] Docker + docker-compose
 - [ ] Testes > 70% cobertura
 - [ ] Vídeo YouTube 5-10 min
@@ -285,7 +286,13 @@ LOG_LEVEL=DEBUG
 - [ ] Integration tests
 - [ ] Load tests (Locust)
 
-### Task 009: Documentation (5 pontos)
+### Task 009: Deploy Azure (10 pontos) - **OBRIGATÓRIO**
+- [ ] App Service criado (Free Tier F1)
+- [ ] API deployada e acessível publicamente
+- [ ] Variáveis de ambiente configuradas
+- [ ] URL de produção documentada
+
+### Task 010: Documentation (5 pontos)
 - [ ] README final
 - [ ] Vídeo YouTube 5-10 min
 
