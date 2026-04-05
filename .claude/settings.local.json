@@ -14,7 +14,9 @@
       "Bash(gh api:*)",
       "Bash(gh run:*)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(findstr \"state\")",
+      "Bash(git rm:*)"
     ]
   }
 }

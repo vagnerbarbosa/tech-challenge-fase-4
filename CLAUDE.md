@@ -258,6 +258,7 @@ open http://localhost:8000/docs
 - ✅ Docker funciona com `docker-compose up`
 - ✅ Swagger em `/docs`
 - ✅ LGPD compliance (anonimização, consentimento)
+- ✅ **Hard Stop**: Sistema interrompe automaticamente quando quotas forem atingidas ([ver estratégia](docs/technical/azure-free-tier-hard-stop.md))
 
 ### MUST NOT:
 - ❌ Exceder quotas do Azure Free Tier

@@ -282,6 +282,17 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 
 **Custo total: $0** (dentro do free tier)
 
+### 🔒 Proteção Contra Custos (Hard Stop)
+
+O sistema implementa uma **estratégia de hard stop** que garante **zero custos**:
+
+- **Contadores internos** por serviço (Texto, Áudio, Visão)
+- **Interrupção automática** quando quotas forem atingidas
+- **Retorno HTTP 503** com informação de retry
+- **Reset automático** às 00:00 UTC
+
+> Ver detalhes em: [`docs/technical/azure-free-tier-hard-stop.md`](docs/technical/azure-free-tier-hard-stop.md)
+
 ---
 
 ## Testes
@@ -303,6 +314,7 @@ poetry run locust -f locustfile.py
 - [Histórias de Usuário](docs/user-stories.md)
 - [Arquitetura](docs/architecture.md)
 - [Análise Cloud Free Tier](docs/technical/cloud-free-tier-analysis.md)
+- [Estratégia Hard Stop - Zero Custo](docs/technical/azure-free-tier-hard-stop.md)
 - [API Contracts](docs/api-contracts.md)
 
 ---
