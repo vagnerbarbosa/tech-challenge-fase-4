@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(grep -E \"\\\\.\\(md|py|toml|yml|sh\\)$\")",
+      "WebFetch(domain:)",
+      "Bash(gh pr:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
