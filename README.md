@@ -132,11 +132,6 @@ docker-compose -f docker-compose.mock.yml up --build
 | Mock Speech | http://localhost:3002 | Azure Speech Services mock |
 | Mock Vision | http://localhost:3003 | Azure Computer Vision mock |
 
-**Para Windows (PowerShell):**
-```powershell
-.\scripts\run-mock.ps1
-```
-
 ---
 
 ## Endpoints
