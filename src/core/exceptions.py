@@ -4,7 +4,7 @@ Fornece classes de exceção padronizadas para diferentes cenários de erro
 na API.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 
 class AppException(Exception):
@@ -14,7 +14,7 @@ class AppException(Exception):
         self,
         message: str,
         status_code: int = 500,
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message)
         self.message = message
@@ -29,8 +29,8 @@ class AzureServiceException(AppException):
         self,
         message: str = "Erro no serviço Azure",
         status_code: int = 502,
-        service: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        service: str | None = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message, status_code, details)
         self.service = service
@@ -42,8 +42,8 @@ class ValidationException(AppException):
     def __init__(
         self,
         message: str = "Erro de validação",
-        field: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        field: str | None = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message, 400, details)
         self.field = field
@@ -55,8 +55,8 @@ class RateLimitException(AppException):
     def __init__(
         self,
         message: str = "Limite de requisições excedido",
-        service: Optional[str] = None,
-        retry_after: Optional[int] = None,
+        service: str | None = None,
+        retry_after: int | None = None,
     ):
         super().__init__(message, 429, {"retry_after": retry_after})
         self.service = service
@@ -70,7 +70,7 @@ class SecurityException(AppException):
         self,
         message: str = "Erro de segurança",
         status_code: int = 403,
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message, status_code, details)
 
@@ -81,7 +81,7 @@ class AuthenticationException(SecurityException):
     def __init__(
         self,
         message: str = "Falha na autenticação",
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message, 401, details)
 
@@ -92,7 +92,7 @@ class QuotaExceededException(AppException):
     def __init__(
         self,
         message: str = "Quota do Azure excedida",
-        service: Optional[str] = None,
+        service: str | None = None,
     ):
         super().__init__(
             message,
