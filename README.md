@@ -396,34 +396,42 @@ Arquivos de coleção compatíveis com **Postman**, **Insomnia** e **Bruno** est
 
 ```
 tech-challenge-fase-4/
-├── src/
-│   ├── api/               # FastAPI routes
-│   ├── core/              # Configurações Azure
-│   ├── services/          # Análise multimodal
-│   ├── models/            # Schemas Pydantic
-│   └── infrastructure/    # Integração Azure
-├── tests/
+├── src/                      # Código fonte
+│   ├── api/                  # FastAPI app e rotas
+│   │   ├── main.py
+│   │   └── routes/
+│   │       ├── health.py
+│   │       ├── text.py
+│   │       ├── audio.py
+│   │       ├── image.py
+│   │       └── multimodal.py
+│   ├── core/                 # Configurações, logging, exceções
+│   │   ├── config.py
+│   │   ├── logging_config.py
+│   │   └── exceptions.py
+│   ├── services/             # Lógica de negócio (Azure AI)
+│   │   ├── text_analysis.py
+│   │   ├── audio_analysis.py
+│   │   ├── image_analysis.py
+│   │   └── fusion.py
+│   ├── models/               # Schemas Pydantic
+│   ├── infrastructure/       # Clientes Azure
+│   └── utils/                # Helpers
+├── tests/                    # Testes
 │   ├── unit/
 │   ├── integration/
 │   └── load/
-├── docs/                  # Documentação SDD
-├── docker/
+├── docs/                     # Documentação SDD
+│   └── technical/
+├── scripts/                  # Scripts de desenvolvimento
+├── mock/                     # Serviços mock Azure (dev)
+├── tasks/                    # Arquivos de tarefas
 ├── docker-compose.yml
+├── docker-compose.mock.yml
 ├── Dockerfile
+├── Dockerfile.dev
 └── README.md
 ```
-
----
-
-## Requisitos de Avaliação
-
-| Critério | Peso | Status |
-|----------|------|--------|
-| Funcionalidade | 30% | API multimodal funciona |
-| Código | 25% | Clean code, type hints |
-| Containerização | 20% | Docker + Azure |
-| Testes | 15% | >70% cobertura |
-| Documentação | 10% | README + vídeo |
 
 ---
 
