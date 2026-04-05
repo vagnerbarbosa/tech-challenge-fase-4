@@ -90,9 +90,9 @@ sequenceDiagram
     participant C as Cliente
     participant API as FastAPI
     participant S as AudioAnalysisService
-    AZ as Azure Speech
-    Storage as Azure Blob
-    DB as Azure SQL
+    participant AZ as Azure Speech
+    participant Storage as Azure Blob
+    participant DB as Azure SQL
 
     C->>API: POST /analyze/audio (upload)
     API->>Storage: Salvar arquivo temporário
