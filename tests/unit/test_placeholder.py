@@ -1,32 +1,32 @@
-"""Placeholder tests for initial setup.
+"""Testes placeholder para setup inicial.
 
-These tests verify that the test infrastructure is working correctly.
+Estes testes verificam se a infraestrutura de testes está funcionando corretamente.
 """
 
 import pytest
 
 
 class TestPlaceholder:
-    """Basic placeholder tests."""
+    """Testes placeholder básicos."""
 
     def test_basic_assertion(self):
-        """Verify basic assertions work."""
+        """Verifica se assertivas básicas funcionam."""
         assert True
 
     def test_arithmetic(self):
-        """Verify basic arithmetic works."""
+        """Verifica se aritmética básica funciona."""
         assert 2 + 2 == 4
 
     def test_string_operations(self):
-        """Verify string operations work."""
+        """Verifica se operações de string funcionam."""
         assert "hello".upper() == "HELLO"
 
 
 class TestHealthEndpoint:
-    """Tests for health endpoint (placeholder)."""
+    """Testes para endpoint de health (placeholder)."""
 
     def test_health_endpoint_exists(self, client):
-        """Verify health endpoint returns 200."""
+        """Verifica se o endpoint de health retorna 200."""
         response = client.get("/health")
         assert response.status_code == 200
         data = response.json()

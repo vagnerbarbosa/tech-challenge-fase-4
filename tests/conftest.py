@@ -1,6 +1,6 @@
-"""Pytest fixtures and configuration.
+"""Fixtures e configuração do Pytest.
 
-Provides shared fixtures for all test modules.
+Fornece fixtures compartilhadas para todos os módulos de teste.
 """
 
 import pytest
@@ -11,25 +11,25 @@ from src.api.main import app
 
 @pytest.fixture(scope="session")
 def client():
-    """Create a TestClient instance for the FastAPI app."""
+    """Cria uma instância de TestClient para o app FastAPI."""
     return TestClient(app)
 
 
 @pytest.fixture(scope="session")
 def api_client(client):
-    """Alias for client fixture."""
+    """Alias para a fixture client."""
     return client
 
 
 @pytest.fixture
 def sample_text():
-    """Sample text for testing."""
+    """Texto de exemplo para testes."""
     return "Estou me sentindo ansiosa e com medo"
 
 
 @pytest.fixture
 def sample_analysis_result():
-    """Sample analysis result for testing."""
+    """Resultado de análise de exemplo para testes."""
     return {
         "risco_violencia": 0.2,
         "risco_saude_mental": 0.7,

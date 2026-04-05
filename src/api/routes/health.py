@@ -1,6 +1,6 @@
-"""Health check endpoints.
+"""Endpoints de health check.
 
-Provides endpoints for checking API health and readiness.
+Fornece endpoints para verificar saúde e prontidão da API.
 """
 
 from datetime import datetime
@@ -19,12 +19,12 @@ logger = get_logger(__name__)
     status_code=status.HTTP_200_OK,
     tags=["Health"],
     summary="Health check",
-    description="Check if the API is running and healthy.",
+    description="Verifica se a API está rodando e saudável.",
 )
 async def health_check():
-    """Health check endpoint.
+    """Endpoint de health check.
 
-    Returns basic health information about the API.
+    Retorna informações básicas de saúde da API.
     """
     return {
         "status": "healthy",
@@ -39,15 +39,15 @@ async def health_check():
     status_code=status.HTTP_200_OK,
     tags=["Health"],
     summary="Readiness check",
-    description="Check if the API is ready to receive requests.",
+    description="Verifica se a API está pronta para receber requisições.",
 )
 async def readiness_check():
-    """Readiness check endpoint.
+    """Endpoint de readiness check.
 
-    Returns readiness status for Kubernetes/Docker health checks.
+    Retorna status de prontidão para health checks do Kubernetes/Docker.
     """
-    # TODO: Check database connection
-    # TODO: Check Azure services availability
+    # TODO: Verificar conexão com banco de dados
+    # TODO: Verificar disponibilidade dos serviços Azure
     return {
         "status": "ready",
         "timestamp": datetime.utcnow().isoformat(),

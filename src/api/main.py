@@ -1,7 +1,7 @@
-"""FastAPI application entry point.
+"""Ponto de entrada da aplicação FastAPI.
 
-Configures the FastAPI application with all middleware, routes,
-and exception handlers.
+Configura a aplicação FastAPI com todos os middlewares, rotas
+e handlers de exceção.
 """
 
 from contextlib import asynccontextmanager
@@ -14,30 +14,30 @@ from src.core.config import settings
 from src.core.logging_config import configure_logging, get_logger
 from src.core.exceptions import AppException
 
-# Configure logging
+# Configura logging
 configure_logging()
 logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan context manager.
+    """Gerenciador de contexto do lifespan da aplicação.
 
-    Handles startup and shutdown events.
+    Gerencia eventos de startup e shutdown.
     """
     # Startup
     logger.info(
-        "Starting application",
+        "Iniciando aplicação",
         app_name=settings.app_name,
         version=settings.app_version,
         environment=settings.environment,
     )
     yield
     # Shutdown
-    logger.info("Shutting down application")
+    logger.info("Encerrando aplicação")
 
 
-# Create FastAPI application
+# Cria aplicação FastAPI
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
@@ -48,24 +48,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure CORS
+# Configura CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.debug else [],  # TODO: Configure for production
+    allow_origins=["*"] if settings.debug else [],  # TODO: Configurar para produção
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Exception handlers
+# Handlers de exceção
 @app.exception_handler(AppException)
 async def app_exception_handler(request, exc: AppException):
-    """Handle custom application exceptions."""
+    """Trata exceções customizadas da aplicação."""
     from fastapi.responses import JSONResponse
 
     logger.error(
-        "Application error",
+        "Erro na aplicação",
         error=exc.message,
         status_code=exc.status_code,
         path=request.url.path,
@@ -80,13 +80,13 @@ async def app_exception_handler(request, exc: AppException):
     )
 
 
-# Include routers
+# Inclui routers
 app.include_router(health.router, tags=["Health"])
 
 
 @app.get("/", tags=["Root"])
 async def root():
-    """Root endpoint."""
+    """Endpoint raiz."""
     return {
         "name": settings.app_name,
         "version": settings.app_version,

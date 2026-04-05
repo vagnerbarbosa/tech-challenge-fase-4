@@ -1,7 +1,7 @@
-"""Structured logging configuration using structlog.
+"""Configuração de logging estruturado usando structlog.
 
-Provides JSON-formatted logging for production and human-readable logs
-for development. Includes context binding for request tracing.
+Fornece logs formatados em JSON para produção e logs legíveis
+para desenvolvimento. Inclui context binding para rastreamento de requests.
 """
 
 import logging
@@ -14,32 +14,32 @@ from src.core.config import settings
 
 
 def configure_logging() -> None:
-    """Configure structured logging for the application.
+    """Configura logging estruturado para a aplicação.
 
-    Uses structlog for structured logging with fallback to standard
-    logging for third-party libraries.
+    Usa structlog para logging estruturado com fallback para
+    logging padrão das bibliotecas de terceiros.
     """
     shared_processors: list[Any] = [
-        # Add log level to output
+        # Adiciona nível de log na saída
         structlog.stdlib.filter_by_level,
-        # Add timestamp
+        # Adiciona timestamp
         structlog.processors.TimeStamper(fmt="iso"),
-        # Add log level
+        # Adiciona nível de log
         structlog.stdlib.add_log_level,
-        # Add logger name
+        # Adiciona nome do logger
         structlog.stdlib.add_logger_name,
-        # Replace exception info with formatted traceback
+        # Substitui informação de exceção por traceback formatado
         structlog.processors.format_exc_info,
     ]
 
     if settings.environment == "production":
-        # Production: JSON format
+        # Produção: formato JSON
         processors = shared_processors + [
             structlog.processors.dict_tracebacks,
             structlog.processors.JSONRenderer(),
         ]
     else:
-        # Development: Console renderer with colors
+        # Desenvolvimento: renderer de console com cores
         processors = shared_processors + [
             structlog.dev.ConsoleRenderer(
                 colors=True,
@@ -47,7 +47,7 @@ def configure_logging() -> None:
             ),
         ]
 
-    # Configure structlog
+    # Configura structlog
     structlog.configure(
         processors=processors,
         context_class=dict,
@@ -56,41 +56,42 @@ def configure_logging() -> None:
         cache_logger_on_first_use=True,
     )
 
-    # Configure standard library logging
+    # Configura logging da biblioteca padrão
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=getattr(logging, settings.log_level),
     )
 
-    # Silence noisy third-party loggers
+    # Silencia loggers de terceiros barulhentos
     logging.getLogger("azure").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
-    """Get a structured logger instance.
+    """Obtém uma instância de logger estruturado.
 
     Args:
-        name: Logger name (usually __name__)
+        name: Nome do logger (geralmente __name__)
 
     Returns:
-        BoundLogger with structured logging capabilities
+        BoundLogger com capacidades de logging estruturado
     """
     return structlog.get_logger(name)
 
 
 class RequestContextMiddleware:
-    """ASGI middleware to add request context to logs.
+    """Middleware ASGI para adicionar contexto de request nos logs.
 
-    Adds request_id, method, and path to all log entries within a request.
+    Adiciona request_id, method e path em todas as entradas de log
+    dentro de um request.
     """
 
     def __init__(self, app: Any) -> None:
         self.app = app
 
     async def __call__(self, scope: Any, receive: Any, send: Any) -> None:
-        """Add request context to logs."""
+        """Adiciona contexto de request nos logs."""
         import uuid
 
         if scope["type"] == "http":
