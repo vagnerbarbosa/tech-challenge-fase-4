@@ -359,6 +359,44 @@ O vídeo demonstra:
 
 ---
 
+## Collection API
+
+Arquivos de coleção compatíveis com **Postman**, **Insomnia** e **Bruno** estão disponíveis em `docs/`.
+
+### Arquivos
+
+- **`docs/collection.json`**: Coleção com todos os endpoints da API
+- **`docs/environment.json`**: Variáveis de ambiente (`base_url`, `api_key`)
+
+### Como Importar
+
+#### Postman
+1. File → Import → Upload Files
+2. Selecione `docs/collection.json` e `docs/environment.json`
+3. Clique em "Import"
+4. Selecione o environment "Multimodal Health Analysis API" no dropdown superior direito
+
+#### Insomnia
+1. Application → Preferences → Data → Import Data
+2. Selecione "From File"
+3. Escolha `docs/collection.json`
+4. Repita para `docs/environment.json`
+
+#### Bruno
+1. Collections → Import Collection
+2. Selecione "Postman Collection"
+3. Escolha o arquivo `docs/collection.json`
+4. Para o environment, use: Environments → Create Environment e importe `docs/environment.json`
+
+### Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `{{base_url}}` | URL base da API | `http://localhost:8000` |
+| `{{api_key}}` | Chave de API | `test-api-key` |
+
+---
+
 ## Estrutura do Projeto
 
 ```
