@@ -36,10 +36,15 @@ Sistema **multimodal** para identificação de:
 ## Critical Requirements (From Official Brief)
 
 ### Modalidades Obrigatórias:
-- ✅ **Texto** (Azure Text Analytics)
-- ✅ **Áudio** (Azure Speech Services)
-- ✅ **Imagem/Vídeo** (Azure Computer Vision)
+- ✅ **Texto** (Azure AI Language / Text Analytics)
+- ✅ **Áudio** (Azure AI Speech)
+- ✅ **Imagem/Vídeo** (Azure AI Vision)
 - ✅ **Fusão multimodal** (combinação das 3)
+
+> **⚠️ NOTA SOBRE REBRANDING**: Os serviços anteriormente chamados "Azure Cognitive Services" foram renomeados para **Azure AI Services** (2024) e agora fazem parte do **Azure AI Foundry** (2025). Os SDKs Python foram atualizados:
+> - ✅ `azure-ai-textanalytics` (Texto - mantido)
+> - ✅ `azure-cognitiveservices-speech` (Áudio - mantido)
+> - ⚠️ `azure-ai-vision-imageanalysis` (Visão - **novo SDK**, o antigo `azure-cognitiveservices-vision-computervision` foi deprecated em nov/2024)
 
 ### Azure Free Tier Limits:
 - Text Analytics: 5,000 requests/mês
@@ -68,11 +73,17 @@ Sistema **multimodal** para identificação de:
 - **Validation**: Pydantic v2
 - **Config**: Pydantic Settings
 
-### Azure Cognitive Services:
-- **Azure AI Text Analytics**: Análise de sentimento, NLP
-- **Azure Speech Services**: Speech-to-text, análise de voz
-- **Azure Computer Vision**: Análise de imagem, expressões faciais
-- **Azure Blob Storage**: Armazenamento temporário de arquivos
+### Azure AI Services (Foundry Tools):
+> **Nota**: Azure Cognitive Services foi renomeado para Azure AI Services em 2024 e agora faz parte do Azure AI Foundry.
+
+| Serviço | SDK Python | Versão | Uso |
+|---------|------------|--------|-----|
+| **Azure AI Language** (Text Analytics) | `azure-ai-textanalytics` | 5.4.0 | Análise de sentimento, NLP |
+| **Azure AI Speech** | `azure-cognitiveservices-speech` | 1.48.x | Speech-to-text, análise de voz |
+| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x+ | Análise de imagem, expressões faciais |
+| **Azure Blob Storage** | `azure-storage-blob` | 12.x+ | Armazenamento temporário de arquivos |
+
+> **⚠️ Importante**: O SDK antigo `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**. Usar `azure-ai-vision-imageanalysis`.
 
 ### Infrastructure:
 - **Container**: Docker + Docker Compose
@@ -247,6 +258,7 @@ open http://localhost:8000/docs
 - ✅ Docker funciona com `docker-compose up`
 - ✅ Swagger em `/docs`
 - ✅ LGPD compliance (anonimização, consentimento)
+- ✅ **Hard Stop**: Sistema interrompe automaticamente quando quotas forem atingidas ([ver estratégia](docs/technical/azure-free-tier-hard-stop.md))
 
 ### MUST NOT:
 - ❌ Exceder quotas do Azure Free Tier

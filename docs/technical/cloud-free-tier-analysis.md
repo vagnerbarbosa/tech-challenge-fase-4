@@ -64,30 +64,37 @@
 
 ---
 
-### 3. Azure (Microsoft)
+### 3. Azure (Microsoft) - **RECOMENDADO**
+
+> **Nota sobre Rebranding (2024-2025)**: Os serviços "Azure Cognitive Services" foram renomeados para **Azure AI Services** e agora fazem parte do **Azure AI Foundry**. Os SDKs Python foram atualizados; o antigo `azure-cognitiveservices-vision-computervision` foi deprecated em nov/2024.
 
 #### Free Tier Inclui (12 meses + Sempre Grátis):
-| Serviço | Free Tier | Uso no Projeto |
-|---------|-----------|----------------|
-| Virtual Machines | 750h B1s | API Server |
-| Blob Storage | 5GB + 10k operations | Armazenamento |
-| SQL Database | 250GB + 15 DBs | Banco de dados |
-| Functions | 1M execuções/mês | Serverless functions |
-| Speech Services | 5 horas/mês (Standard) | Speech-to-text (MAIOR LIMITE!) |
-| Computer Vision | 5k transactions/mês | Análise de imagem + frames de vídeo |
-| Text Analytics | 5k requests/mês | NLP/Sentiment |
-| Language Service | 5k requests/mês | NLP avançado |
+| Serviço | Free Tier | Uso no Projeto | SDK Python |
+|---------|-----------|----------------|------------|
+| Virtual Machines | 750h B1s | API Server | - |
+| Blob Storage | 5GB + 10k operations | Armazenamento | `azure-storage-blob` |
+| SQL Database | 250GB + 15 DBs | Banco de dados | `pyodbc` / `asyncpg` |
+| Functions | 1M execuções/mês | Serverless functions | `azure-functions` |
+| **Azure AI Speech** | 5 horas/mês | Speech-to-text | `azure-cognitiveservices-speech` >=1.48.0 |
+| **Azure AI Vision** | 5k transactions/mês | Análise de imagem/vídeo | `azure-ai-vision-imageanalysis` >=1.0.0 |
+| **Azure AI Language** (Text Analytics) | 5k requests/mês | NLP/Sentiment | `azure-ai-textanalytics` >=5.4.0 |
+
+> **⚠️ SDK Vision Atualizado**: Usar `azure-ai-vision-imageanalysis` (novo). O antigo `azure-cognitiveservices-vision-computervision` foi deprecated.
 
 #### ✅ VANTAGENS (RECOMENDADO):
-- **Speech Services: 5 horas/mês** (vs 60 min dos outros!) - MAIOR LIMITE
-- Text Analytics para sentiment analysis
-- Computer Vision para análise de vídeo
+- **Azure AI Speech: 5 horas/mês** (vs 60 min dos outros!) - MAIOR LIMITE
+- Azure AI Language (Text Analytics) para sentiment analysis
+- Azure AI Vision para análise de vídeo
 - SQL Database com 250GB (muito espaço)
 - Azure Functions serverless
-- Integração fácil com Python SDK
+- **SDKs Python atualizados e mantidos**:
+  - `azure-ai-textanalytics` 5.4.0+ (ativo)
+  - `azure-cognitiveservices-speech` 1.48.0+ (ativo)
+  - `azure-ai-vision-imageanalysis` 1.0.0+ (novo SDK, substitui o deprecated)
 
 #### ❌ Desvantagens:
 - Menos popular para tutoriais em português
+- Rebranding recente pode confundir (Cognitive Services → AI Services → AI Foundry)
 
 ---
 
@@ -132,33 +139,45 @@
 
 ---
 
-## Arquitetura com Azure (Free Tier)
+## Arquitetura com Azure AI Services (Free Tier)
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         AZURE CLOUD                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐   ┌────────────────┐   ┌──────────────┐ │
-│  │  Azure       │   │  Azure Speech  │   │  Azure       │ │
-│  │  App Service │   │  Services      │   │  Computer    │ │
-│  │  (API REST)  │   │  (5h/mês free) │   │  Vision      │ │
-│  └──────┬───────┘   └────────────────┘   └──────────────┘ │
-│         │                                                     │
-│  ┌──────▼──────┐   ┌────────────────┐                      │
-│  │  Azure      │   │  Azure Text    │                      │
-│  │  SQL        │   │  Analytics     │                      │
-│  │  Database   │   │  (Sentiment)   │                      │
-│  └─────────────┘   └────────────────┘                      │
-│                                                              │
-│  ┌────────────────────────────────────┐                    │
-│  │  Azure Blob Storage (5GB free)     │                    │
-│  │  - Áudios das consultas            │                    │
-│  │  - Vídeos/análises                 │                    │
-│  │  - Logs                            │                    │
-│  └────────────────────────────────────┘                    │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                      AZURE AI SERVICES                               │
+│                    (Azure AI Foundry)                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌────────────────┐   ┌────────────────────┐   ┌──────────────────┐ │
+│  │  Azure App     │   │  Azure AI Speech   │   │  Azure AI Vision │ │
+│  │  Service       │◄──┤  (5h/mês free)     │   │  (5k trans/mês)  │ │
+│  │  (API REST)    │   │  SDK: azure-cogni- │   │  SDK: azure-ai-  │ │
+│  │                │   │  tiveservices-    │   │  vision-image-  │ │
+│  │                │   │  speech            │   │  analysis         │ │
+│  └───────┬────────┘   └────────────────────┘   └──────────────────┘ │
+│          │                                                           │
+│  ┌───────▼────────┐   ┌────────────────────────┐                    │
+│  │  Azure SQL       │   │  Azure AI Language   │                    │
+│  │  Database        │   │  (Text Analytics)    │                    │
+│  │  (250GB free)    │   │  (5k requests/mês)   │                    │
+│  │                  │   │  SDK: azure-ai-      │                    │
+│  │                  │   │  textanalytics       │                    │
+│  └──────────────────┘   └──────────────────────┘                    │
+│                                                                      │
+│  ┌────────────────────────────────────────┐                        │
+│  │  Azure Blob Storage (5GB free)         │                        │
+│  │  - Áudios temporários                  │                        │
+│  │  - Frames de vídeo                     │                        │
+│  │  - Logs e metadados                    │                        │
+│  │  SDK: azure-storage-blob               │                        │
+│  └────────────────────────────────────────┘                        │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+**SDKs Python (2025):**
+- Texto: azure-ai-textanalytics >=5.4.0
+- Áudio: azure-cognitiveservices-speech >=1.48.0
+- Visão: azure-ai-vision-imageanalysis >=1.0.0 (novo!)
+- Storage: azure-storage-blob >=12.0.0
 ```
 
 ---
@@ -179,48 +198,53 @@ Se 5h/mês de Azure não for suficiente, estratégia híbrida:
 
 ---
 
-## Configuração Azure para Projeto
+## Configuração Azure AI Services para Projeto
 
 ### Serviços Necessários:
 
 ```yaml
 # azure-services.yaml
 recursos:
-  - nome: "diabetes-api-app"
+  - nome: "health-api-app"
     tipo: "App Service"
     tier: "Free (F1)"
     uso: "Hospedar API FastAPI"
     limites: "1GB RAM, 60 min CPU/dia"
 
-  - nome: "diabetes-speech"
-    tipo: "Speech Services"
+  - nome: "health-speech"
+    tipo: "Azure AI Speech"
     tier: "Free (F0)"
     uso: "Transcrever consultas de áudio"
     limites: "5 horas áudio/mês"
+    sdk: "azure-cognitiveservices-speech>=1.48.0"
 
-  - nome: "diabetes-text"
-    tipo: "Text Analytics"
+  - nome: "health-language"
+    tipo: "Azure AI Language" (Text Analytics)
     tier: "Free (F0)"
     uso: "Análise de sentimento em textos"
     limites: "5k requests/mês"
+    sdk: "azure-ai-textanalytics>=5.4.0"
 
-  - nome: "diabetes-vision"
-    tipo: "Computer Vision"
+  - nome: "health-vision"
+    tipo: "Azure AI Vision"
     tier: "Free (F0)"
     uso: "Análise de imagens/vídeos"
     limites: "5k transactions/mês"
+    sdk: "azure-ai-vision-imageanalysis>=1.0.0"
+    nota: "NÃO usar azure-cognitiveservices-vision-computervision (deprecated)"
 
-  - nome: "diabetes-db"
+  - nome: "health-db"
     tipo: "SQL Database"
     tier: "Free"
     uso: "Armazenar metadados e logs"
     limites: "250GB"
 
-  - nome: "diabetes-storage"
+  - nome: "health-storage"
     tipo: "Blob Storage"
     tier: "Standard (LRS)"
-    uso: "Arquivos de áudio e vídeo"
+    uso: "Arquivos de áudio e vídeo temporários"
     limites: "5GB + $0 egress"
+    sdk: "azure-storage-blob>=12.0.0"
 ```
 
 ---
@@ -266,14 +290,20 @@ def check_usage_limits():
 
 ## Conclusão
 
-**Recomendação final: Azure**
+**Recomendação final: Azure AI Services (Foundry Tools)**
 
 **Justificativa:**
 1. Maior quota de Speech-to-Text (5h vs 1h)
-2. Serviços integrados para todas as 3 modalidades
+2. Serviços integrados para todas as 3 modalidades (Texto, Áudio, Visão)
 3. SQL Database generoso (250GB)
-4. Documentação Python completa
+4. **SDKs Python atualizados e bem mantidos**:
+   - `azure-ai-textanalytics` 5.4.0+ (estável, ativo)
+   - `azure-cognitiveservices-speech` 1.48.0+ (estável, ativo)
+   - `azure-ai-vision-imageanalysis` 1.0.0+ (novo, substitui SDK deprecated)
 5. Fácil deploy de APIs Python (App Service)
+
+**Nota sobre Rebranding:**
+Azure Cognitive Services foi renomeado para Azure AI Services (2024) e agora faz parte do Azure AI Foundry (2025). Os serviços permanecem os mesmos, mas os SDKs foram atualizados. O antigo SDK `azure-cognitiveservices-vision-computervision` foi deprecated em novembro 2024; usar `azure-ai-vision-imageanalysis`.
 
 **Custo estimado para MVP:** $0 (dentro do free tier)
 **Caso ultrapasse:** ~$5-10/mês para volumes pequenos
