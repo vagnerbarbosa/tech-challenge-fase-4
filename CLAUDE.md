@@ -243,6 +243,7 @@ open http://localhost:8000/docs
 - ✅ Fusão multimodal (combinação de 3)
 - ✅ **Campos obrigatórios em TODAS respostas**: `risco_violencia` e `risco_saude_mental`
 - ✅ Azure Free Tier (custo zero)
+- ✅ **Deploy em produção Azure** (obrigatório - Azure App Service ou Container Instances)
 - ✅ Docker funciona com `docker-compose up`
 - ✅ Swagger em `/docs`
 - ✅ LGPD compliance (anonimização, consentimento)
@@ -284,7 +285,8 @@ RATE_LIMITS = {
 6. **006-multimodal-fusion**: Combinação de 3 modalidades
 7. **007-rate-limiting**: Proteção de quotas Azure
 8. **008-tests**: Unit + integration + load tests
-9. **009-documentation**: Final README and video
+9. **009-deploy-azure**: Deploy em produção Azure App Service (Free Tier) - **OBRIGATÓRIO**
+10. **010-documentation**: Final README and video
 
 ---
 
