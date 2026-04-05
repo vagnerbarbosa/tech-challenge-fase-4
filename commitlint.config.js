@@ -35,5 +35,8 @@ module.exports = {
     // Corpo e rodapé são opcionais
     'body-leading-blank': [1, 'always'],
     'footer-leading-blank': [1, 'always'],
+
+    // Aumenta limite de caracteres no corpo do commit (padrão é 100)
+    'body-max-line-length': [2, 'always', 200],
   },
 };

@@ -76,8 +76,8 @@ cp .env.example .env
 # Editar com suas credenciais Azure
 AZURE_SPEECH_KEY=seu_key_aqui
 AZURE_SPEECH_REGION=brazilsouth
-AZURE_TEXT_ANALYTICS_KEY=seu_key_aqui
-AZURE_COMPUTER_VISION_KEY=seu_key_aqui
+AZURE_TEXT_KEY=seu_key_aqui
+AZURE_VISION_KEY=seu_key_aqui
 ```
 
 ### 2. Executar com Docker
@@ -109,6 +109,28 @@ poetry shell
 # Executar
 poetry run uvicorn src.api.main:app --reload
 ```
+
+### Executar com Mocks (sem conta Azure)
+
+Para desenvolvimento local sem precisar de credenciais Azure:
+
+```bash
+# Usando Docker Compose com mocks
+./scripts/run-mock.sh
+
+# Ou diretamente
+docker-compose -f docker-compose.mock.yml up --build
+```
+
+**Serviços disponíveis:**
+
+| Serviço | URL | Descrição |
+|---------|-----|-----------|
+| API | http://localhost:8000 | API FastAPI |
+| Docs | http://localhost:8000/docs | Swagger UI |
+| Mock Text | http://localhost:3001 | Azure Text Analytics mock |
+| Mock Speech | http://localhost:3002 | Azure Speech Services mock |
+| Mock Vision | http://localhost:3003 | Azure AI Vision mock |
 
 ---
 
@@ -254,10 +276,10 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 - Telemedicina
 - Depoimentos
 
-### 🎥 Imagem/Vídeo (Azure Computer Vision + FFmpeg)
+### 🎥 Imagem/Vídeo (Azure AI Vision + FFmpeg)
 
 **Processamento:**
-- **Imagens**: Análise direta com Azure Computer Vision
+- **Imagens**: Análise direta com Azure AI Vision
 - **Vídeos**: Extração automática de frames (1 a cada 5s) + análise
 - Análise de expressões faciais
 - Detecção de emoções
@@ -329,6 +351,44 @@ O vídeo demonstra:
 - Identificação de sinais de alerta
 - Dashboard de resultados
 - Deploy na Azure
+
+---
+
+## Collection API
+
+Arquivos de coleção compatíveis com **Postman**, **Insomnia** e **Bruno** estão disponíveis em `docs/`.
+
+### Arquivos
+
+- **`docs/collection.json`**: Coleção com todos os endpoints da API
+- **`docs/environment.json`**: Variáveis de ambiente (`base_url`, `api_key`)
+
+### Como Importar
+
+#### Postman
+1. File → Import → Upload Files
+2. Selecione `docs/collection.json` e `docs/environment.json`
+3. Clique em "Import"
+4. Selecione o environment "Multimodal Health Analysis API" no dropdown superior direito
+
+#### Insomnia
+1. Application → Preferences → Data → Import Data
+2. Selecione "From File"
+3. Escolha `docs/collection.json`
+4. Repita para `docs/environment.json`
+
+#### Bruno
+1. Collections → Import Collection
+2. Selecione "Postman Collection"
+3. Escolha o arquivo `docs/collection.json`
+4. Para o environment, use: Environments → Create Environment e importe `docs/environment.json`
+
+### Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `{{base_url}}` | URL base da API | `http://localhost:8000` |
+| `{{api_key}}` | Chave de API | `test-api-key` |
 
 ---
 

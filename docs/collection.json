@@ -1,0 +1,556 @@
+{
+  "info": {
+    "_postman_id": "tech-challenge-fase-4",
+    "name": "Multimodal Health Analysis API",
+    "description": "API multimodal para análise de saúde da mulher usando Azure AI Services. Compatível com Postman, Insomnia e Bruno.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "Health",
+      "description": "Endpoints de verificação de saúde da API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text",
+                "description": "Chave de API (opcional em desenvolvimento)"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Verifica se a API está funcionando corretamente"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/health",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2026-04-05T19:20:35.237538\",\n  \"version\": \"1.0.0\",\n  \"environment\": \"development\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Readiness Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ready",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ready"
+              ]
+            },
+            "description": "Verifica se a API está pronta para receber requisições"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Root",
+      "item": [
+        {
+          "name": "API Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Retorna informações básicas da API"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"name\": \"Multimodal Health Analysis API\",\n  \"version\": \"1.0.0\",\n  \"docs\": \"/docs\",\n  \"health\": \"/health\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Análise",
+      "description": "Endpoints de análise multimodal de dados médicos",
+      "item": [
+        {
+          "name": "Texto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"Estou me sentindo muito ansiosa e tenho medo de falar sobre o que acontece em casa...\",\n  \"tipo\": \"diario\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/text",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyze",
+                "text"
+              ]
+            },
+            "description": "Analisa texto para identificar sinais de violência e riscos à saúde mental.\n\n**Campos obrigatórios na resposta:**\n- `risco_violencia`: alto, medio, baixo\n- `risco_saude_mental`: alto, medio, baixo"
+          },
+          "response": [
+            {
+              "name": "Exemplo - Risco Detectado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"texto\": \"Estou me sentindo muito ansiosa e tenho medo...\",\n  \"tipo\": \"diario\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/text",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "analyze",
+                    "text"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"sentimento\": \"negativo\",\n  \"score\": -0.85,\n  \"risco_violencia\": \"alto\",\n  \"risco_saude_mental\": \"alto\",\n  \"palavras_chave\": [\"ansiosa\", \"medo\", \"casa\"],\n  \"indicadores\": [\"sinalizacao_isolamento\", \"expressao_medo\"]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Áudio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "/c:/consulta.wav",
+                  "description": "Arquivo de áudio (wav, mp3, ogg, m4a)"
+                },
+                {
+                  "key": "metadata",
+                  "type": "text",
+                  "value": "{\"tipo_consulta\": \"pré-natal\"}",
+                  "description": "Metadados em JSON"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/audio",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyze",
+                "audio"
+              ]
+              },
+            "description": "Transcreve e analisa áudio para identificar padrões de comunicação e riscos.\n\n**Campos obrigatórios na resposta:**\n- `risco_violencia`: alto, medio, baixo\n- `risco_saude_mental`: alto, medio, baixo"
+          },
+          "response": [
+            {
+              "name": "Exemplo - Áudio Processado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "audio",
+                      "type": "file",
+                      "src": "consulta.wav"
+                    },
+                    {
+                      "key": "metadata",
+                      "type": "text",
+                      "value": "{\"tipo_consulta\": \"pré-natal\"}"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/audio",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "analyze",
+                    "audio"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"transcricao\": \"Doutor, eu não sei se posso contar isso...\",\n  \"sentimento\": \"negativo\",\n  \"entonação\": \"hesitante\",\n  \"risco_violencia\": \"medio\",\n  \"risco_saude_mental\": \"alto\",\n  \"pausas_suspeitas\": 3,\n  \"voz_tremida\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Imagem/Vídeo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "imagem",
+                  "type": "file",
+                  "src": "/c:/foto_consulta.jpg",
+                  "description": "Arquivo de imagem (jpg, jpeg, png) ou vídeo (mp4, avi, mov, max 30s)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/image",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyze",
+                "image"
+              ]
+            },
+            "description": "Analisa imagem ou vídeo para identificar expressões faciais e sinais visuais.\n\n**Campos obrigatórios na resposta:**\n- `risco_violencia`: alto, medio, baixo\n- `risco_saude_mental`: alto, medio, baixo"
+          },
+          "response": [
+            {
+              "name": "Exemplo - Imagem Analisada",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "imagem",
+                      "type": "file",
+                      "src": "foto_consulta.jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/image",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "analyze",
+                    "image"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"emoção_principal\": \"tristeza\",\n  \"confiança\": 0.89,\n  \"expressoes\": [\"evitando_olho\", \"expressao_tensa\"],\n  \"sinais_alertas\": [],\n  \"risco_violencia\": \"medio\",\n  \"risco_saude_mental\": \"alto\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Multimodal (Fusão)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "texto",
+                  "type": "text",
+                  "value": "Estou me sentindo muito ansiosa e com medo...",
+                  "description": "Texto a ser analisado"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "/c:/consulta.wav",
+                  "description": "Arquivo de áudio (opcional)"
+                },
+                {
+                  "key": "imagem",
+                  "type": "file",
+                  "src": "/c:/foto.jpg",
+                  "description": "Arquivo de imagem/vídeo (opcional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/multimodal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyze",
+                "multimodal"
+              ]
+            },
+            "description": "Combina análise de texto, áudio e imagem para detecção de riscos.\n\n**Campos obrigatórios na resposta:**\n- `risco_violencia`: alto, medio, baixo\n- `risco_saude_mental`: alto, medio, baixo\n- `fusao`: Resultado combinado das 3 modalidades"
+          },
+          "response": [
+            {
+              "name": "Exemplo - Fusão Multimodal",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "texto",
+                      "type": "text",
+                      "value": "Estou me sentindo muito ansiosa..."
+                    },
+                    {
+                      "key": "audio",
+                      "type": "file",
+                      "src": "consulta.wav"
+                    },
+                    {
+                      "key": "imagem",
+                      "type": "file",
+                      "src": "foto.jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/multimodal",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "analyze",
+                    "multimodal"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"fusao\": {\n    \"risco_violencia\": \"alto\",\n    \"risco_saude_mental\": \"alto\",\n    \"confiança\": 0.92,\n    \"alerta\": true\n  },\n  \"texto\": {\n    \"sentimento\": \"negativo\",\n    \"score\": -0.85\n  },\n  \"audio\": {\n    \"transcricao\": \"Estou me sentindo muito ansiosa...\",\n    \"entonação\": \"hesitante\"\n  },\n  \"imagem\": {\n    \"emoção_principal\": \"tristeza\",\n    \"confiança\": 0.89\n  },\n  \"recomendacao\": \"Encaminhar para equipe multidisciplinar\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documentação",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/docs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "docs"
+              ]
+            },
+            "description": "Documentação interativa da API (Swagger UI)"
+          }
+        },
+        {
+          "name": "OpenAPI Spec",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/openapi.json",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "openapi.json"
+              ]
+            },
+            "description": "Especificação OpenAPI em formato JSON"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Configuração global antes de cada requisição"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Validações padrão após cada requisição"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "URL base da API"
+    },
+    {
+      "key": "api_key",
+      "value": "",
+      "type": "string",
+      "description": "Chave de API para autenticação"
+    }
+  ]
+}
