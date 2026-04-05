@@ -96,6 +96,9 @@ select = [
 ]
 ignore = [
     "E501",  # Line too long (handled by formatter)
+    "N818",  # Exception name should end with Error suffix (usamos *Exception)
+    "B008",  # Function call in argument defaults (padrão FastAPI para UploadFile)
+    "N803",  # Argument name should be lowercase (visualFeatures é parâmetro Azure)
 ]
 
 [tool.ruff.lint.pydocstyle]

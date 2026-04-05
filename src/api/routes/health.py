@@ -4,6 +4,7 @@ Fornece endpoints para verificar saúde e prontidão da API.
 """
 
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, status
 
@@ -21,7 +22,7 @@ logger = get_logger(__name__)
     summary="Health check",
     description="Verifica se a API está rodando e saudável.",
 )
-async def health_check():
+async def health_check() -> dict[str, Any]:
     """Endpoint de health check.
 
     Retorna informações básicas de saúde da API.
@@ -41,7 +42,7 @@ async def health_check():
     summary="Readiness check",
     description="Verifica se a API está pronta para receber requisições.",
 )
-async def readiness_check():
+async def readiness_check() -> dict[str, Any]:
     """Endpoint de readiness check.
 
     Retorna status de prontidão para health checks do Kubernetes/Docker.
