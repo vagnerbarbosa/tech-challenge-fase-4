@@ -1,8 +1,9 @@
 """Clientes Azure AI com padrão singleton para uso eficiente de recursos."""
 
 import os
+from collections.abc import Callable
 from functools import lru_cache
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
