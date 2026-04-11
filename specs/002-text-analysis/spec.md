@@ -1,8 +1,8 @@
 # Feature Specification: Análise de Texto
 
-**Feature Branch**: `[002-text-analysis]`
+**Feature Branch**: `feature/002-text-analysis`
 **Created**: 2026-04-11
-**Status**: Draft
+**Status**: ✅ Concluído
 **Input**: User description: "Implementar endpoint de análise de texto usando Azure Text Analytics"
 
 ---
@@ -62,7 +62,7 @@ Como profissional de saúde, quero ver palavras-chave extraídas do texto para e
 - **FR-004**: Retorna obrigatoriamente: risco_violencia, risco_saude_mental
 - **FR-005**: Retorna: sentimento, score (-1 a 1), palavras_chave
 - **FR-006**: Validação de entrada com erro 400 para dados inválidos
-- **FR-007**: Campos obrigatórios conforme RNF07 do product-spec
+- **FR-007**: Campos obrigatórios risco_violencia e risco_saude_mental em todas respostas
 - **FR-008**: Implementar cache em memória com TTL 1h para evitar reprocessamento
 - **FR-009**: Usar lista pré-definida de palavras-chave de risco para detecção local
 
@@ -316,6 +316,6 @@ async def analyze_text(
 
 ## Referências
 
-- Documentação completa: `docs/technical/best-practices.md`
+- Documentação completa: `docs/technical/context7-best-practices.md`
 - [Azure AI Language](https://learn.microsoft.com/azure/ai-services/language-service/)
 - [Azure Text Analytics SDK Python](https://learn.microsoft.com/python/api/azure-ai-textanalytics/)
