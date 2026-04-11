@@ -66,14 +66,19 @@ jobs:
 
       - name: Validar cobertura mínima (70%)
         run: |
-          COVERAGE=$(poetry run python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f'{float(root.attrib['line-rate'])*100:.2f}')")
-          echo "📊 Cobertura atual: ${COVERAGE}%"
-          echo "📊 Cobertura mínima exigida: 70%"
-          python -c "exit(0 if float('$COVERAGE') >= 70 else 1)" || {
-            echo "❌ Cobertura abaixo de 70%. Merge bloqueado."
-            exit 1
-          }
-          echo "✅ Cobertura acima de 70%!"
+          poetry run python << 'EOF'
+          import xml.etree.ElementTree as ET
+          import sys
+          tree = ET.parse('coverage.xml')
+          root = tree.getroot()
+          coverage = float(root.attrib['line-rate']) * 100
+          print(f"📊 Cobertura atual: {coverage:.2f}%")
+          print("📊 Cobertura mínima exigida: 70%")
+          if coverage < 70:
+              print("❌ Cobertura abaixo de 70%. Merge bloqueado.")
+              sys.exit(1)
+          print("✅ Cobertura acima de 70%!")
+          EOF
 
       - name: Enviar cobertura para Codecov
         if: github.event_name == 'pull_request'
