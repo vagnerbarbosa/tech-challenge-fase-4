@@ -63,74 +63,220 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 
 ### Pré-requisitos
 
-- Python 3.11+
-- Conta Azure (free tier)
-- Chaves de API Azure configuradas
+- **Python 3.11+**
+- **Poetry** (gerenciamento de dependências)
+- **Docker e Docker Compose** (opcional, para modo com mocks)
+- **Git**
 
-### 1. Configurar Azure
+---
+
+## Opção 1: Usando Docker com Mocks (Recomendado para Desenvolvimento)
+
+Esta opção usa containers Docker que simulam os serviços Azure, permitindo desenvolver sem precisar de uma conta Azure.
+
+> **Nota:** Com Docker não é necessário rodar `setup.sh` nem instalar Poetry/Python localmente. O Docker cuida de todas as dependências.
+
+### Passo 1: Iniciar os Containers
+
+```bash
+# Usando o script (recomendado)
+./scripts/run-mock.sh
+
+# Ou comando Docker direto
+docker-compose -f docker-compose.mock.yml up -d
+```
+
+### Passo 2: Verificar se está funcionando
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Deve retornar: {"status": "ok", "version": "1.0.0"}
+```
+
+### Passo 3: Testar o Endpoint de Análise de Texto
+
+```bash
+# Via curl
+curl -X POST http://localhost:8000/analyze/text \
+  -H "Content-Type: application/json" \
+  -d '{"texto": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa", "tipo": "diario"}'
+
+# Ou use a interface Swagger
+# Abra no navegador: http://localhost:8000/docs
+```
+
+**Serviços disponíveis:**
+- API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- Mock Azure Text: http://localhost:3001
+- Mock Azure Speech: http://localhost:3002
+- Mock Azure Vision: http://localhost:3003
+- Redis: http://localhost:6379
+
+### Passo 4: Parar os Containers
+
+```bash
+docker-compose -f docker-compose.mock.yml down
+```
+
+---
+
+## Opção 2: Executar Localmente (com Poetry)
+
+Esta opção requer configurar variáveis de ambiente com credenciais Azure reais ou usar o modo mock local.
+
+> **Nota:** Na primeira vez, é necessário rodar `setup.sh` para instalar Poetry e as dependências Python.
+
+### Passo 1: Configurar o Ambiente
+
+```bash
+# Clone o repositório
+git clone https://github.com/vagnerbarbosa/tech-challenge-fase-4.git
+cd tech-challenge-fase-4
+
+# Execute o script de setup (instala Poetry e dependências na primeira vez)
+./scripts/setup.sh
+
+# Ou faça manualmente:
+# poetry install
+# cp .env.example .env
+```
+
+### Passo 2: Configurar Variáveis de Ambiente
 
 ```bash
 # Criar arquivo .env
 cp .env.example .env
 
-# Editar com suas credenciais Azure
-AZURE_SPEECH_KEY=seu_key_aqui
-AZURE_SPEECH_REGION=brazilsouth
-AZURE_TEXT_KEY=seu_key_aqui
-AZURE_VISION_KEY=seu_key_aqui
+# Edite o arquivo .env com suas credenciais Azure (opcional para testes locais)
+# AZURE_TEXT_KEY=sua_chave_aqui
+# AZURE_TEXT_ENDPOINT=https://<seu-resource>.cognitiveservices.azure.com/
 ```
 
-### 2. Executar com Docker
+### Passo 3: Iniciar o Servidor
 
 ```bash
-# Clonar repositório
-git clone https://github.com/vagnerbarbosa/tech-challenge-fase-4.git
-cd tech-challenge-fase-4
+# Usando o script (recomendado)
+./scripts/run.sh
 
-# Subir aplicação
-docker-compose up -d
+# Ou comando Poetry direto
+poetry run uvicorn src.api.main:app --reload --port 8000
+```
 
-# Verificar se está funcionando
+### Passo 4: Testar
+
+```bash
+# Health check
 curl http://localhost:8000/health
+
+# Análise de texto
+curl -X POST http://localhost:8000/analyze/text \
+  -H "Content-Type: application/json" \
+  -d '{"texto": "Estou me sentindo muito ansiosa e com medo"}'
 ```
 
-### 3. Executar Localmente
+---
+
+## Scripts Disponíveis
+
+A pasta `/scripts` contém utilitários para facilitar o desenvolvimento:
+
+| Script | Descrição | Uso |
+|--------|-----------|-----|
+| `setup.sh` | Configuração inicial do projeto | `./scripts/setup.sh` |
+| `run-mock.sh` | Inicia com Docker + Mocks | `./scripts/run-mock.sh` |
+| `run.sh` | Inicia localmente com Poetry | `./scripts/run.sh` |
+| `test.sh` | Executa testes | `./scripts/test.sh [unit\|integration\|coverage]` |
+| `lint.sh` | Verifica código (Ruff + mypy) | `./scripts/lint.sh` |
+| `check-azure.sh` | Verifica credenciais Azure | `./scripts/check-azure.sh` |
+
+**Nota para Windows:** Execute os scripts via Git Bash, WSL ou use `bash ./scripts/nome-do-script.sh`.
+
+---
+
+## Testando a API
+
+### Endpoint: POST /analyze/text
+
+Analisa texto em português e retorna sentimento, níveis de risco e palavras-chave.
+
+**Exemplo de Request:**
+```bash
+curl -X POST http://localhost:8000/analyze/text \
+  -H "Content-Type: application/json" \
+  -d '{
+    "texto": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa",
+    "tipo": "diario",
+    "patient_id": "uuid-anonimo-123"
+  }'
+```
+
+**Exemplo de Response:**
+```json
+{
+  "sentimento": "negativo",
+  "score": -0.85,
+  "risco_violencia": "alto",
+  "risco_saude_mental": "alto",
+  "palavras_chave": ["ansiosa", "medo", "casa"],
+  "indicadores": ["ansiedade", "medo"],
+  "metadata": {
+    "correlation_id": "abc-123-xyz",
+    "timestamp": "2026-04-11T14:30:00Z",
+    "tempo_processamento_ms": 450,
+    "cache_hit": false,
+    "azure_calls": 1
+  }
+}
+```
+
+### Outros Endpoints
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/health` | GET | Verifica status da API |
+| `/` | GET | Informações da API |
+| `/docs` | GET | Swagger UI (documentação interativa) |
+| `/analyze/text` | POST | Análise de texto |
+
+---
+
+## Executando Testes
 
 ```bash
-# Instalar Poetry
-curl -sSL https://install.python-poetry.org | python3 -
+# Todos os testes
+./scripts/test.sh
 
-# Instalar dependências
-poetry install
+# Apenas testes unitários
+./scripts/test.sh unit
 
-# Ativar ambiente
-poetry shell
+# Testes de integração
+./scripts/test.sh integration
 
-# Executar
-poetry run uvicorn src.api.main:app --reload
+# Com relatório de cobertura
+./scripts/test.sh coverage
 ```
 
-### Executar com Mocks (sem conta Azure)
+Ou diretamente com Poetry:
+```bash
+poetry run pytest tests/ -v --cov=src
+```
 
-Para desenvolvimento local sem precisar de credenciais Azure:
+---
+
+## Verificação de Qualidade de Código
 
 ```bash
-# Usando Docker Compose com mocks
-./scripts/run-mock.sh
+# Usando o script
+./scripts/lint.sh
 
-# Ou diretamente
-docker-compose -f docker-compose.mock.yml up --build
+# Ou comandos individuais
+poetry run ruff check src/ tests/
+poetry run ruff format src/ tests/
+poetry run mypy src/
 ```
-
-**Serviços disponíveis:**
-
-| Serviço | URL | Descrição |
-|---------|-----|-----------|
-| API | http://localhost:8000 | API FastAPI |
-| Docs | http://localhost:8000/docs | Swagger UI |
-| Mock Text | http://localhost:3001 | Azure Text Analytics mock |
-| Mock Speech | http://localhost:3002 | Azure Speech Services mock |
-| Mock Vision | http://localhost:3003 | Azure AI Vision mock |
 
 ---
 
@@ -432,6 +578,40 @@ tech-challenge-fase-4/
 ├── Dockerfile.dev
 └── README.md
 ```
+
+---
+
+## Configuração de CI/CD (GitHub Actions)
+
+O projeto possui workflows automatizados que executam em Pull Requests:
+
+### Workflows
+
+| Workflow | Arquivo | Descrição |
+|----------|---------|-----------|
+| Tests | `.github/workflows/tests.yml` | Executa testes unitários e de integração |
+| Validate Commits | `.github/workflows/validate-commits.yml` | Valida mensagens de commit |
+
+### Configurar Proteção de Branch
+
+Para bloquear merge se os testes falharem:
+
+1. Vá em **Settings** → **Branches** do repositório
+2. Clique em **Add rule** na seção "Branch protection rules"
+3. Em "Branch name pattern", digite: `main`
+4. Ative as opções:
+   - ✅ **Require a pull request before merging**
+   - ✅ **Require status checks to pass before merging**
+   - ✅ **Require branches to be up to date before merging**
+5. Em "Status checks", procure e adicione:
+   - `Run Tests`
+   - `All Tests Pass`
+6. Salve clicando em **Create**
+
+**Agora PRs só podem ser mergeados se:**
+- ✅ Todos os testes passarem
+- ✅ O código estiver atualizado com a main
+- ✅ A revisão de código for aprovada
 
 ---
 
