@@ -478,7 +478,7 @@ O sistema implementa uma **estratégia de hard stop** que garante **zero custos*
 - **Retorno HTTP 503** com informação de retry
 - **Reset automático** às 00:00 UTC
 
-> Ver detalhes em: [`docs/technical/azure-free-tier-hard-stop.md`](docs/technical/azure-free-tier-hard-stop.md)
+> Ver detalhes em: [`specs/006-rate-limiting/spec.md`](specs/006-rate-limiting/spec.md)
 
 ---
 
