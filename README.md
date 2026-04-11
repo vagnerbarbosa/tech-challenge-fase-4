@@ -608,12 +608,6 @@ tech-challenge-fase-4/
 
 ---
 
-## Licença
-
-MIT License - Copyright (c) 2026 Equipe Tech Challenge
-
----
-
 ## ⚠️ Notas Importantes
 
 - **Consentimento**: Todos os dados de áudio/vídeo devem ter consentimento explícito
@@ -630,7 +624,7 @@ Este projeto é desenvolvido pela mesma equipe das Fases 1, 2 e 3:
 | Nome | GitHub |
 |------|--------|
 | Adriel Santos | [@AdrielCandido](https://github.com/AdrielCandido) |
-| Leticia Nepomuceno | [@LeticiaNepomuceno](https://github.com/LeticiaNepomuceno) |
+| Leticia Nepomuceno | [@LeticiaNepomucena](https://github.com/LeticiaNepomucena) |
 | Lucas Silva | [@lucfsilva](https://github.com/lucfsilva) |
 | Vagner Barbosa | [@vagnerbarbosa](https://github.com/vagnerbarbosa) |
 
@@ -644,3 +638,9 @@ Este projeto é desenvolvido pela mesma equipe das Fases 1, 2 e 3:
 - [Fase 1 - Diabetes Prediction](https://github.com/vagnerbarbosa/tech-challenge-fase-1)
 - [Fase 2 - Otimização com Algoritmos Genéticos](https://github.com/vagnerbarbosa/tech-challenge-fase-2)
 - [Fase 3 - Assistente Virtual Médico](https://github.com/vagnerbarbosa/tech-challenge-fase-3)
+
+---
+
+## Licença
+
+MIT License - Copyright (c) 2026 Grupo 27 Tech Challenge
