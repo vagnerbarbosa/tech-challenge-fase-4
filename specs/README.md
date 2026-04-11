@@ -10,7 +10,7 @@
 | ID | Feature | Status | Branch | Prioridade |
 |----|---------|--------|--------|------------|
 | 001 | Bootstrap do Projeto | ✅ Concluído | `main` | P0 |
-| 002 | Análise de Texto | 🔄 Em Progresso | `002-text-analysis` | P1 |
+| 002 | Análise de Texto | ✅ Concluído | `main` | P1 |
 | 003 | Análise de Áudio | 📝 Draft | `003-audio-analysis` | P1 |
 | 004 | Análise de Imagem/Vídeo | 📝 Draft | `004-image-analysis` | P1 |
 | 005 | Fusão Multimodal | 📝 Draft | `005-multimodal-fusion` | P1 |
@@ -70,5 +70,5 @@ Tudo → 010 (Docs)
 ## Links Rápidos
 
 - [Constitution](constitution.md) - Regras e princípios do projeto
-- [CLAUDE.md](../../CLAUDE.md) - Contexto técnico completo
+- [CLAUDE.md](../.claude/CLAUDE.md) - Contexto técnico completo
 - Especificações detalhadas em cada pasta `XXX-feature/spec.md`

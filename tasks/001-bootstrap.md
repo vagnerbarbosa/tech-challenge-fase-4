@@ -30,9 +30,10 @@
 
 ### Documentação
 - [x] README.md com instruções completas
-- [x] Estrutura de documentação SDD
-- [x] Coleção Postman/Insomnia/Bruno (collection.json)
+- [x] Estrutura de documentação Spec Kit (specs/)
+- [x] Coleção API (collection.json)
 - [x] Environment configuration (environment.json)
+- [x] docs/technical/context7-best-practices.md
 
 ### Qualidade de Código
 - [x] Testes estruturais passando
@@ -106,10 +107,10 @@ Variáveis de ambiente configuradas em `.env.example`.
 
 ## Próximos Passos Após Bootstrap
 
-- [x] Task 002: Análise de texto (Azure Text Analytics)
-- [ ] Task 003: Análise de áudio (Azure Speech)
-- [ ] Task 004: Análise de imagem (Azure Vision)
-- [ ] Task 005: Fusão multimodal
+- [x] Spec 002: Análise de texto (Azure Text Analytics) - CONCLUÍDO
+- [ ] Spec 003: Análise de áudio (Azure Speech)
+- [ ] Spec 004: Análise de imagem (Azure Vision)
+- [ ] Spec 005: Fusão multimodal
 
 ---
 

@@ -318,7 +318,7 @@ RATE_LIMITS = {
 
 ## Melhores Práticas de Código (MCP Context7)
 
-> **IMPORTANTE**: Todas as implementações de código devem seguir as melhores práticas documentadas em `docs/technical/best-practices.md`
+> **IMPORTANTE**: Todas as implementações de código devem seguir as melhores práticas documentadas em `docs/technical/context7-best-practices.md`
 
 ### Validação com Context7:
 Antes de implementar cada módulo, buscar no MCP Context7:
@@ -345,4 +345,4 @@ Antes de implementar cada módulo, buscar no MCP Context7:
 - Fase 3: https://github.com/vagnerbarbosa/tech-challenge-fase-3
 - Tech Challenge Brief: `d:\OneDrive\vagner-desktop\Downloads\POSTECH - IADT - Tech Challenge - Fase 4.pdf`
 - Azure Free Tier: https://azure.microsoft.com/free
-- Melhores Práticas: `docs/technical/best-practices.md`
+- Melhores Práticas: `docs/technical/context7-best-practices.md`

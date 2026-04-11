@@ -41,6 +41,13 @@ tests/
 ├── integration/test_azure_services.py
 └── unit/core/test_cache.py
 
+specs/
+├── README.md
+├── constitution.md
+└── 002-text-analysis/
+    ├── spec.md
+    ├── plan.md
+    └── tasks.md
 docs/
 └── technical/context7-best-practices.md
 ```

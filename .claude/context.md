@@ -28,13 +28,16 @@
 - [x] Correção do objetivo (não é deploy do modelo Fase 2!)
 - [x] Estrutura SDD criada com foco correto:
   - [x] README.md (atualizado - multimodal)
-  - [x] docs/product-spec.md (multimodal)
-  - [x] docs/user-stories.md (multimodal)
-  - [x] docs/architecture.md (Azure Cognitive Services)
-  - [x] docs/api-contracts.md (endpoints /analyze/*)
-  - [x] docs/objectives.md (citação do PDF)
-  - [x] docs/technical/cloud-free-tier-analysis.md (análise Azure)
+  - [x] specs/README.md (índice de especificações)
+  - [x] specs/001-bootstrap/ (bootstrap do projeto)
+  - [x] specs/002-text-analysis/ (análise de texto)
+  - [x] specs/003-audio-analysis/ (análise de áudio)
+  - [x] specs/004-image-analysis/ (análise de imagem)
+  - [x] specs/005-multimodal-fusion/ (fusão multimodal)
+  - [x] specs/constitution.md (regras do projeto)
+  - [x] docs/technical/context7-best-practices.md (melhores práticas)
   - [x] tasks/001-bootstrap.md (atualizado Azure)
+  - [x] tasks/002-text-analysis.md (task concluída)
   - [x] CLAUDE.md atualizado
   - [x] .claude/context.md (este arquivo)
 - [x] Bootstrap técnico (COMPLETED)
@@ -107,54 +110,67 @@
 
 ```
 tech-challenge-fase-4/
-├── src/
+├── src/                        # Código fonte
 │   ├── api/                    # FastAPI routes
 │   │   ├── main.py
 │   │   └── routes/
 │   │       ├── health.py
-│   │       ├── text.py
-│   │       ├── audio.py
-│   │       ├── image.py
-│   │       └── multimodal.py
-│   ├── core/                   # Config, logging, rate_limit
+│   │       └── text.py         # Task 002 implementado
+│   ├── core/                   # Config, logging, cache
 │   │   ├── config.py
 │   │   ├── logging_config.py
 │   │   ├── exceptions.py
-│   │   └── rate_limit.py
+│   │   └── cache.py
 │   ├── services/               # Lógica de negócio
-│   │   ├── text_analysis.py
-│   │   ├── audio_analysis.py
-│   │   ├── image_analysis.py
-│   │   └── fusion.py
+│   │   ├── text_analysis.py    # Task 002 implementado
+│   │   ├── risk_detector.py    # Task 002 implementado
+│   │   ├── audio_analysis.py   # Task 003 (pendente)
+│   │   ├── image_analysis.py   # Task 004 (pendente)
+│   │   └── fusion.py           # Task 005 (pendente)
 │   ├── models/                 # Pydantic schemas
 │   │   └── schemas.py
 │   ├── infrastructure/         # Azure clients
 │   │   └── azure_clients.py
 │   └── utils/                  # Helpers
-├── tests/
+├── tests/                      # Testes
 │   ├── unit/
+│   │   ├── services/
+│   │   └── core/
 │   ├── integration/
 │   └── load/
 │       └── locustfile.py
-├── docs/                       # Documentação SDD
-│   ├── product-spec.md
-│   ├── user-stories.md
-│   ├── architecture.md
-│   ├── api-contracts.md
-│   ├── objectives.md
+├── specs/                      # Especificações Spec Kit
+│   ├── README.md
+│   ├── constitution.md
+│   ├── 001-bootstrap/
+│   ├── 002-text-analysis/
+│   ├── 003-audio-analysis/
+│   ├── 004-image-analysis/
+│   ├── 005-multimodal-fusion/
+│   ├── 006-rate-limiting/
+│   ├── 007-security-hardening/
+│   ├── 008-tests/
+│   └── 009-deploy-azure/
+├── tasks/                      # Status das tasks
+│   ├── 001-bootstrap.md
+│   └── 002-text-analysis.md
+├── docs/                       # Documentação técnica
 │   └── technical/
-│       └── cloud-free-tier-analysis.md
-├── scripts/                    # Dev scripts
-├── tasks/
-│   └── 001-bootstrap.md
+│       └── context7-best-practices.md
+├── scripts/                    # Scripts de dev
 ├── pyproject.toml
 ├── poetry.lock
 ├── Dockerfile
 ├── docker-compose.yml
+├── docker-compose.mock.yml
 ├── .env.example
 ├── .gitignore
 ├── README.md
-└── CLAUDE.md
+├── CLAUDE.md
+└── .claude/                    # Configuração Claude Code
+    ├── context.md
+    ├── CLAUDE.md
+    └── settings.local.json
 ```
 
 ---
@@ -244,63 +260,65 @@ LOG_LEVEL=DEBUG
 
 ---
 
-## Próximos Passos (Tasks)
+## Próximos Passos (Specs)
 
-### Task 001: Bootstrap (8 pontos)
-- [ ] Poetry init + dependências (FastAPI + Azure SDKs)
-- [ ] Estrutura de diretórios completa
-- [ ] Configuração Ruff, mypy, pytest
-- [ ] Dockerfile multi-stage
-- [ ] docker-compose.yml
-- [ ] Scripts auxiliares
-- [ ] .env.example com variáveis Azure
-- [ ] Criar conta Azure e provisionar recursos
+### Spec 001: Bootstrap ✅ CONCLUÍDO
+- [x] Poetry init + dependências (FastAPI + Azure SDKs)
+- [x] Estrutura de diretórios completa
+- [x] Configuração Ruff, mypy, pytest
+- [x] Dockerfile multi-stage
+- [x] docker-compose.yml
+- [x] Scripts auxiliares
+- [x] .env.example com variáveis Azure
 
-### Task 002: Health Endpoint (3 pontos)
-- [ ] FastAPI app base
-- [ ] GET /health com status Azure
-- [ ] Testes
+### Spec 002: Text Analysis ✅ CONCLUÍDO
+- [x] Integração Azure Text Analytics
+- [x] POST /analyze/text
+- [x] Cache em memória com TTL
+- [x] Detecção de risco
+- [x] Testes (72 passando, 81% coverage)
 
-### Task 003: Text Analysis (8 pontos)
-- [ ] Integração Azure Text Analytics
-- [ ] POST /analyze/text
-- [ ] Validação de entrada
-- [ ] Testes
-
-### Task 004: Audio Analysis (8 pontos)
+### Spec 003: Análise de Áudio 📝 DRAFT
 - [ ] Integração Azure Speech Services
 - [ ] POST /analyze/audio (upload)
-- [ ] Transcrição + análise
+- [ ] Transcrição + análise prosódica
 - [ ] Testes
 
-### Task 005: Image Analysis (8 pontos)
-- [ ] Integração Azure Computer Vision
+### Spec 004: Análise de Imagem 📝 DRAFT
+- [ ] Integração Azure AI Vision
 - [ ] POST /analyze/image (upload)
-- [ ] Análise de expressões
+- [ ] Análise de expressões faciais
+- [ ] Extração de frames de vídeo
 - [ ] Testes
 
-### Task 006: Multimodal Fusion (13 pontos)
+### Spec 005: Fusão Multimodal 📝 DRAFT
 - [ ] Combinar 3 modalidades
 - [ ] POST /analyze/multimodal
-- [ ] Late fusion
+- [ ] Late fusion com ponderação
 - [ ] Testes
 
-### Task 007: Rate Limiting (3 pontos)
+### Spec 006: Rate Limiting 📝 DRAFT
 - [ ] Proteção quotas Azure
-- [ ] Cache Redis (opcional)
+- [ ] Hard stop automático
+- [ ] Monitoramento de quotas
 
-### Task 008: Tests (8 pontos)
-- [ ] Unit tests > 70%
-- [ ] Integration tests
-- [ ] Load tests (Locust)
+### Spec 007: Security Hardening 📝 DRAFT
+- [ ] Correções de vulnerabilidades
+- [ ] Headers de segurança
+- [ ] Validação de uploads
 
-### Task 009: Deploy Azure (10 pontos) - **OBRIGATÓRIO**
+### Spec 008: Testes 📝 DRAFT
+- [ ] Testes unitários completos
+- [ ] Testes de integração
+- [ ] Testes de carga (Locust)
+
+### Spec 009: Deploy Azure 📝 DRAFT - **OBRIGATÓRIO**
 - [ ] App Service criado (Free Tier F1)
 - [ ] API deployada e acessível publicamente
 - [ ] Variáveis de ambiente configuradas
 - [ ] URL de produção documentada
 
-### Task 010: Documentation (5 pontos)
+### Spec 010: Documentação 📝 DRAFT
 - [ ] README final
 - [ ] Vídeo YouTube 5-10 min
 
@@ -336,7 +354,7 @@ Toda implementação de código deve ser validada com MCP Context7 para:
 ```
 
 ### Documento de Referência:
-`docs/technical/best-practices.md` - Contém padrões a serem seguidos
+`docs/technical/context7-best-practices.md` - Contém padrões atualizados de 2026
 
 ---
 
@@ -348,7 +366,7 @@ Toda implementação de código deve ser validada com MCP Context7 para:
 - Documentação PDF: `POSTECH - IADT - Tech Challenge - Fase 4.pdf` (arquivo local)
 - Azure Free Tier: https://azure.microsoft.com/free
 - Azure Cognitive Services: https://azure.microsoft.com/services/cognitive-services/
-- Melhores Práticas: `docs/technical/best-practices.md`
+- Melhores Práticas: `docs/technical/context7-best-practices.md`
 
 ---
 

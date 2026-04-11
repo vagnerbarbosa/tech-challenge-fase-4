@@ -417,7 +417,7 @@ async def analyze_image_with_metrics(image_path: Path):
 
 ## Referências
 
-- Documentação completa: `docs/technical/best-practices.md` (integrado)
+- Documentação completa: `docs/technical/context7-best-practices.md` (integrado)
 - [Azure AI Vision](https://learn.microsoft.com/azure/ai-services/computer-vision/)
 - [OpenCV Python](https://docs.opencv.org/4.x/d6/d00/tutorial_py_root.html)
 - [python-magic](https://github.com/ahupp/python-magic)

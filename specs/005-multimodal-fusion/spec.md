@@ -437,6 +437,6 @@ class PerformanceTracker:
 
 ## Referências
 
-- Documentação completa: `docs/technical/best-practices.md` (integrado)
+- Documentação completa: `docs/technical/context7-best-practices.md` (integrado)
 - [Asyncio - Python Documentation](https://docs.python.org/3/library/asyncio.html)
 - [Multimodal ML Architecture](https://en.wikipedia.org/wiki/Multimodal_learning)
