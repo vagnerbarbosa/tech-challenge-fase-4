@@ -232,6 +232,25 @@ curl -X POST http://localhost:8000/analyze/text \
 }
 ```
 
+### Parâmetros do Request
+
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `texto` | string | Sim | Texto para análise (10-5000 caracteres) |
+| `tipo` | string | Não | Origem do texto: `diario`, `prontuario`, `relato` ou `geral` (padrão) |
+| `patient_id` | string | Não | ID anônimo do paciente (UUID recomendado) |
+
+#### Tipos de Texto (`tipo`)
+
+O campo `tipo` indica a origem/contexto do texto para classificação:
+
+| Tipo | Quando Usar |
+|------|-------------|
+| `diario` | Entradas pessoais, diários da paciente |
+| `prontuario` | Registros médicos formais |
+| `relato` | Narrações de consultas ou entrevistas |
+| `geral` | Textos genéricos (padrão se não informado) |
+
 ### Outros Endpoints
 
 | Endpoint | Método | Descrição |
