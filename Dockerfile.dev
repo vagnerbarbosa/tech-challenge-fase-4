@@ -26,7 +26,11 @@ RUN pip install --no-cache-dir \
     structlog \
     httpx \
     pytest \
-    pytest-asyncio
+    pytest-asyncio \
+    azure-ai-textanalytics>=5.4.0 \
+    azure-cognitiveservices-speech \
+    azure-ai-vision-imageanalysis \
+    azure-storage-blob
 
 # Criar diretórios necessários
 RUN mkdir -p data logs uploads

@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import health
+from src.api.routes import health, text
 from src.core.config import settings
 from src.core.exceptions import AppException
 from src.core.logging_config import configure_logging, get_logger
@@ -83,6 +83,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> Any:
 
 # Inclui routers
 app.include_router(health.router, tags=["Health"])
+app.include_router(text.router)
 
 
 @app.get("/", tags=["Root"])
