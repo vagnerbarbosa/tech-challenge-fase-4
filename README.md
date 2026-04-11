@@ -497,18 +497,13 @@ poetry run locust -f locustfile.py
 
 ## Documentação
 
-### Especificações (Spec Kit)
 - [📋 Especificações do Projeto](specs/README.md)
 - [🚀 Task 001 - Bootstrap](specs/001-bootstrap/spec.md)
 - [📝 Task 002 - Análise de Texto](specs/002-text-analysis/spec.md)
 - [🎙️ Task 003 - Análise de Áudio](specs/003-audio-analysis/spec.md)
 - [🎥 Task 004 - Análise de Imagem](specs/004-image-analysis/spec.md)
 - [🔀 Task 005 - Fusão Multimodal](specs/005-multimodal-fusion/spec.md)
-
-### Técnico
 - [📊 Context7 - Melhores Práticas](docs/technical/context7-best-practices.md)
-- [⚙️ Configuração Claude Code](.claude/CLAUDE.md)
-- [🔧 GitHub MCP](.claude/GITHUB_MCP.md)
 
 ---
 
@@ -571,32 +566,39 @@ tech-challenge-fase-4/
 │   ├── api/                  # FastAPI app e rotas
 │   │   ├── main.py
 │   │   └── routes/
-│   │       ├── health.py
-│   │       ├── text.py
-│   │       ├── audio.py
-│   │       ├── image.py
-│   │       └── multimodal.py
+│   │       ├── health.py          # Health check endpoints
+│   │       └── text.py            # Análise de texto (Task 002)
 │   ├── core/                 # Configurações, logging, exceções
-│   │   ├── config.py
-│   │   ├── logging_config.py
-│   │   └── exceptions.py
-│   ├── services/             # Lógica de negócio (Azure AI)
-│   │   ├── text_analysis.py
-│   │   ├── audio_analysis.py
-│   │   ├── image_analysis.py
-│   │   └── fusion.py
+│   │   ├── config.py              # Configurações da aplicação
+│   │   ├── logging_config.py      # Logging estruturado
+│   │   ├── exceptions.py          # Exceções customizadas
+│   │   └── cache.py               # Cache em memória (Task 002)
+│   ├── services/             # Lógica de negócio
+│   │   ├── text_analysis.py       # Serviço de análise de texto
+│   │   └── risk_detector.py     # Detecção de risco (Task 002)
 │   ├── models/               # Schemas Pydantic
+│   │   └── schemas.py             # Modelos de request/response
 │   ├── infrastructure/       # Clientes Azure
+│   │   └── azure_clients.py       # Singleton Azure Text Analytics
 │   └── utils/                # Helpers
 ├── tests/                    # Testes
-│   ├── unit/
-│   ├── integration/
-│   └── load/
-├── docs/                     # Documentação SDD
+│   ├── unit/                 # Testes unitários
+│   │   ├── core/                  # Testes de cache
+│   │   └── services/              # Testes de serviços
+│   ├── integration/          # Testes de integração
+│   │   ├── test_text_endpoint.py
+│   │   └── test_azure_services.py
+│   └── load/                 # Testes de carga
+├── specs/                    # Especificações Spec Kit
+│   ├── 001-bootstrap/
+│   ├── 002-text-analysis/
+│   └── ...
+├── tasks/                    # Status das tasks
+├── docs/                     # Documentação
 │   └── technical/
-├── scripts/                  # Scripts de desenvolvimento
-├── mock/                     # Serviços mock Azure (dev)
-├── tasks/                    # Arquivos de tarefas
+├── .claude/                  # Configuração Claude Code
+├── .specify/                 # Configuração Spec Kit
+├── .github/                  # GitHub Actions
 ├── docker-compose.yml
 ├── docker-compose.mock.yml
 ├── Dockerfile
