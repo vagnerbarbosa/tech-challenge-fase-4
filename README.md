@@ -497,12 +497,13 @@ poetry run locust -f locustfile.py
 
 ## Documentação
 
-- [Especificação do Produto](docs/product-spec.md)
-- [Histórias de Usuário](docs/user-stories.md)
-- [Arquitetura](docs/architecture.md)
-- [Análise Cloud Free Tier](docs/technical/cloud-free-tier-analysis.md)
-- [Estratégia Hard Stop - Zero Custo](docs/technical/azure-free-tier-hard-stop.md)
-- [API Contracts](docs/api-contracts.md)
+- [📋 Especificações do Projeto](specs/README.md)
+- [🚀 Task 001 - Bootstrap](specs/001-bootstrap/spec.md)
+- [📝 Task 002 - Análise de Texto](specs/002-text-analysis/spec.md)
+- [🎙️ Task 003 - Análise de Áudio](specs/003-audio-analysis/spec.md)
+- [🎥 Task 004 - Análise de Imagem](specs/004-image-analysis/spec.md)
+- [🔀 Task 005 - Fusão Multimodal](specs/005-multimodal-fusion/spec.md)
+- [📊 Context7 - Melhores Práticas](docs/technical/context7-best-practices.md)
 
 ---
 
@@ -565,72 +566,45 @@ tech-challenge-fase-4/
 │   ├── api/                  # FastAPI app e rotas
 │   │   ├── main.py
 │   │   └── routes/
-│   │       ├── health.py
-│   │       ├── text.py
-│   │       ├── audio.py
-│   │       ├── image.py
-│   │       └── multimodal.py
+│   │       ├── health.py          # Health check endpoints
+│   │       └── text.py            # Análise de texto (Task 002)
 │   ├── core/                 # Configurações, logging, exceções
-│   │   ├── config.py
-│   │   ├── logging_config.py
-│   │   └── exceptions.py
-│   ├── services/             # Lógica de negócio (Azure AI)
-│   │   ├── text_analysis.py
-│   │   ├── audio_analysis.py
-│   │   ├── image_analysis.py
-│   │   └── fusion.py
+│   │   ├── config.py              # Configurações da aplicação
+│   │   ├── logging_config.py      # Logging estruturado
+│   │   ├── exceptions.py          # Exceções customizadas
+│   │   └── cache.py               # Cache em memória (Task 002)
+│   ├── services/             # Lógica de negócio
+│   │   ├── text_analysis.py       # Serviço de análise de texto
+│   │   └── risk_detector.py     # Detecção de risco (Task 002)
 │   ├── models/               # Schemas Pydantic
+│   │   └── schemas.py             # Modelos de request/response
 │   ├── infrastructure/       # Clientes Azure
+│   │   └── azure_clients.py       # Singleton Azure Text Analytics
 │   └── utils/                # Helpers
 ├── tests/                    # Testes
-│   ├── unit/
-│   ├── integration/
-│   └── load/
-├── docs/                     # Documentação SDD
+│   ├── unit/                 # Testes unitários
+│   │   ├── core/                  # Testes de cache
+│   │   └── services/              # Testes de serviços
+│   ├── integration/          # Testes de integração
+│   │   ├── test_text_endpoint.py
+│   │   └── test_azure_services.py
+│   └── load/                 # Testes de carga
+├── specs/                    # Especificações Spec Kit
+│   ├── 001-bootstrap/
+│   ├── 002-text-analysis/
+│   └── ...
+├── tasks/                    # Status das tasks
+├── docs/                     # Documentação
 │   └── technical/
-├── scripts/                  # Scripts de desenvolvimento
-├── mock/                     # Serviços mock Azure (dev)
-├── tasks/                    # Arquivos de tarefas
+├── .claude/                  # Configuração Claude Code
+├── .specify/                 # Configuração Spec Kit
+├── .github/                  # GitHub Actions
 ├── docker-compose.yml
 ├── docker-compose.mock.yml
 ├── Dockerfile
 ├── Dockerfile.dev
 └── README.md
 ```
-
----
-
-## Configuração de CI/CD (GitHub Actions)
-
-O projeto possui workflows automatizados que executam em Pull Requests:
-
-### Workflows
-
-| Workflow | Arquivo | Descrição |
-|----------|---------|-----------|
-| Tests | `.github/workflows/tests.yml` | Executa testes unitários e de integração |
-| Validate Commits | `.github/workflows/validate-commits.yml` | Valida mensagens de commit |
-
-### Configurar Proteção de Branch
-
-Para bloquear merge se os testes falharem:
-
-1. Vá em **Settings** → **Branches** do repositório
-2. Clique em **Add rule** na seção "Branch protection rules"
-3. Em "Branch name pattern", digite: `main`
-4. Ative as opções:
-   - ✅ **Require a pull request before merging**
-   - ✅ **Require status checks to pass before merging**
-   - ✅ **Require branches to be up to date before merging**
-5. Em "Status checks", procure e adicione:
-   - `Run Tests`
-   - `All Tests Pass`
-6. Salve clicando em **Create**
-
-**Agora PRs só podem ser mergeados se:**
-- ✅ Todos os testes passarem
-- ✅ O código estiver atualizado com a main
-- ✅ A revisão de código for aprovada
 
 ---
 
