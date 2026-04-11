@@ -72,7 +72,7 @@ jobs:
           echo "✅ Todos os commits seguem o padrão Conventional Commits!"
 
   validate-pr-title:
-    name: Validar título da PR
+    name: Validar Título da PR
     runs-on: ubuntu-latest
 
     steps:
