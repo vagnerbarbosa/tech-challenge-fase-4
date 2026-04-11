@@ -497,12 +497,18 @@ poetry run locust -f locustfile.py
 
 ## Documentação
 
-- [Especificação do Produto](docs/product-spec.md)
-- [Histórias de Usuário](docs/user-stories.md)
-- [Arquitetura](docs/architecture.md)
-- [Análise Cloud Free Tier](docs/technical/cloud-free-tier-analysis.md)
-- [Estratégia Hard Stop - Zero Custo](docs/technical/azure-free-tier-hard-stop.md)
-- [API Contracts](docs/api-contracts.md)
+### Especificações (Spec Kit)
+- [📋 Especificações do Projeto](specs/README.md)
+- [🚀 Task 001 - Bootstrap](specs/001-bootstrap/spec.md)
+- [📝 Task 002 - Análise de Texto](specs/002-text-analysis/spec.md)
+- [🎙️ Task 003 - Análise de Áudio](specs/003-audio-analysis/spec.md)
+- [🎥 Task 004 - Análise de Imagem](specs/004-image-analysis/spec.md)
+- [🔀 Task 005 - Fusão Multimodal](specs/005-multimodal-fusion/spec.md)
+
+### Técnico
+- [📊 Context7 - Melhores Práticas](docs/technical/context7-best-practices.md)
+- [⚙️ Configuração Claude Code](.claude/CLAUDE.md)
+- [🔧 GitHub MCP](.claude/GITHUB_MCP.md)
 
 ---
 
@@ -597,40 +603,6 @@ tech-challenge-fase-4/
 ├── Dockerfile.dev
 └── README.md
 ```
-
----
-
-## Configuração de CI/CD (GitHub Actions)
-
-O projeto possui workflows automatizados que executam em Pull Requests:
-
-### Workflows
-
-| Workflow | Arquivo | Descrição |
-|----------|---------|-----------|
-| Tests | `.github/workflows/tests.yml` | Executa testes unitários e de integração |
-| Validate Commits | `.github/workflows/validate-commits.yml` | Valida mensagens de commit |
-
-### Configurar Proteção de Branch
-
-Para bloquear merge se os testes falharem:
-
-1. Vá em **Settings** → **Branches** do repositório
-2. Clique em **Add rule** na seção "Branch protection rules"
-3. Em "Branch name pattern", digite: `main`
-4. Ative as opções:
-   - ✅ **Require a pull request before merging**
-   - ✅ **Require status checks to pass before merging**
-   - ✅ **Require branches to be up to date before merging**
-5. Em "Status checks", procure e adicione:
-   - `Run Tests`
-   - `All Tests Pass`
-6. Salve clicando em **Create**
-
-**Agora PRs só podem ser mergeados se:**
-- ✅ Todos os testes passarem
-- ✅ O código estiver atualizado com a main
-- ✅ A revisão de código for aprovada
 
 ---
 
