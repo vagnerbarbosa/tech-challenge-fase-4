@@ -623,9 +623,9 @@ MIT License - Copyright (c) 2026 Equipe Tech Challenge
 
 ---
 
-## Equipe
+## Integrantes do Grupo 27
 
-Este projeto é desenvolvido pela mesma equipe das Fases 1, 2 e 3:
+Este projeto é desenvolvido pelo Grupo 27:
 
 | Nome | GitHub |
 |------|--------|
