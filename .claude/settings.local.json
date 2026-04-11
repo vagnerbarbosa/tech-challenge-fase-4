@@ -3,8 +3,10 @@
     "allow": [
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:github.com)",
-      "Bash(grep -E \"\\\\.\\(md|py|toml|yml|sh\\)$\")",
-      "WebFetch(domain:)",
+      "WebFetch(domain:docs.pydantic.dev)",
+      "WebFetch(domain:fastapi.tiangolo.com)",
+      "WebFetch(domain:mcp.io)",
+      "Bash(grep)",
       "Bash(gh pr:*)",
       "Bash(git add:*)",
       "Bash(git checkout:*)",
@@ -15,8 +17,44 @@
       "Bash(gh run:*)",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "Bash(findstr \"state\")",
-      "Bash(git rm:*)"
+      "Bash(findstr)",
+      "Bash(git rm:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git branch:*)",
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(poetry:*)",
+      "Bash(python:*)",
+      "Bash(docker:*)",
+      "Bash(npx -y @upstash/context7-mcp@latest --version)",
+      "Bash(gh api:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh release:*)",
+      "WebSearch",
+      "Bash(gh auth:*)"
     ]
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@latest"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
   }
 }
