@@ -247,7 +247,7 @@ async def security_headers(request: Request, call_next):
 
 ## Referências
 
-- Documentação completa: `docs/technical/security-audit.md`
+- `docs/technical/security-audit.md` (auditoria de segurança)
 - [OWASP Top 10 2021](https://owasp.org/Top10/)
 - [FastAPI Security](https://fastapi.tiangolo.com/tutorial/security/)
 - [OWASP FastAPI Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/FastAPI_Security_Cheat_Sheet.md)

@@ -332,7 +332,7 @@ class ProsodicFeatureExtractor:
 
 ## Referências
 
-- Documentação completa: `docs/technical/best-practices.md` (integrado)
+- Documentação completa: `docs/technical/context7-best-practices.md` (integrado)
 - [Azure AI Speech](https://learn.microsoft.com/azure/ai-services/speech-service/)
 - [librosa Documentation](https://librosa.org/doc/latest/)
 - [python-magic](https://github.com/ahupp/python-magic)
