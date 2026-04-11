@@ -14,12 +14,12 @@ description: "Task list for text analysis feature implementation"
 
 **Purpose**: Configurar Azure e estrutura de cache
 
-- [ ] T001 Adicionar dependência azure-ai-textanalytics no pyproject.toml
+- [X] T001 Adicionar dependência azure-ai-textanalytics no pyproject.toml
   - `poetry add azure-ai-textanalytics>=5.4.0`
   - Rodar `poetry install`
   - [Link para spec](spec.md#technical-notes)
 
-- [ ] T002 Configurar Azure Text Analytics no Portal Azure
+- [X] T002 Configurar Azure Text Analytics no Portal Azure
   - Criar recurso Cognitive Services
   - Copiar endpoint e key para .env
   - [Link para spec](spec.md#azure-configuration)
@@ -174,7 +174,7 @@ description: "Task list for text analysis feature implementation"
   - **Depends**: T012
 
 - [X] T022 Atualizar documentação em `specs/README.md`
-  - Mudar status de 002-text-analysis para "Em Progresso"
+  - Mudar status de 002-text-analysis para "Concluído"
 
 - [X] T023 Commit e PR
   - Mensagem: `feat: implementa análise de texto com Azure Text Analytics`
