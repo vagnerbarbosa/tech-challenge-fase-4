@@ -1,6 +1,6 @@
 # Melhores Práticas - Context7 Reference
 
-**Documento de referência com as melhores práticas atualizadas (2024)**
+**Documento de referência com as melhores práticas atualizadas (2026)**
 
 Este documento consolida as melhores práticas das tecnologias utilizadas no projeto, baseado na documentação oficial e guidelines mais recentes.
 
