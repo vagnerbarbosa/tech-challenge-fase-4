@@ -630,7 +630,7 @@ Este projeto é desenvolvido pela mesma equipe das Fases 1, 2 e 3:
 | Nome | GitHub |
 |------|--------|
 | Adriel Santos | [@AdrielCandido](https://github.com/AdrielCandido) |
-| Leticia Nepomuceno | [@LeticiaNepomuceno](https://github.com/LeticiaNepomuceno) |
+| Leticia Nepomuceno | [@LeticiaNepomucena](https://github.com/LeticiaNepomucena) |
 | Lucas Silva | [@lucfsilva](https://github.com/lucfsilva) |
 | Vagner Barbosa | [@vagnerbarbosa](https://github.com/vagnerbarbosa) |
 

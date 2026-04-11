@@ -114,7 +114,7 @@ Antes de considerar uma feature completa:
 
 - **Autores**: Grupo 27
   - Adriel Santos ([@AdrielCandido](https://github.com/AdrielCandido))
-  - Leticia Nepomuceno ([@LeticiaNepomuceno](https://github.com/LeticiaNepomuceno))
+  - Leticia Nepomuceno ([@LeticiaNepomucena](https://github.com/LeticiaNepomucena))
   - Lucas Silva ([@lucfsilva](https://github.com/lucfsilva))
   - Vagner Barbosa ([@vagnerbarbosa](https://github.com/vagnerbarbosa))
 - **Projeto**: FIAP/Alura - AI para Devs
