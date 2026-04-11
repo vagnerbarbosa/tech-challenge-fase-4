@@ -112,7 +112,11 @@ Antes de considerar uma feature completa:
 
 ## Contato e Responsabilidades
 
-- **Autor**: Vagner Barbosa
+- **Autores**: Grupo 27
+  - Adriel Santos ([@AdrielCandido](https://github.com/AdrielCandido))
+  - Leticia Nepomuceno ([@LeticiaNepomuceno](https://github.com/LeticiaNepomuceno))
+  - Lucas Silva ([@lucfsilva](https://github.com/lucfsilva))
+  - Vagner Barbosa ([@vagnerbarbosa](https://github.com/vagnerbarbosa))
 - **Projeto**: FIAP/Alura - AI para Devs
 - **Fase**: 4 (Multimodal AI)
 - **Repositório**: vagnerbarbosa/tech-challenge-fase-4
