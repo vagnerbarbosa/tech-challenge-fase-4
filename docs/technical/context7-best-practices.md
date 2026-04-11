@@ -548,7 +548,7 @@ poetry export -f requirements.txt --output requirements.txt
 name = "multimodal-health-analysis"
 version = "1.0.0"
 description = "API multimodal para análise de saúde da mulher"
-authors = ["Equipe Tech Challenge"]
+authors = ["Grupo 27 Tech Challenge"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

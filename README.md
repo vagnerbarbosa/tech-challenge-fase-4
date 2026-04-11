@@ -643,4 +643,4 @@ Este projeto é desenvolvido pela mesma equipe das Fases 1, 2 e 3:
 
 ## Licença
 
-MIT License - Copyright (c) 2026 Equipe Tech Challenge
+MIT License - Copyright (c) 2026 Grupo 27 Tech Challenge

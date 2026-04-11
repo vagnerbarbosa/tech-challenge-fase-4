@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Full Name**: Tech Challenge Fase 4 - FIAP/Alura AI para Devs
 - **Language**: Python 3.11+
 - **Framework**: FastAPI
-- **License**: MIT License (Copyright 2026 Equipe Tech Challenge)
+- **License**: MIT License (Copyright 2026 Grupo 27 Tech Challenge)
 - **Stage**: SDD Foundation Complete - Ready for Bootstrap
 
 ### Objective Principal (Do PDF Oficial)
