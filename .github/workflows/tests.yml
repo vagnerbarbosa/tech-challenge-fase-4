@@ -58,11 +58,22 @@ jobs:
 
       - name: Executar testes
         run: |
-          poetry run pytest tests/ -v --cov=src --cov-report=xml --cov-report=term
+          poetry run pytest tests/ -v --cov=src --cov-report=xml --cov-report=term --cov-fail-under=70
         env:
           PYTHONPATH: ${{ github.workspace }}
           AZURE_TEXT_KEY: fake-key-for-testing
           AZURE_TEXT_ENDPOINT: http://localhost:3001/
+
+      - name: Validar cobertura mínima (70%)
+        run: |
+          COVERAGE=$(poetry run python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f'{float(root.attrib['line-rate'])*100:.2f}')")
+          echo "📊 Cobertura atual: ${COVERAGE}%"
+          echo "📊 Cobertura mínima exigida: 70%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "❌ Cobertura abaixo de 70%. Merge bloqueado."
+            exit 1
+          fi
+          echo "✅ Cobertura acima de 70%!"
 
       - name: Enviar cobertura para Codecov
         if: github.event_name == 'pull_request'
