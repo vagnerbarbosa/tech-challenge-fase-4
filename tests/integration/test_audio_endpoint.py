@@ -15,7 +15,7 @@ class TestAudioEndpointSuccess:
     """Testes de sucesso para análise de áudio."""
 
     @pytest.mark.asyncio
-    async def test_analyze_audio_mock_mode(self, client: AsyncClient, tmp_path):
+    async def test_analyze_audio_mock_mode(self, async_client: AsyncClient, tmp_path):
         """Testa análise de áudio em modo mock (sem Azure)."""
         # Arrange
         test_audio = tmp_path / "test.wav"
@@ -28,7 +28,7 @@ class TestAudioEndpointSuccess:
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
         ):
             with open(test_audio, "rb") as f:
-                response = await client.post(
+                response = await async_client.post(
                     "/analyze/audio",
                     files={"file": ("test.wav", f, "audio/wav")},
                     data={"patient_id": "patient-123"},
@@ -45,7 +45,7 @@ class TestAudioEndpointSuccess:
         assert "metadata" in data
 
     @pytest.mark.asyncio
-    async def test_analyze_audio_no_patient_id(self, client: AsyncClient, tmp_path):
+    async def test_analyze_audio_no_patient_id(self, async_client: AsyncClient, tmp_path):
         """Testa análise sem patient_id (opcional)."""
         # Arrange
         test_audio = tmp_path / "test.wav"
@@ -57,7 +57,7 @@ class TestAudioEndpointSuccess:
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
         ):
             with open(test_audio, "rb") as f:
-                response = await client.post(
+                response = await async_client.post(
                     "/analyze/audio",
                     files={"file": ("test.wav", f, "audio/wav")},
                 )
@@ -70,14 +70,14 @@ class TestAudioEndpointValidation:
     """Testes de validação para o endpoint de áudio."""
 
     @pytest.mark.asyncio
-    async def test_invalid_extension_rejected(self, client: AsyncClient, tmp_path):
+    async def test_invalid_extension_rejected(self, async_client: AsyncClient, tmp_path):
         """Testa que extensão inválida é rejeitada."""
         # Arrange
         test_file = tmp_path / "test.txt"
         test_file.write_text("conteudo invalido")
 
         with open(test_file, "rb") as f:
-            response = await client.post(
+            response = await async_client.post(
                 "/analyze/audio",
                 files={"file": ("test.txt", f, "text/plain")},
             )
@@ -87,7 +87,7 @@ class TestAudioEndpointValidation:
         assert "Extensão não permitida" in response.json()["detail"]
 
     @pytest.mark.asyncio
-    async def test_invalid_mime_type_rejected(self, client: AsyncClient, tmp_path):
+    async def test_invalid_mime_type_rejected(self, async_client: AsyncClient, tmp_path):
         """Testa que MIME type inválido é rejeitado."""
         # Arrange
         test_audio = tmp_path / "test.wav"
@@ -98,7 +98,7 @@ class TestAudioEndpointValidation:
             return_value="application/octet-stream",
         ):
             with open(test_audio, "rb") as f:
-                response = await client.post(
+                response = await async_client.post(
                     "/analyze/audio",
                     files={"file": ("test.wav", f, "audio/wav")},
                 )
@@ -107,7 +107,7 @@ class TestAudioEndpointValidation:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.asyncio
-    async def test_file_too_large_rejected(self, client: AsyncClient, tmp_path):
+    async def test_file_too_large_rejected(self, async_client: AsyncClient, tmp_path):
         """Testa que arquivo muito grande é rejeitado."""
         # Arrange
         test_audio = tmp_path / "test.wav"
@@ -117,7 +117,7 @@ class TestAudioEndpointValidation:
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
         ):
             with open(test_audio, "rb") as f:
-                response = await client.post(
+                response = await async_client.post(
                     "/analyze/audio",
                     files={"file": ("test.wav", f, "audio/wav")},
                 )
@@ -133,7 +133,7 @@ class TestAudioFormatsEndpoint:
     @pytest.mark.asyncio
     async def test_get_audio_formats(self, client: AsyncClient):
         """Testa endpoint de formatos."""
-        response = await client.get("/analyze/audio/formats")
+        response = await async_client.get("/analyze/audio/formats")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -147,7 +147,7 @@ class TestAudioAzureErrors:
     """Testes para erros do Azure."""
 
     @pytest.mark.asyncio
-    async def test_quota_exceeded_returns_429(self, client: AsyncClient, tmp_path):
+    async def test_quota_exceeded_returns_429(self, async_client: AsyncClient, tmp_path):
         """Testa retorno 429 quando quota excedida."""
         # Arrange
         test_audio = tmp_path / "test.wav"
@@ -163,7 +163,7 @@ class TestAudioAzureErrors:
                 side_effect=Exception("Quota exceeded"),
             ):
                 with open(test_audio, "rb") as f:
-                    response = await client.post(
+                    response = await async_client.post(
                         "/analyze/audio",
                         files={"file": ("test.wav", f, "audio/wav")},
                     )
