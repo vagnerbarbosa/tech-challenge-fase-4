@@ -27,11 +27,11 @@
 
 ### Modalidades Implementadas
 
-| Modalidade | Status | Endpoint | Azure Service | SDK Version |
-|------------|--------|----------|---------------|-------------|
+| Modalidade | Status | Endpoint | Tecnologia | Versão |
+|------------|--------|----------|------------|--------|
 | 📝 **Texto** | ✅ Concluído | `POST /analyze/text` | Azure AI Language (Text Analytics) | 5.4.0 |
 | 🎙️ **Áudio** | 📝 Draft | `POST /analyze/audio` | Azure AI Speech | 1.48.0 |
-| 🎥 **Imagem** | 📝 Draft | `POST /analyze/image` | Azure AI Vision | 1.0.0 |
+| 🎥 **Vídeo (YOLOv8)** | 📝 Draft | `POST /analyze/video` | **YOLOv8 Local** + Azure Vision (fallback) | 8.x |
 | 🔀 **Multimodal** | 📝 Draft | `POST /analyze/multimodal` | Fusão das 3 modalidades | - |
 
 ### Status das Specs
@@ -41,8 +41,9 @@
 | 001 | Bootstrap do Projeto | ✅ Concluído | P0 | - |
 | 002 | Análise de Texto | ✅ Concluído | P1 | 001 |
 | 003 | Análise de Áudio | 📝 Draft | P1 | 001 |
-| 004 | Análise de Imagem | 📝 Draft | P1 | 001 |
-| 005 | Fusão Multimodal | 📝 Draft | P1 | 002, 003, 004 |
+| **004a** | **Análise Vídeo YOLOv8** | 📝 **Draft** | **P1** | **001** |
+| 004b | Análise Imagem Azure | 📝 Draft | P1 | 001 |
+| 005 | Fusão Multimodal | 📝 Draft | P1 | 002, 003, 004a |
 | 006 | Rate Limiting | 📝 Draft | P2 | 002-004 |
 | 007 | Security Hardening | 📝 Draft | P1 | Todos |
 | 008 | Testes Automatizados | 📝 Draft | P1 | 005 |

@@ -27,11 +27,13 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 
 ### Tecnologias Multimodais:
 
-| Tipo | Tecnologia Azure | SDK Python | Uso |
-|------|------------------|------------|-----|
+| Tipo | Tecnologia | SDK Python | Uso |
+|------|------------|------------|-----|
 | **Texto** | Azure AI Language (Text Analytics) | `azure-ai-textanalytics` | Análise de sentimento, NLP |
 | **Áudio** | Azure AI Speech | `azure-cognitiveservices-speech` | Transcrição + análise de voz |
-| **Vídeo** | Azure AI Vision | `azure-ai-vision-imageanalysis` | Análise de expressões faciais |
+| **Vídeo** | **YOLOv8** (local) + Azure AI Vision (fallback) | `ultralytics` + `azure-ai-vision-imageanalysis` | Detecção instrumentos, sangramento, postura |
+
+> **Nota YOLOv8**: YOLOv8 roda **localmente no container** (custo zero), atendendo requisito do PDF de "YOLOv8 customizado para instrumentos cirúrgicos, áreas críticas e sangramento anômalo". Azure Vision é usado apenas como fallback opcional quando YOLOv8 tem baixa confiança.
 
 > **Nota**: Azure Cognitive Services foi renomeado para **Azure AI Services** (2024) e agora faz parte do **Azure AI Foundry** (2025). O SDK `azure-cognitiveservices-vision-computervision` foi deprecated; usar `azure-ai-vision-imageanalysis`.
 
@@ -50,8 +52,8 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
   - `azure-ai-textanalytics` 5.4.0 (Texto)
   - `azure-cognitiveservices-speech` 1.48.x (Áudio)
   - `azure-ai-vision-imageanalysis` 1.0.x (Imagem/Vídeo)
-- **ML**: scikit-learn, transformers
-- **Vídeo**: FFmpeg/OpenCV (extração de frames)
+- **ML**: scikit-learn, transformers, **YOLOv8** (detecção objetos em vídeo)
+- **Vídeo**: FFmpeg/OpenCV (extração de frames), **ultralytics** (YOLOv8 local)
 - **Container**: Docker + Docker Compose
 - **Testes**: pytest
 
