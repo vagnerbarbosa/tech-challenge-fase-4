@@ -31,9 +31,9 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 |------|------------|------------|-----|
 | **Texto** | Azure AI Language (Text Analytics) | `azure-ai-textanalytics` | Análise de sentimento, NLP |
 | **Áudio** | Azure AI Speech | `azure-cognitiveservices-speech` | Transcrição + análise de voz |
-| **Vídeo** | **YOLOv8** (local) + Azure AI Vision (fallback) | `ultralytics` + `azure-ai-vision-imageanalysis` | Detecção instrumentos, sangramento, postura |
+| **Vídeo** | **YOLOv8** (local) | `ultralytics` + `opencv-python` | Detecção instrumentos, sangramento, postura |
 
-> **Nota YOLOv8**: YOLOv8 roda **localmente no container** (custo zero), atendendo requisito do PDF de "YOLOv8 customizado para instrumentos cirúrgicos, áreas críticas e sangramento anômalo". Azure Vision é usado apenas como fallback opcional quando YOLOv8 tem baixa confiança.
+> **Nota YOLOv8**: YOLOv8 roda **localmente no container** (custo zero), atendendo requisito obrigatório do PDF de "YOLOv8 customizado para instrumentos cirúrgicos, áreas críticas e sangramento anômalo". Aceita vídeos MP4 e imagens (processadas como vídeo de 1 frame).
 
 > **Nota**: Azure Cognitive Services foi renomeado para **Azure AI Services** (2024) e agora faz parte do **Azure AI Foundry** (2025). O SDK `azure-cognitiveservices-vision-computervision` foi deprecated; usar `azure-ai-vision-imageanalysis`.
 
@@ -46,12 +46,10 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
   - Azure App Service: Hospedagem API
   - Azure AI Speech: Transcrição (5h/mês free)
   - Azure AI Language: NLP (5k requests/mês free)
-  - Azure AI Vision: Análise de imagem (5k requests/mês free)
   - Azure SQL Database: Metadados (250GB free)
 - **SDKs Azure**:
   - `azure-ai-textanalytics` 5.4.0 (Texto)
   - `azure-cognitiveservices-speech` 1.48.x (Áudio)
-  - `azure-ai-vision-imageanalysis` 1.0.x (Imagem/Vídeo)
 - **ML**: scikit-learn, transformers, **YOLOv8** (detecção objetos em vídeo)
 - **Vídeo**: FFmpeg/OpenCV (extração de frames), **ultralytics** (YOLOv8 local)
 - **Container**: Docker + Docker Compose
@@ -128,7 +126,6 @@ curl -X POST http://localhost:8000/analyze/text \
 - Swagger UI: http://localhost:8000/docs
 - Mock Azure Text: http://localhost:3001
 - Mock Azure Speech: http://localhost:3002
-- Mock Azure Vision: http://localhost:3003
 - Redis: http://localhost:6379
 
 ### Passo 4: Parar os Containers
@@ -323,14 +320,14 @@ poetry run mypy src/
 
 ## Endpoints
 
-| Endpoint | Método | Descrição | Modalidade |
-|----------|--------|-----------|------------|
-| `/health` | GET | Health check da API | - |
-| `/analyze/text` | POST | Análise de texto | 📝 Texto |
-| `/analyze/audio` | POST | Análise de áudio | 🎙️ Áudio |
-| `/analyze/image` | POST | Análise de imagem ou vídeo | 🎥 Imagem/Vídeo |
-| `/analyze/multimodal` | POST | Fusão de 3 modalidades | 📝🎙️🎥 |
-| `/docs` | GET | Documentação Swagger | - |
+| Endpoint | Método | Descrição | Tecnologia | Modalidade |
+|----------|--------|-----------|------------|------------|
+| `/health` | GET | Health check da API | - | - |
+| `/analyze/text` | POST | Análise de texto | Azure AI Language | 📝 Texto |
+| `/analyze/audio` | POST | Análise de áudio | Azure AI Speech | 🎙️ Áudio |
+| `/analyze/video` | POST | Análise de vídeo/imagem | **YOLOv8 Local** | 🎥 Vídeo/Imagem |
+| `/analyze/multimodal` | POST | Fusão de 3 modalidades | Combinação serviços | 📝🎙️🎥 |
+| `/docs` | GET | Documentação Swagger | - | - |
 
 ---
 
@@ -380,20 +377,17 @@ curl -X POST "http://localhost:8000/analyze/audio" \
 }
 ```
 
-### Análise de Imagem/Vídeo
+### Análise de Vídeo (YOLOv8 Local)
 
-**Imagem:**
-```bash
-curl -X POST "http://localhost:8000/analyze/image" \
-  -H "Content-Type: multipart/form-data" \
-  -F "imagem=@foto_consulta.jpg"
-```
+> **Nota**: YOLOv8 roda localmente no container (custo zero). Aceita vídeos MP4 ou imagens (JPEG, PNG) que são processadas como vídeo de 1 frame.
 
-**Vídeo (frames extraídos automaticamente):**
+> **Nota**: YOLOv8 roda localmente no container (custo zero). Extrai frames automaticamente e detecta instrumentos cirúrgicos, sangramento e linguagem corporal.
+
 ```bash
-curl -X POST "http://localhost:8000/analyze/image" \
+curl -X POST "http://localhost:8000/analyze/video" \
   -H "Content-Type: multipart/form-data" \
-  -F "imagem=@consulta_video.mp4"
+  -F "video=@cirurgia.mp4" \
+  -F "tipo=cirurgia"
 ```
 
 **Resposta:**
@@ -414,7 +408,7 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
   -H "Content-Type: multipart/form-data" \
   -F "texto=@relatorio.txt" \
   -F "audio=@consulta.wav" \
-  -F "imagem=@foto.jpg"
+  -F "video=@cirurgia.mp4"
 ```
 
 **Resposta:**
@@ -427,7 +421,7 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
   },
   "texto": { ... },
   "audio": { ... },
-  "imagem": { ... },
+  "video": { ... },
   "recomendacao": "Encaminhar para equipe multidisciplinar"
 }
 ```
@@ -463,18 +457,18 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 - Telemedicina
 - Depoimentos
 
-### 🎥 Imagem/Vídeo (Azure AI Vision + FFmpeg)
+### 🎥 Vídeo/Imagem (YOLOv8 Local + OpenCV)
 
 **Processamento:**
-- **Imagens**: Análise direta com Azure AI Vision
-- **Vídeos**: Extração automática de frames (1 a cada 5s) + análise
-- Análise de expressões faciais
-- Detecção de emoções
-- Identificação de marcas/sinais
+- **Vídeos**: Extração automática de frames (1 a cada 5s) + análise YOLOv8
+- **Imagens**: Processadas como vídeo de 1 frame via YOLOv8
+- Detecção de instrumentos cirúrgicos
+- Detecção de sangramento anômalo
+- Análise de linguagem corporal
 
 **Exemplos de entrada:**
-- Fotos de consulta (JPEG, PNG)
 - Vídeos curtos de atendimento (MP4, max 30s)
+- Fotos de consulta (JPEG, PNG)
 
 ---
 
@@ -484,18 +478,19 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 |---------|-------------|-------------------|
 | Speech Services | 5h áudio/mês | ~300 consultas |
 | Text Analytics | 5k requests/mês | Suficiente para MVP |
-| Computer Vision | 5k transactions/mês | ~5k análises |
 | SQL Database | 250GB | Metadados + logs |
 | App Service | 60min CPU/dia | API contínua |
-| Blob Storage | 5GB | Áudios + imagens |
+| Blob Storage | 5GB | Áudios + vídeos |
 
 **Custo total: $0** (dentro do free tier)
+
+> **💡 Nota sobre YOLOv8**: A análise de vídeo/imagem usa YOLOv8 local (dentro do container), consumindo **zero** da quota Azure AI Vision.
 
 ### 🔒 Proteção Contra Custos (Hard Stop)
 
 O sistema implementa uma **estratégia de hard stop** que garante **zero custos**:
 
-- **Contadores internos** por serviço (Texto, Áudio, Visão)
+- **Contadores internos** por serviço (Texto, Áudio)
 - **Interrupção automática** quando quotas forem atingidas
 - **Retorno HTTP 503** com informação de retry
 - **Reset automático** às 00:00 UTC

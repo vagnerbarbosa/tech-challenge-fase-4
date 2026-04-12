@@ -12,8 +12,7 @@
 | 001 | Bootstrap do Projeto | ✅ Concluído | `main` | P0 |
 | 002 | Análise de Texto | ✅ Concluído | `main` | P1 |
 | 003 | Análise de Áudio | 📝 Draft | `003-audio-analysis` | P1 |
-| 004a | Análise de Vídeo com YOLOv8 | 📝 Draft | `004-yolo-video-analysis` | P1 |
-| 004b | Análise de Imagem/Vídeo (Azure) | 📝 Draft | `004-image-analysis` | P1 |
+| 004 | Análise de Vídeo (YOLOv8) | 📝 Draft | `004-yolo-video-analysis` | P1 |
 | 005 | Fusão Multimodal | 📝 Draft | `005-multimodal-fusion` | P1 |
 | 006 | Rate Limiting | 📝 Draft | `006-rate-limiting` | P2 |
 | 007 | Security Hardening | 📝 Draft | `007-security-hardening` | P1 |
@@ -38,8 +37,7 @@
 001 (Bootstrap) → Todos os outros
 002 (Texto) ───────┐
 003 (Áudio) ───────┼→ 005 (Multimodal)
-004a (YOLOv8) ─────┤
-004b (Azure Vision) ┘
+004 (YOLOv8) ──────┘
 005 (Multimodal) → 008 (Tests)
 002-004 → 006 (Rate Limiting)
 Tudo → 007 (Security)

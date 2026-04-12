@@ -53,7 +53,7 @@ Sistema **multimodal** para identificação de:
 - Blob Storage: 5GB
 
 ### Required Deliverables:
-1. API REST multimodal (`/analyze/text`, `/analyze/audio`, `/analyze/image`, `/analyze/multimodal`)
+1. API REST multimodal (`/analyze/text`, `/analyze/audio`, `/analyze/video`, `/analyze/multimodal`)
 2. Integração com Azure Cognitive Services
 3. Swagger/OpenAPI documentation em `/docs`
 4. Dockerfile (multi-stage)

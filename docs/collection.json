@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, imagem)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis\n⏳ Pendente: Audio, Image, Multimodal",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis\n⏳ Pendente: Audio, Video, Multimodal",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -149,10 +149,10 @@
       ]
     },
     {
-      "name": "Image Analysis [NÃO IMPLEMENTADO]",
+      "name": "Video Analysis [NÃO IMPLEMENTADO]",
       "item": [
         {
-          "name": "Analyze Image",
+          "name": "Analyze Video",
           "request": {
             "method": "POST",
             "header": [
@@ -165,23 +165,23 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "imagem",
+                  "key": "video",
                   "type": "file",
-                  "src": "/path/to/image.jpg"
+                  "src": "/path/to/video.mp4"
                 },
                 {
                   "key": "tipo",
-                  "value": "foto_consulta",
+                  "value": "cirurgia",
                   "type": "text"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/analyze/image",
+              "raw": "{{base_url}}/analyze/video",
               "host": ["{{base_url}}"],
-              "path": ["analyze", "image"]
+              "path": ["analyze", "video"]
             },
-            "description": "[PENDENTE] Analisa imagem (JPG, PNG) ou vídeo (MP4)"
+            "description": "[PENDENTE] Analisa vídeo (MP4) ou imagem (JPG, PNG) usando YOLOv8 local"
           },
           "response": []
         }
@@ -214,9 +214,9 @@
                   "src": "/path/to/audio.wav"
                 },
                 {
-                  "key": "imagem",
+                  "key": "video",
                   "type": "file",
-                  "src": "/path/to/image.jpg"
+                  "src": "/path/to/video.mp4"
                 }
               ]
             },
@@ -225,7 +225,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "[PENDENTE] Combina análise de texto, áudio e imagem"
+            "description": "[PENDENTE] Combina análise de texto, áudio e vídeo"
           },
           "response": []
         }
