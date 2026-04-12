@@ -17,7 +17,8 @@ from src.infrastructure.azure_clients import (
     safe_azure_call,
 )
 from src.models.schemas import AnalysisMetadata, TextAnalysisResponse
-from src.services.risk_detector import calculate_risk, sanitize_text_input
+from src.services.risk_detector import calculate_risk
+from src.utils.text_utils import sanitize_text_input
 
 
 class TextAnalysisError(Exception):
