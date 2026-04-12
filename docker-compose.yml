@@ -48,6 +48,7 @@ services:
       - ANONYMIZE_PII=true
       - CONSENT_REQUIRED=true
     volumes:
+      - ./src:/app/src
       - ./data:/app/data
       - ./logs:/app/logs
     networks:

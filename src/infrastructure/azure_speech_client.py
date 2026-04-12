@@ -161,8 +161,13 @@ class AzureSpeechClient:
             )
 
             # Executa reconhecimento com timeout
+            # recognize_once_async retorna ResultFuture, precisamos chamar get()
+            def _recognize():
+                future = recognizer.recognize_once_async()
+                return future.get()  # Bloqueia até ter resultado
+
             result = await asyncio.wait_for(
-                asyncio.to_thread(recognizer.recognize_once_async),
+                asyncio.to_thread(_recognize),
                 timeout=timeout_secs,
             )
 
