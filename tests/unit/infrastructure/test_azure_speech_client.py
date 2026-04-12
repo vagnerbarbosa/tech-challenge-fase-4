@@ -101,8 +101,10 @@ class TestAzureSpeechClient:
         with patch(
             "src.infrastructure.azure_speech_client.SpeechRecognizer"
         ) as mock_recognizer:
-            # recognize_once_async é chamado via asyncio.to_thread
-            mock_recognizer.return_value.recognize_once_async.return_value = mock_result
+            # recognize_once_async retorna um future, e chamamos .get() nele
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
 
             # Act
             result = await client.transcribe(test_file)
@@ -127,7 +129,10 @@ class TestAzureSpeechClient:
         with patch(
             "src.infrastructure.azure_speech_client.SpeechRecognizer"
         ) as mock_recognizer:
-            mock_recognizer.return_value.recognize_once_async.return_value = mock_result
+            # recognize_once_async retorna um future, e chamamos .get() nele
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
 
             # Act
             result = await client.transcribe(test_file)
