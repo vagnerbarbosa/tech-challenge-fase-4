@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: Audio Analysis API
+  description: Endpoint para análise de áudio usando Azure Speech Services
+  version: 1.0.0
+  contact:
+    name: Grupo 27
+
+paths:
+  /analyze/audio:
+    post:
+      summary: Analisar áudio
+      description: |
+        Transcreve áudio usando Azure Speech e extrai features prosódicas.
+
+        **LGPD Compliance:**
+        - Arquivos são processados e deletados automaticamente
+        - Não armazenamos áudio após análise
+        - patient_id é opcional e anônimo
+
+        **Limitações:**
+        - Formatos: WAV, MP3, OGG
+        - Tamanho máximo: 50MB
+        - Timeout: 30s
+      tags:
+        - Audio Analysis
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Arquivo de áudio (WAV, MP3, OGG, max 50MB)
+                tipo_consulta:
+                  type: string
+                  enum: ["pré-natal", "pós-parto", "geral"]
+                  default: "geral"
+                  description: Tipo da consulta
+                patient_id:
+                  type: string
+                  format: uuid
+                  description: ID anônimo do paciente (UUID v4)
+              required:
+                - audio
+      responses:
+        '200':
+          description: Análise concluída com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioAnalysisResponse'
+              example:
+                transcricao: "Doutor, eu estou muito ansiosa..."
+                idioma_detectado: "pt-BR"
+                sentimento: "negativo"
+                entonação: "hesitante"
+                voz_tremida: true
+                pausas_suspeitas: 2
+                duracao_segundos: 32.5
+                risco_violencia: "medio"
+                risco_saude_mental: "alto"
+                metadata:
+                  correlation_id: "uuid-123"
+                  timestamp: "2026-04-12T14:30:00Z"
+                  tempo_processamento_ms: 8200
+                  cache_hit: false
+                  azure_calls: 1
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                formato_invalido:
+                  summary: Formato não suportado
+                  value:
+                    detail: "Tipo MIME não suportado: audio/flac"
+                arquivo_muito_grande:
+                  summary: Arquivo excede limite
+                  value:
+                    detail: "Arquivo muito grande (max 50MB)"
+        '429':
+          description: Rate limit exceeded (Azure quota)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Azure Speech quota exceeded. Retry after 00:00 UTC"
+                retry_after: 3600
+        '503':
+          description: Azure Speech indisponível
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Serviço de transcrição temporariamente indisponível"
+        '504':
+          description: Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Tempo limite excedido para processamento (30s)"
+
+components:
+  schemas:
+    AudioAnalysisResponse:
+      type: object
+      required:
+        - transcricao
+        - sentimento
+        - risco_violencia
+        - risco_saude_mental
+        - metadata
+      properties:
+        transcricao:
+          type: string
+          description: Texto transcrito do áudio
+          example: "Doutor, eu estou muito ansiosa..."
+        idioma_detectado:
+          type: string
+          description: Idioma detectado
+          default: "pt-BR"
+          example: "pt-BR"
+        sentimento:
+          type: string
+          enum: ["positivo", "negativo", "neutro", "misto"]
+          description: Sentimento da transcrição
+          example: "negativo"
+        entonação:
+          type: string
+          enum: ["normal", "hesitante", "agitado", "calmo"]
+          description: Entonação detectada na fala
+          default: "normal"
+          example: "hesitante"
+        voz_tremida:
+          type: boolean
+          description: Indica tremor na voz (possível ansiedade)
+          default: false
+          example: true
+        pausas_suspeitas:
+          type: integer
+          minimum: 0
+          description: Número de pausas longas detectadas
+          default: 0
+          example: 2
+        duracao_segundos:
+          type: number
+          format: float
+          minimum: 0.1
+          description: Duração do áudio em segundos
+          example: 32.5
+        risco_violencia:
+          type: string
+          enum: ["baixo", "medio", "alto"]
+          description: Nível de risco de violência (OBRIGATÓRIO)
+          example: "medio"
+        risco_saude_mental:
+          type: string
+          enum: ["baixo", "medio", "alto"]
+          description: Nível de risco de saúde mental (OBRIGATÓRIO)
+          example: "alto"
+        metadata:
+          $ref: '#/components/schemas/AnalysisMetadata'
+
+    AnalysisMetadata:
+      type: object
+      required:
+        - correlation_id
+        - timestamp
+        - tempo_processamento_ms
+        - cache_hit
+        - azure_calls
+      properties:
+        correlation_id:
+          type: string
+          format: uuid
+          description: ID único de correlação
+          example: "uuid-123"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp da requisição (ISO 8601)
+          example: "2026-04-12T14:30:00Z"
+        tempo_processamento_ms:
+          type: integer
+          description: Tempo de processamento em milissegundos
+          example: 8200
+        cache_hit:
+          type: boolean
+          description: Se resultado veio do cache
+          default: false
+        azure_calls:
+          type: integer
+          minimum: 0
+          description: Número de chamadas Azure
+          default: 0
+          example: 1
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Mensagem de erro
+        retry_after:
+          type: integer
+          description: Segundos até retry (apenas para 429)
+          example: 3600

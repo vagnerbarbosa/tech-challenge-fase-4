@@ -120,7 +120,7 @@ Como avaliador, quero um vídeo demonstrativo do sistema funcionando.
 2. Arquitetura (1min): Diagrama e componentes
 3. Demo Texto (1min): Submeter texto, mostrar análise
 4. Demo Áudio (1min): Submeter áudio, mostrar transcrição
-5. Demo Imagem (1min): Submeter imagem, mostrar análise facial
+5. Demo Video (1min): Submeter video, mostrar análise facial
 6. Demo Multimodal (2min): Combinar 3 modalidades, mostrar fusão
 7. Conclusão (30s): Resultados e próximos passos
 

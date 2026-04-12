@@ -1,8 +1,8 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis\n⏳ Pendente: Audio, Video, Multimodal",
-    "version": "1.0.0",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis\n⏳ Pendente: Video, Multimodal",
+    "version": "1.1.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -19,7 +19,7 @@
               "host": ["{{base_url}}"],
               "path": ["health"]
             },
-            "description": "Verifica status da API"
+            "description": "Verifica status da API e quotas Azure"
           },
           "response": []
         },
@@ -110,29 +110,24 @@
       ]
     },
     {
-      "name": "Audio Analysis [NÃO IMPLEMENTADO]",
+      "name": "Audio Analysis",
       "item": [
         {
           "name": "Analyze Audio",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "audio",
+                  "key": "file",
                   "type": "file",
                   "src": "/path/to/audio.wav"
                 },
                 {
-                  "key": "tipo",
-                  "value": "consulta",
+                  "key": "patient_id",
+                  "value": "uuid-anonimo-123",
                   "type": "text"
                 }
               ]
@@ -142,7 +137,21 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "audio"]
             },
-            "description": "[PENDENTE] Analisa arquivo de áudio (WAV, MP3, OGG)"
+            "description": "Analisa arquivo de áudio (WAV, MP3, OGG) para transcrição, prosódia e riscos"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audio Formats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/audio/formats",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "audio", "formats"]
+            },
+            "description": "Retorna formatos de áudio suportados e limites"
           },
           "response": []
         }

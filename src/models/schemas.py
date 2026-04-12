@@ -109,3 +109,77 @@ class TextAnalysisResponse(BaseModel):
         ...,
         description="Metadados da análise",
     )
+
+
+class AudioAnalysisResponse(BaseModel):
+    """Modelo de resposta para o endpoint de análise de áudio."""
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "transcricao": "Doutor, eu não sei se posso contar isso...",
+                "idioma_detectado": "pt-BR",
+                "sentimento": "negativo",
+                "entonação": "hesitante",
+                "voz_tremida": True,
+                "pausas_suspeitas": 3,
+                "duracao_segundos": 45.2,
+                "risco_violencia": "medio",
+                "risco_saude_mental": "alto",
+                "metadata": {
+                    "correlation_id": "abc-123",
+                    "timestamp": "2026-04-11T14:30:00Z",
+                    "tempo_processamento_ms": 8500,
+                    "cache_hit": False,
+                    "azure_calls": 1,
+                },
+            }
+        }
+    }
+
+    transcricao: str = Field(
+        ...,
+        description="Texto transcrito do áudio",
+    )
+    idioma_detectado: str = Field(
+        default="pt-BR",
+        description="Idioma detectado no áudio",
+    )
+    sentimento: str = Field(
+        default="neutro",
+        pattern="^(positivo|negativo|neutro|misto)$",
+        description="Classificação de sentimento da transcrição",
+    )
+    entonação: str = Field(
+        default="normal",
+        pattern="^(normal|hesitante|agitado|calmo)$",
+        description="Entonação detectada na fala",
+    )
+    voz_tremida: bool = Field(
+        default=False,
+        description="Indica se foi detectado tremor na voz (possível ansiedade/stress)",
+    )
+    pausas_suspeitas: int = Field(
+        default=0,
+        ge=0,
+        description="Número de pausas suspeitas detectadas (silêncios longos)",
+    )
+    duracao_segundos: float = Field(
+        ...,
+        ge=0,
+        description="Duração do áudio em segundos",
+    )
+    risco_violencia: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de violência - CAMPO OBRIGATÓRIO",
+    )
+    risco_saude_mental: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de saúde mental - CAMPO OBRIGATÓRIO",
+    )
+    metadata: AnalysisMetadata = Field(
+        ...,
+        description="Metadados da análise",
+    )

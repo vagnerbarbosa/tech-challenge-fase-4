@@ -103,3 +103,10 @@ class QuotaExceededException(AppException):
             },
         )
         self.service = service
+
+
+# Aliases para compatibilidade com azure_speech_client
+AzureServiceError = AzureServiceException
+AzureAuthenticationError = AuthenticationException
+AzureQuotaExceededError = QuotaExceededException
+AzureConnectionError = AzureServiceException

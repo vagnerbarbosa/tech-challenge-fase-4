@@ -34,7 +34,7 @@ class Settings(BaseSettings):
         description="Nome da aplicação",
     )
     app_version: str = Field(
-        default="0.2.0",
+        default="0.3.0",
         description="Versão da aplicação",
     )
     environment: Literal["development", "staging", "production"] = Field(
@@ -183,7 +183,7 @@ class Settings(BaseSettings):
         alias="ALLOWED_IMAGE_EXTENSIONS",
     )
     allowed_audio_extensions: str = Field(
-        default="wav,mp3,ogg,m4a",
+        default="wav,mp3,ogg",
         description="Lista de extensões de áudio permitidas separadas por vírgula",
         alias="ALLOWED_AUDIO_EXTENSIONS",
     )

@@ -6,10 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1
 
-# Instalar dependências de sistema mínimas
+# Instalar dependências de sistema (incluindo FFmpeg para librosa)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
+        ffmpeg \
+        libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Diretório de trabalho
@@ -27,6 +29,11 @@ RUN pip install --no-cache-dir \
     httpx \
     pytest \
     pytest-asyncio \
+    aiofiles>=23.0.0 \
+    librosa>=0.10.0 \
+    python-magic \
+    numpy \
+    scikit-learn \
     azure-ai-textanalytics>=5.4.0 \
     azure-cognitiveservices-speech \
     azure-ai-vision-imageanalysis \

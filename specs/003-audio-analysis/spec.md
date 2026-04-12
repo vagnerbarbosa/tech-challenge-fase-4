@@ -7,6 +7,18 @@
 
 ---
 
+## Clarifications
+
+### Session 2026-04-12
+
+- **Q**: Fallback quando Azure Speech falha → **A**: Retornar erro HTTP 503 quando Azure indisponível (requer Azure)
+- **Q**: Timeout de processamento → **A**: 30 segundos por requisição
+- **Q**: Limite de tamanho de arquivo → **A**: Hard limit - rejeitar arquivos >50MB com HTTP 400
+- **Q**: Storage temporário → **A**: Local filesystem (/tmp) com cleanup automático
+- **Q**: Desenvolvimento sem Azure → **A**: Modo mock com transcrição simulada + aviso no log
+
+---
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Speech-to-Text (Priority: P1)
@@ -62,7 +74,7 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 - **FR-003**: Integra com Azure Speech Services para transcrição
 - **FR-004**: Retorna obrigatoriamente: risco_violencia, risco_saude_mental
 - **FR-005**: Retorna: transcrição, idioma_detectado, sentimento, entonação, voz_tremida, pausas_suspeitas
-- **FR-006**: Armazena arquivo temporariamente (Azure Blob) durante processamento
+- **FR-006**: Armazena arquivo temporariamente em filesystem local (/tmp) durante processamento
 - **FR-007**: Deleta arquivo após processamento (LGPD)
 - **FR-008**: Valida formato e tamanho do arquivo
 
@@ -105,9 +117,10 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 - Detectar pausas via análise de silêncio
 
 ### Storage Temporário
-- Azure Blob Storage (container temporário)
-- TTL: 24 horas (configurável)
-- Anonimização: patient_id hash no nome do arquivo
+- ~~Azure Blob Storage~~ Local filesystem (`/tmp`)
+- TTL: Imediato (cleanup após processamento)
+- Anonimização: patient_id hash (SHA256) no prefixo do nome do arquivo
+- Cleanup garantido via `try/finally` + `atexit` handler
 
 ---
 

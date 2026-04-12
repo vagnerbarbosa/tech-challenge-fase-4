@@ -139,8 +139,8 @@ class QuotaManager:
 
     FREE_TIER_LIMITS = {
         ServiceType.TEXT_ANALYTICS: {"daily": 160, "monthly": 5000},
-        ServiceType.SPEECH: {"daily_minutes": 10, "monthly_minutes": 300},
-        ServiceType.VISION: {"daily": 160, "monthly": 5000}
+        ServiceType.SPEECH: {"daily_minutes": 10, "monthly_minutes": 300}
+        # Nota: Vídeo usa YOLOv8 local (custo zero), não precisa de rate limiting Azure
     }
 
     async def check_and_increment(
