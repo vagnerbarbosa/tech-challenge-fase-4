@@ -100,7 +100,13 @@ class TestProsodicFeatureExtractor:
             np.full((50, 10), 50.0),   # Metade com valor baixo
             np.full((50, 10), 250.0),  # Metade com valor alto
         ])
-        magnitudes = np.full((100, 10), 1.0)  # Magnitudes altas para serem selecionadas
+        # Magnitudes variadas para que alguns valores passem no filtro (magnitudes > mediana)
+        # Metade com magnitude baixa (0.1) e metade com magnitude alta (1.0)
+        # A mediana será 0.55, então os valores com 1.0 passarão no filtro
+        magnitudes = np.concatenate([
+            np.full((50, 10), 0.1),   # Baixa magnitude (filtrada)
+            np.full((50, 10), 1.0),   # Alta magnitude (selecionada)
+        ])
         mock_piptrack.return_value = (pitches, magnitudes)
 
         mock_rms.return_value = np.array([[0.05, 0.06]])

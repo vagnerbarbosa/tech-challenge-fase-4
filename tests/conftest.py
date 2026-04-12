@@ -6,6 +6,7 @@ Fornece fixtures compartilhadas para todos os módulos de teste.
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+from httpx import ASGITransport
 
 from src.api.main import app
 
@@ -25,7 +26,7 @@ def api_client(client):
 @pytest.fixture
 async def async_client():
     """Cria uma instância de AsyncClient para testes async."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 
