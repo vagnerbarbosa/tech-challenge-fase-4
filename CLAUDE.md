@@ -80,10 +80,18 @@ Sistema **multimodal** para identificação de:
 |---------|------------|--------|-----|
 | **Azure AI Language** (Text Analytics) | `azure-ai-textanalytics` | 5.4.0 | Análise de sentimento, NLP |
 | **Azure AI Speech** | `azure-cognitiveservices-speech` | 1.48.x | Speech-to-text, análise de voz |
-| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x+ | Análise de imagem, expressões faciais |
+| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x+ | Análise de imagem, expressões faciais (fallback) |
 | **Azure Blob Storage** | `azure-storage-blob` | 12.x+ | Armazenamento temporário de arquivos |
 
 > **⚠️ Importante**: O SDK antigo `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**. Usar `azure-ai-vision-imageanalysis`.
+
+### Local ML Services (Custo Zero):
+| Serviço | Pacote | Versão | Uso |
+|---------|--------|--------|-----|
+| **YOLOv8** (Ultralytics) | `ultralytics` | 8.x+ | Detecção objetos em vídeo - **Requisito PDF** |
+| **OpenCV** | `opencv-python` | 4.8+ | Extração frames, pré-processamento |
+
+> **💡 Nota YOLOv8**: Atende requisito obrigatório do PDF para "YOLOv8 customizado". Roda localmente no container (sem consumir quota Azure), detectando instrumentos cirúrgicos, sangramento anômalo e linguagem corporal.
 
 ### Infrastructure:
 - **Container**: Docker + Docker Compose
