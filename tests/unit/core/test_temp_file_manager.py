@@ -4,7 +4,7 @@ LGPD Compliance: Verifica cleanup automático de arquivos temporários.
 """
 
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -34,7 +34,7 @@ class TestTempFileManager:
         # Arrange
         mock_upload = Mock()
         mock_upload.filename = "test.wav"
-        mock_upload.read = Mock(return_value=b"fake audio content")
+        mock_upload.read = AsyncMock(return_value=b"fake audio content")
 
         # Act
         result_path = await temp_manager.save_temp(mock_upload)
@@ -50,7 +50,7 @@ class TestTempFileManager:
         # Arrange
         mock_upload = Mock()
         mock_upload.filename = "test.wav"
-        mock_upload.read = Mock(return_value=b"fake audio content")
+        mock_upload.read = AsyncMock(return_value=b"fake audio content")
 
         result_path = await temp_manager.save_temp(mock_upload)
         assert result_path.exists()
@@ -119,4 +119,6 @@ class TestTempFileManagerGlobal:
         """Testa se instância global é singleton."""
         from src.core.temp_file_manager import TempFileManager
 
-        assert temp_file_manager is TempFileManager()
+        # Cria nova instância e verifica se é a mesma
+        instance = TempFileManager()
+        assert temp_file_manager is instance

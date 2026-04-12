@@ -4,7 +4,7 @@ Validação de arquivos com magic numbers.
 """
 
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -25,8 +25,8 @@ class TestValidateAudioFile:
         """Fixture para UploadFile mockado."""
         upload = Mock()
         upload.filename = "test.wav"
-        upload.read = Mock()
-        upload.seek = Mock()
+        upload.read = AsyncMock()
+        upload.seek = AsyncMock()
         return upload
 
     @pytest.mark.asyncio
