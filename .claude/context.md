@@ -31,6 +31,7 @@
 |------------|--------|----------|------------|--------|
 | 📝 **Texto** | ✅ Concluído | `POST /analyze/text` | Azure AI Language (Text Analytics) | 5.4.0 |
 | 🎙️ **Áudio** | 📝 Draft | `POST /analyze/audio` | Azure AI Speech | 1.48.0 |
+| 🖼️ **Imagem** | 📝 Draft | `POST /analyze/image` | Azure AI Vision | 1.0.x |
 | 🎥 **Vídeo (YOLOv8)** | 📝 Draft | `POST /analyze/video` | **YOLOv8 Local** + Azure Vision (fallback) | 8.x |
 | 🔀 **Multimodal** | 📝 Draft | `POST /analyze/multimodal` | Fusão das 3 modalidades | - |
 
@@ -308,25 +309,30 @@ addopts = [
    - Detecção de voz tremida
    - Formatos: WAV, MP3, OGG (max 50MB)
 
-2. **Spec 004: Análise de Imagem**
+2. **Spec 004a: Análise de Imagem (Azure Vision)**
    - Azure AI Vision (análise facial/emocional)
-   - OpenCV para extração de frames de vídeo
-   - Vídeos: MP4 (max 30s)
    - Imagens: JPEG, PNG (max 20MB)
+   - Endpoint: `POST /analyze/image`
 
-3. **Spec 005: Fusão Multimodal**
+3. **Spec 004b: Análise de Vídeo (YOLOv8)**
+   - YOLOv8 local para detecção de objetos
+   - OpenCV para extração de frames
+   - Vídeos: MP4 (max 30s)
+   - Endpoint: `POST /analyze/video`
+
+4. **Spec 005: Fusão Multimodal**
    - Late fusion com ponderação por confiança
    - `asyncio.gather()` para processamento paralelo
    - Alerta quando risco alto em 2+ modalidades
    - Fallback gracioso se uma modalidade falhar
 
-4. **Spec 007: Security Hardening**
+5. **Spec 007: Security Hardening**
    - Validação de uploads (magic numbers)
    - Headers de segurança HTTP (CSP, HSTS, etc.)
    - API Key authentication
    - Sanitização de inputs
 
-5. **Spec 009: Deploy Azure**
+6. **Spec 009: Deploy Azure**
    - Azure App Service (Free Tier F1)
    - HTTPS obrigatório
    - Azure Key Vault para secrets
@@ -334,16 +340,16 @@ addopts = [
 
 ### Prioridade P2
 
-6. **Spec 006: Rate Limiting**
+7. **Spec 006: Rate Limiting**
    - Hard stop automático quando quota atingida
    - Headers X-RateLimit-Limit, X-RateLimit-Remaining
    - Redis opcional para rate limiting distribuído
 
-7. **Spec 008: Testes**
+8. **Spec 008: Testes**
    - Testes de carga com Locust
    - Cobertura > 70%
 
-8. **Spec 010: Documentação**
+9. **Spec 010: Documentação**
    - Vídeo demonstrativo YouTube (5-10 min)
    - README final completo
 

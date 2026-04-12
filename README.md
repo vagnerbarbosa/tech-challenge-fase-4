@@ -323,14 +323,15 @@ poetry run mypy src/
 
 ## Endpoints
 
-| Endpoint | Método | Descrição | Modalidade |
-|----------|--------|-----------|------------|
-| `/health` | GET | Health check da API | - |
-| `/analyze/text` | POST | Análise de texto | 📝 Texto |
-| `/analyze/audio` | POST | Análise de áudio | 🎙️ Áudio |
-| `/analyze/image` | POST | Análise de imagem ou vídeo | 🎥 Imagem/Vídeo |
-| `/analyze/multimodal` | POST | Fusão de 3 modalidades | 📝🎙️🎥 |
-| `/docs` | GET | Documentação Swagger | - |
+| Endpoint | Método | Descrição | Tecnologia | Modalidade |
+|----------|--------|-----------|------------|------------|
+| `/health` | GET | Health check da API | - | - |
+| `/analyze/text` | POST | Análise de texto | Azure AI Language | 📝 Texto |
+| `/analyze/audio` | POST | Análise de áudio | Azure AI Speech | 🎙️ Áudio |
+| `/analyze/image` | POST | Análise de imagem | Azure AI Vision | 🖼️ Imagem |
+| `/analyze/video` | POST | Análise de vídeo | **YOLOv8 Local** + Azure Vision (fallback) | 🎥 Vídeo |
+| `/analyze/multimodal` | POST | Fusão de 3 modalidades | Combinação serviços | 📝🎙️🎥 |
+| `/docs` | GET | Documentação Swagger | - | - |
 
 ---
 
@@ -380,20 +381,34 @@ curl -X POST "http://localhost:8000/analyze/audio" \
 }
 ```
 
-### Análise de Imagem/Vídeo
+### Análise de Imagem (Azure Vision)
 
-**Imagem:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/image" \
   -H "Content-Type: multipart/form-data" \
   -F "imagem=@foto_consulta.jpg"
 ```
 
-**Vídeo (frames extraídos automaticamente):**
+**Resposta:**
+```json
+{
+  "emoção_principal": "tristeza",
+  "confiança": 0.89,
+  "expressoes": ["evitando_olho", "expressao_tensa"],
+  "risco_violencia": "medio",
+  "risco_saude_mental": "alto"
+}
+```
+
+### Análise de Vídeo (YOLOv8 Local)
+
+> **Nota**: YOLOv8 roda localmente no container (custo zero). Extrai frames automaticamente e detecta instrumentos cirúrgicos, sangramento e linguagem corporal.
+
 ```bash
-curl -X POST "http://localhost:8000/analyze/image" \
+curl -X POST "http://localhost:8000/analyze/video" \
   -H "Content-Type: multipart/form-data" \
-  -F "imagem=@consulta_video.mp4"
+  -F "video=@cirurgia.mp4" \
+  -F "tipo=cirurgia"
 ```
 
 **Resposta:**
