@@ -166,7 +166,7 @@ class AudioAnalysisResponse(BaseModel):
     )
     duracao_segundos: float = Field(
         ...,
-        gt=0,
+        ge=0,
         description="Duração do áudio em segundos",
     )
     risco_violencia: str = Field(
