@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, imagem)",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, imagem)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis\n⏳ Pendente: Audio, Image, Multimodal",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -20,6 +20,20 @@
               "path": ["health"]
             },
             "description": "Verifica status da API"
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ready",
+              "host": ["{{base_url}}"],
+              "path": ["ready"]
+            },
+            "description": "Verifica se a API está pronta para receber requisições (Kubernetes/Docker health check)"
           },
           "response": []
         },
@@ -71,11 +85,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/analyze/cache/stats",
+              "raw": "{{base_url}}/analyze/text/cache/stats",
               "host": ["{{base_url}}"],
-              "path": ["analyze", "cache", "stats"]
+              "path": ["analyze", "text", "cache", "stats"]
             },
-            "description": "Retorna estatísticas do cache"
+            "description": "Retorna estatísticas do cache de análises de texto"
           },
           "response": []
         },
@@ -85,18 +99,18 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/analyze/cache/clear",
+              "raw": "{{base_url}}/analyze/text/cache/clear",
               "host": ["{{base_url}}"],
-              "path": ["analyze", "cache", "clear"]
+              "path": ["analyze", "text", "cache", "clear"]
             },
-            "description": "Limpa o cache de análises"
+            "description": "Limpa o cache de análises de texto"
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Audio Analysis",
+      "name": "Audio Analysis [NÃO IMPLEMENTADO]",
       "item": [
         {
           "name": "Analyze Audio",
@@ -128,14 +142,14 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "audio"]
             },
-            "description": "Analisa arquivo de áudio (WAV, MP3, OGG)"
+            "description": "[PENDENTE] Analisa arquivo de áudio (WAV, MP3, OGG)"
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Image Analysis",
+      "name": "Image Analysis [NÃO IMPLEMENTADO]",
       "item": [
         {
           "name": "Analyze Image",
@@ -167,14 +181,14 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "image"]
             },
-            "description": "Analisa imagem (JPG, PNG) ou vídeo (MP4)"
+            "description": "[PENDENTE] Analisa imagem (JPG, PNG) ou vídeo (MP4)"
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Multimodal Analysis",
+      "name": "Multimodal Analysis [NÃO IMPLEMENTADO]",
       "item": [
         {
           "name": "Analyze Multimodal",
@@ -211,7 +225,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "Combina análise de texto, áudio e imagem"
+            "description": "[PENDENTE] Combina análise de texto, áudio e imagem"
           },
           "response": []
         }

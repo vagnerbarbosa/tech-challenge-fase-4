@@ -5,8 +5,8 @@ from src.services.risk_detector import (
     _find_keywords,
     _score_to_risk_level,
     calculate_risk,
-    sanitize_text_input,
 )
+from src.utils.text_utils import sanitize_text_input
 
 
 class TestFindKeywords:
