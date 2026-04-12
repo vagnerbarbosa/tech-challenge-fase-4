@@ -92,7 +92,7 @@ docker-compose -f docker-compose.mock.yml up -d
 # Health check
 curl http://localhost:8000/health
 
-# Deve retornar: {"status": "ok", "version": "1.0.0"}
+# Deve retornar: {"status": "ok", "version": "0.2.0"}
 ```
 
 ### Passo 3: Testar o Endpoint de Análise de Texto
@@ -109,6 +109,17 @@ curl -X POST http://localhost:8000/analyze/text \
 # Ou importe as collections do Postman
 # Arquivos: docs/collection.json e docs/environment.json
 ```
+
+> **⚠️ Nota sobre o Mock:** O modo mock retorna valores **fixos** para testes, independente do texto enviado:
+> ```json
+> {
+>   "sentimento": "neutro",
+>   "score": 0.0,
+>   "risco_violencia": "medio",
+>   "risco_saude_mental": "baixo"
+> }
+> ```
+> Para análise real com Azure, configure as credenciais no arquivo `.env` (veja seção de Configuração Azure abaixo).
 
 **Serviços disponíveis:**
 - API: http://localhost:8000
@@ -178,6 +189,12 @@ curl http://localhost:8000/health
 curl -X POST http://localhost:8000/analyze/text \
   -H "Content-Type: application/json" \
   -d '{"texto": "Estou me sentindo muito ansiosa e com medo"}'
+
+# Ou use a interface Swagger
+# Abra no navegador: http://localhost:8000/docs
+
+# Ou importe as collections do Postman
+# Arquivos: docs/collection.json e docs/environment.json
 ```
 
 ---
