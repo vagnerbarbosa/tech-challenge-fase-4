@@ -10,7 +10,7 @@
 
 | Aspecto | Status | Observação |
 |---------|--------|------------|
-| **Alinhamento PDF Oficial** | 🟡 **65%** | Texto (✅ 100%), Áudio (📝 10%), Vídeo YOLOv8 (📝 50%) |
+| **Alinhamento PDF Oficial** | 🟡 **70%** | Texto (✅ 100%), Áudio (✅ 100%), Vídeo YOLOv8 (📝 50%) |
 | **Conformidade Constitution** | 🟢 **95%** | Todos os princípios sendo seguidos |
 | **Documentação** | 🟢 **Completa** | README, CLAUDE.md, specs detalhadas |
 | **Arquitetura Definida** | 🟢 **Completa** | YOLOv8 local + Azure fallback |
@@ -80,7 +80,7 @@
 | Modalidade | PDF Exige | Status Atual | Conformidade |
 |------------|-----------|--------------|--------------|
 | **Texto** | Azure Text Analytics | ✅ Implementado | 🟢 100% |
-| **Áudio** | Azure Speech + análise | 📝 Spec 003 criada | 🟡 10% |
+| **Áudio** | Azure Speech + análise | ✅ Implementado | 🟢 100% |
 | **Vídeo** | **YOLOv8** + Azure Vision | 📝 Spec 004a completa | 🟡 50% |
 
 #### Funcionalidades Escolhidas (Mínimo 2)
@@ -88,7 +88,7 @@
 | Funcionalidade | Status | Implementação |
 |----------------|--------|---------------|
 | ✅ Analisar vídeos cirurgias/consultas | 📝 Spec criada | YOLOv8 local + Azure fallback |
-| ✅ Processar gravações de voz | 📝 Spec criada | Azure Speech configurado |
+| ✅ Processar gravações de voz | ✅ Implementado | Azure Speech + librosa funcionando |
 | ⬜ Sinais vitais (pressão, batimentos) | ❌ Fora escopo | Não planejado |
 | ✅ Integrar serviços nuvem | ✅ Funcionando | Azure AI Services + YOLO local |
 
@@ -152,9 +152,9 @@
 |------------|--------|
 | Spec 003 criada | ✅ Completa |
 | Azure Speech SDK | ✅ Configurado |
-| Endpoint `/analyze/audio` | 📝 Por implementar |
-| Análise prosódica (pitch, energia) | 📝 Por implementar |
-| Detecção voz tremida | 📝 Por implementar |
+| Endpoint `/analyze/audio` | ✅ Implementado |
+| Análise prosódica (pitch, energia) | ✅ Implementado |
+| Detecção voz tremida | ✅ Implementado |
 
 ---
 
@@ -178,7 +178,7 @@
 | FastAPI + Uvicorn | ✅ | `src/api/main.py` |
 | Poetry | ✅ | `pyproject.toml` + `poetry.lock` |
 | Docker + Compose | ✅ | Funcionando local e Azure |
-| **Azure AI Services** | �á | Text Analytics ✅, Speech 📝, Vision (fallback) |
+| **Azure AI Services** | 🟡 | Text Analytics ✅, Speech ✅, Vision (fallback) |
 | **YOLOv8 Local** | 📝 | Spec criada, implementação pendente |
 | pytest | ✅ | 72 testes, 81% cobertura |
 | Deploy Azure | 📝 | Spec 009 criada, não implementado |
@@ -306,7 +306,7 @@ Riscos:
 ### Modalidades Obrigatórias
 
 - [x] **Texto** - ✅ Implementado com Azure Text Analytics
-- [ ] **Áudio** - 📝 Spec criada, implementação pendente
+- [x] **Áudio** - ✅ Implementado com Azure Speech + librosa
 - [x] **Vídeo YOLOv8** - 📝 Spec completa, implementação pendente
 - [ ] Fusão Multimodal - 📝 Spec criada
 
@@ -333,7 +333,7 @@ Riscos:
 | Categoria | Progresso |
 |-----------|-----------|
 | **Especificação** | 🟢 **80%** (Specs criadas para todas features) |
-| **Implementação** | 🟡 **35%** (Texto 100%, Áudio/Vídeo estruturado) |
+| **Implementação** | 🟡 **50%** (Texto 100%, Áudio 100%, Vídeo estruturado) |
 | **Testes/Deploy** | 🟡 **25%** (Testes ok, deploy pendente) |
 | **Documentação** | 🟢 **90%** (Docs completas, falta vídeo) |
 
