@@ -71,6 +71,6 @@ Tudo → 010 (Docs)
 
 ## Links Rápidos
 
-- [Constitution](../.specify/memory/constitution.md) - Regras e princípios do projeto
+- [Constitution](constitution.md) - Regras e princípios do projeto
 - [CLAUDE.md](../.claude/CLAUDE.md) - Contexto técnico completo
 - Especificações detalhadas em cada pasta `XXX-feature/spec.md`
