@@ -105,6 +105,9 @@ curl -X POST http://localhost:8000/analyze/text \
 
 # Ou use a interface Swagger
 # Abra no navegador: http://localhost:8000/docs
+
+# Ou importe as collections do Postman
+# Arquivos: docs/collection.json e docs/environment.json
 ```
 
 **Serviços disponíveis:**
