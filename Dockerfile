@@ -5,7 +5,7 @@
 # -------------------------------------------
 # Stage 1: Builder (dependências)
 # -------------------------------------------
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Variáveis de ambiente
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -33,7 +33,7 @@ RUN poetry install --no-root --without dev
 # -------------------------------------------
 # Stage 2: Runtime (imagem final)
 # -------------------------------------------
-FROM python:3.11-slim as runtime
+FROM python:3.11-slim AS runtime
 
 # Criar usuário não-root para segurança
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
@@ -45,14 +45,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     APP_HOME=/app \
     PORT=8000
 
-# Instalar dependências de runtime
+# Instalar dependências de runtime (OpenCV opcional)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        libgl1-mesa-glx \
+        libgl1 \
         libglib2.0-0 \
         libsm6 \
         libxext6 \
-        libxrender-dev \
+        libxrender1 \
         libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -71,7 +71,7 @@ USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+    CMD python -c "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect(('localhost', 8000)); s.close()" || exit 1
 
 # Expor porta
 EXPOSE $PORT
