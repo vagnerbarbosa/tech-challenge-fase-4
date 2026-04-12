@@ -119,6 +119,11 @@ class TestTempFileManagerGlobal:
         """Testa se instância global é singleton."""
         from src.core.temp_file_manager import TempFileManager
 
+        # Limpa singleton para teste limpo
+        TempFileManager._instance = None
+        TempFileManager._temp_files.clear()
+
         # Cria nova instância e verifica se é a mesma
-        instance = TempFileManager()
-        assert temp_file_manager is instance
+        instance1 = TempFileManager()
+        instance2 = TempFileManager()
+        assert instance1 is instance2

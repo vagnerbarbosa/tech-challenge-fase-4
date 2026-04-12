@@ -95,11 +95,12 @@ class TestProsodicFeatureExtractor:
         mock_duration.return_value = 5.0
 
         # Pitch com alta variação (tremor) - std deve ser > 50
-        # Cria array com valores que garantam std > 50
-        pitches = np.zeros((100, 10))
-        pitches[:, :5] = 100.0  # Metade com valor baixo
-        pitches[:, 5:] = 300.0  # Metade com valor alto (diff = 200)
-        magnitudes = np.full((100, 10), 0.5)
+        # Usando valores extremos para garantir std > 50
+        pitches = np.concatenate([
+            np.full((50, 10), 50.0),   # Metade com valor baixo
+            np.full((50, 10), 250.0),  # Metade com valor alto
+        ])
+        magnitudes = np.full((100, 10), 1.0)  # Magnitudes altas para serem selecionadas
         mock_piptrack.return_value = (pitches, magnitudes)
 
         mock_rms.return_value = np.array([[0.05, 0.06]])

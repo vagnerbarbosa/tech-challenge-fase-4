@@ -131,7 +131,7 @@ class TestAudioFormatsEndpoint:
     """Testes para endpoint de formatos suportados."""
 
     @pytest.mark.asyncio
-    async def test_get_audio_formats(self, client: AsyncClient):
+    async def test_get_audio_formats(self, async_client: AsyncClient):
         """Testa endpoint de formatos."""
         response = await async_client.get("/analyze/audio/formats")
 
