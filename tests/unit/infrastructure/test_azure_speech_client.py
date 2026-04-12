@@ -101,8 +101,10 @@ class TestAzureSpeechClient:
         with patch(
             "src.infrastructure.azure_speech_client.SpeechRecognizer"
         ) as mock_recognizer:
-            # recognize_once_async é chamado via asyncio.to_thread
-            mock_recognizer.return_value.recognize_once_async.return_value = mock_result
+            # recognize_once_async retorna um future, e chamamos .get() nele
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
 
             # Act
             result = await client.transcribe(test_file)
@@ -110,7 +112,7 @@ class TestAzureSpeechClient:
             # Assert
             assert result["sucesso"] is True
             assert result["transcricao"] == "Olá mundo"
-            assert result["confiança"] == 0.95
+            assert result["confianca"] == 0.95
 
     @pytest.mark.asyncio
     async def test_transcribe_no_match(self, client, mock_config, tmp_path):
@@ -127,7 +129,10 @@ class TestAzureSpeechClient:
         with patch(
             "src.infrastructure.azure_speech_client.SpeechRecognizer"
         ) as mock_recognizer:
-            mock_recognizer.return_value.recognize_once_async.return_value = mock_result
+            # recognize_once_async retorna um future, e chamamos .get() nele
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
 
             # Act
             result = await client.transcribe(test_file)
@@ -161,6 +166,108 @@ class TestAzureSpeechClient:
         # Assert
         assert result["sucesso"] is True
         assert call_count == 2
+
+
+class TestConvertToWav:
+    """Testes para conversão de áudio para WAV."""
+
+    @pytest.fixture
+    def client(self):
+        """Fixture para AzureSpeechClient em mock mode."""
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            return AzureSpeechClient()
+
+    def test_wav_file_no_conversion(self, client, tmp_path):
+        """Testa que arquivos WAV são retornados sem conversão."""
+        # Arrange
+        wav_file = tmp_path / "test.wav"
+        wav_file.write_bytes(b"fake wav content")
+
+        # Act
+        result = client._convert_to_wav(wav_file)
+
+        # Assert
+        assert result == wav_file
+
+    def test_mp3_conversion(self, client, tmp_path):
+        """Testa conversão de MP3 para WAV."""
+        # Arrange
+        mp3_file = tmp_path / "test.mp3"
+        mp3_file.write_bytes(b"fake mp3 content")
+
+        mock_audio_data = ([0.1, 0.2, 0.3], 16000)  # y, sr
+
+        with (
+            patch("librosa.load", return_value=mock_audio_data) as mock_librosa,
+            patch("soundfile.write") as mock_soundfile,
+            patch("tempfile.NamedTemporaryFile") as mock_temp,
+        ):
+            mock_temp_instance = Mock()
+            mock_temp_instance.name = str(tmp_path / "converted.wav")
+            mock_temp.return_value.__enter__ = Mock(return_value=mock_temp_instance)
+            mock_temp.return_value.__exit__ = Mock(return_value=False)
+
+            # Act
+            result = client._convert_to_wav(mp3_file)
+
+            # Assert
+            mock_librosa.assert_called_once_with(str(mp3_file), sr=16000, mono=True)
+            mock_soundfile.assert_called_once()
+            assert result.suffix == ".wav"
+
+    def test_ogg_conversion(self, client, tmp_path):
+        """Testa conversão de OGG para WAV."""
+        # Arrange
+        ogg_file = tmp_path / "test.ogg"
+        ogg_file.write_bytes(b"fake ogg content")
+
+        mock_audio_data = ([0.1, 0.2, 0.3], 16000)
+
+        with (
+            patch("librosa.load", return_value=mock_audio_data) as mock_librosa,
+            patch("soundfile.write") as mock_soundfile,
+            patch("tempfile.NamedTemporaryFile") as mock_temp,
+        ):
+            mock_temp_instance = Mock()
+            mock_temp_instance.name = str(tmp_path / "converted.wav")
+            mock_temp.return_value.__enter__ = Mock(return_value=mock_temp_instance)
+            mock_temp.return_value.__exit__ = Mock(return_value=False)
+
+            # Act
+            result = client._convert_to_wav(ogg_file)
+
+            # Assert
+            mock_librosa.assert_called_once_with(str(ogg_file), sr=16000, mono=True)
+            mock_soundfile.assert_called_once()
+            assert result.suffix == ".wav"
+
+    def test_conversion_fallback_on_error(self, client, tmp_path):
+        """Testa fallback para arquivo original quando conversão falha."""
+        # Arrange
+        mp3_file = tmp_path / "test.mp3"
+        mp3_file.write_bytes(b"fake mp3 content")
+
+        with patch("librosa.load", side_effect=Exception("Failed to load")):
+            # Act
+            result = client._convert_to_wav(mp3_file)
+
+            # Assert - deve retornar o arquivo original
+            assert result == mp3_file
+
+    def test_other_formats_return_unchanged(self, client, tmp_path):
+        """Testa que outros formatos são retornados sem modificação."""
+        # Arrange
+        flac_file = tmp_path / "test.flac"
+        flac_file.write_bytes(b"fake flac content")
+
+        # Act
+        result = client._convert_to_wav(flac_file)
+
+        # Assert
+        assert result == flac_file
 
 
 class TestAzureSpeechClientErrors:
