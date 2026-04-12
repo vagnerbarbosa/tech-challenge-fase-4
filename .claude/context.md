@@ -1,424 +1,407 @@
-# Contexto do Projeto
+# Contexto do Projeto - Tech Challenge Fase 4
 
 > Arquivo mantido pelo Claude Code para contexto entre sessões.
-> Atualizado em: 2026-04-05 (Deep Dive Completo + Correção Objetivo)
+> Última atualização: 2026-04-11 (Deep Dive Completo - Hyper Contextualização)
 
-## Informações Gerais
+## 📊 Estado Atual do Projeto
 
-- **Projeto**: Tech Challenge - Fase 4 (FIAP/Alura AI para Devs)
-- **Repositório**: tech-challenge-fase-4
-- **Objetivo Principal (CITADO DO PDF)**: "Realizar a análise e fusão de diferentes tipos de dados médicos específicos da saúde da mulher — incluindo texto, áudio e vídeo."
-- **Escopo**: Sistema multimodal para identificação de violência doméstica e riscos à saúde mental feminina
-- **Metodologia**: Specification-Driven Development (SDD)
-- **Critérios de Avaliação**: Funcionalidade (30%), Código (25%), Containerização (20%), Testes (15%), Documentação (10%)
-
-## Opções Selecionadas (3 de 5)
-
-1. ✅ **Detectar precocemente riscos em saúde materna e ginecológica**
-2. ✅ **Identificar sinais de violência doméstica ou abuso**
-3. ❌ Monitorar bem-estar psicológico feminino
-4. ✅ **Utilizar serviços em nuvem** (Azure Free Tier)
-5. ❌ Aplicar técnicas de detecção de anomalias em tempo real
+**Branch**: `main` (atualizada e sincronizada)
+**Specs Concluídas**: 2/10
+**Cobertura de Testes**: 81% (72 testes passando)
+**Último Commit**: docs: atualiza copyright de Equipe Tech Challenge para Grupo 27
 
 ---
 
-## Estado Atual
+## 🎯 Objetivo Principal
 
-- [x] Deep dive na documentação PDF completo
-- [x] Correção do objetivo (não é deploy do modelo Fase 2!)
-- [x] Estrutura SDD criada com foco correto:
-  - [x] README.md (atualizado - multimodal)
-  - [x] specs/README.md (índice de especificações)
-  - [x] specs/001-bootstrap/ (bootstrap do projeto)
-  - [x] specs/002-text-analysis/ (análise de texto)
-  - [x] specs/003-audio-analysis/ (análise de áudio)
-  - [x] specs/004-image-analysis/ (análise de imagem)
-  - [x] specs/005-multimodal-fusion/ (fusão multimodal)
-  - [x] specs/constitution.md (regras do projeto)
-  - [x] docs/technical/context7-best-practices.md (melhores práticas)
-  - [x] tasks/001-bootstrap.md (atualizado Azure)
-  - [x] tasks/002-text-analysis.md (task concluída)
-  - [x] CLAUDE.md atualizado
-  - [x] .claude/context.md (este arquivo)
-- [x] Bootstrap técnico (COMPLETED)
-- [ ] Implementação de features (não iniciada)
+**"Realizar a análise e fusão de diferentes tipos de dados médicos específicos da saúde da mulher — incluindo texto, áudio e vídeo."**
+
+### Opções Selecionadas:
+1. ✅ Detectar precocemente riscos em saúde materna e ginecológica
+2. ✅ Identificar sinais de violência doméstica ou abuso
+4. ✅ Utilizar serviços em nuvem (Azure Free Tier)
 
 ---
 
-## Restrições CRÍTICAS (Não-negociáveis)
+## 🏗️ Arquitetura Multimodal
 
-### Modalidades Obrigatórias:
-1. **Texto** (Azure AI Language / Text Analytics)
-2. **Áudio** (Azure AI Speech)
-3. **Imagem/Vídeo** (Azure AI Vision)
-4. **Fusão multimodal** (combinação das 3)
+### Modalidades Implementadas
 
-> **⚠️ REBRANDING 2025**: Azure Cognitive Services → Azure AI Services → Azure AI Foundry. SDKs atualizados na seção de Tecnologias.
+| Modalidade | Status | Endpoint | Azure Service | SDK Version |
+|------------|--------|----------|---------------|-------------|
+| 📝 **Texto** | ✅ Concluído | `POST /analyze/text` | Azure AI Language (Text Analytics) | 5.4.0 |
+| 🎙️ **Áudio** | 📝 Draft | `POST /analyze/audio` | Azure AI Speech | 1.48.0 |
+| 🎥 **Imagem** | 📝 Draft | `POST /analyze/image` | Azure AI Vision | 1.0.0 |
+| 🔀 **Multimodal** | 📝 Draft | `POST /analyze/multimodal` | Fusão das 3 modalidades | - |
 
-### Campos Obrigatórios em TODAS Respostas:
-- ✅ `risco_violencia`: baixo | medio | alto
-- ✅ `risco_saude_mental`: baixo | medio | alto
+### Status das Specs
 
-### Azure Free Tier - Limites:
-- Text Analytics: 5,000 requests/mês
-- Speech Services: 5 hours áudio/mês
-- Computer Vision: 5,000 transactions/mês
-- Blob Storage: 5GB
-
-### Obrigatórios (Avaliação):
-- [ ] API REST multimodal
-- [ ] Integração Azure Cognitive Services
-- [ ] **Deploy em produção Azure** (Free Tier - obrigatório)
-- [ ] Docker + docker-compose
-- [ ] Testes > 70% cobertura
-- [ ] Vídeo YouTube 5-10 min
+| ID | Feature | Status | Prioridade | Dependências |
+|----|---------|--------|------------|--------------|
+| 001 | Bootstrap do Projeto | ✅ Concluído | P0 | - |
+| 002 | Análise de Texto | ✅ Concluído | P1 | 001 |
+| 003 | Análise de Áudio | 📝 Draft | P1 | 001 |
+| 004 | Análise de Imagem | 📝 Draft | P1 | 001 |
+| 005 | Fusão Multimodal | 📝 Draft | P1 | 002, 003, 004 |
+| 006 | Rate Limiting | 📝 Draft | P2 | 002-004 |
+| 007 | Security Hardening | 📝 Draft | P1 | Todos |
+| 008 | Testes Automatizados | 📝 Draft | P1 | 005 |
+| 009 | Deploy Azure | 📝 Draft | P1 | Todos |
+| 010 | Documentação Final | 📝 Draft | P1 | Todos |
 
 ---
 
-## Tecnologias Definidas
+## 💻 Implementação Detalhada (Spec 002)
 
-### Core:
-- **Framework**: FastAPI (async, OpenAPI)
-- **Python**: 3.11+
-- **Package Manager**: Poetry
+### Core Components
 
-### Azure AI Services (Foundry Tools):
-> **Nota**: Rebranding 2024-2025: Azure Cognitive Services → Azure AI Services → Azure AI Foundry
+#### 1. Cache em Memória (`src/core/cache.py`)
+- **Classe**: `AnalysisCache`
+- **TTL**: 60 minutos (configurável)
+- **Key**: SHA256 do texto normalizado
+- **Thread-safe**: Sim (para desenvolvimento)
+- **Métodos**: `get()`, `set()`, `clear_expired()`, `clear_all()`, `get_stats()`
+- **Estatísticas**: Exposição via endpoint `/analyze/text/cache/stats`
 
-| Serviço | SDK Python | Versão | Propósito |
-|---------|------------|--------|-----------|
-| **Azure AI Language** (Text Analytics) | `azure-ai-textanalytics` | 5.4.0 | Sentiment analysis, NLP |
-| **Azure AI Speech** | `azure-cognitiveservices-speech` | 1.48.x | Speech-to-text, análise de voz |
-| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x | Análise de imagem, expressões |
-| **Azure Blob Storage** | `azure-storage-blob` | 12.x | Armazenamento temporário |
+#### 2. Detecção de Risco (`src/services/risk_detector.py`)
+- **Função Principal**: `calculate_risk(text, sentiment, confidence_scores)`
+- **Lógica**: Score 0-100 baseado em palavras-chave + sentimento Azure
+- **Thresholds**:
+  - Baixo: < 30
+  - Médio: 30-60
+  - Alto: > 60
 
-> **⚠️ IMPORTANTE**: O SDK antigo `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**. Usar `azure-ai-vision-imageanalysis`.
+**RISK_KEYWORDS** (`src/core/config.py:301-418`):
+```python
+violencia: 58 palavras-chave
+  ["violência", "agressão", "bater", "machucar", "ameaça", ...]
 
-### Infrastructure:
-- **Container**: Docker multi-stage
-- **Database**: SQLite (dev) / Azure SQL (opcional)
-- **Cache**: Redis (opcional)
-
-### Dev Tools:
-- **Lint**: Ruff (line length 88)
-- **Type Check**: mypy strict
-- **Tests**: pytest + httpx + locust
-
----
-
-## Estrutura de Diretórios Esperada
-
+saude_mental: 62 palavras-chave
+  ["ansiedade", "depressão", "suicídio", "pânico", "desespero", ...]
 ```
-tech-challenge-fase-4/
-├── src/                        # Código fonte
-│   ├── api/                    # FastAPI routes
-│   │   ├── main.py
-│   │   └── routes/
-│   │       ├── health.py
-│   │       └── text.py         # Task 002 implementado
-│   ├── core/                   # Config, logging, cache
-│   │   ├── config.py
-│   │   ├── logging_config.py
-│   │   ├── exceptions.py
-│   │   └── cache.py
-│   ├── services/               # Lógica de negócio
-│   │   ├── text_analysis.py    # Task 002 implementado
-│   │   ├── risk_detector.py    # Task 002 implementado
-│   │   ├── audio_analysis.py   # Task 003 (pendente)
-│   │   ├── image_analysis.py   # Task 004 (pendente)
-│   │   └── fusion.py           # Task 005 (pendente)
-│   ├── models/                 # Pydantic schemas
-│   │   └── schemas.py
-│   ├── infrastructure/         # Azure clients
-│   │   └── azure_clients.py
-│   └── utils/                  # Helpers
-├── tests/                      # Testes
-│   ├── unit/
-│   │   ├── services/
-│   │   └── core/
-│   ├── integration/
-│   └── load/
-│       └── locustfile.py
-├── specs/                      # Especificações Spec Kit
-│   ├── README.md
-│   ├── constitution.md
-│   ├── 001-bootstrap/
-│   ├── 002-text-analysis/
-│   ├── 003-audio-analysis/
-│   ├── 004-image-analysis/
-│   ├── 005-multimodal-fusion/
-│   ├── 006-rate-limiting/
-│   ├── 007-security-hardening/
-│   ├── 008-tests/
-│   └── 009-deploy-azure/
-├── tasks/                      # Status das tasks
-│   ├── 001-bootstrap.md
-│   └── 002-text-analysis.md
-├── docs/                       # Documentação técnica
-│   └── technical/
-│       └── context7-best-practices.md
-├── scripts/                    # Scripts de dev
-├── pyproject.toml
-├── poetry.lock
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose.mock.yml
-├── .env.example
-├── .gitignore
-├── README.md
-├── CLAUDE.md
-└── .claude/                    # Configuração Claude Code
-    ├── context.md
-    ├── CLAUDE.md
-    └── settings.local.json
+
+#### 3. Integração Azure (`src/infrastructure/azure_clients.py`)
+- **Padrão**: Singleton com `@lru_cache`
+- **Retry Policy**: 3 tentativas, backoff_factor=0.3
+- **Exceções Customizadas**:
+  - `QuotaExceededError` (HTTP 429)
+  - `AuthenticationError` (HTTP 401/403)
+  - `AzureConnectionError`
+  - `AzureServiceError`
+- **Wrapper**: `safe_azure_call()` para tratamento de erros
+
+#### 4. Serviço de Análise (`src/services/text_analysis.py`)
+- **Classe**: `TextAnalysisService`
+- **Cache**: Verificado antes de chamar Azure
+- **Sanitização**: Remove zero-width characters, control chars
+- **Extração de Keywords**: Baseada em frequência (exclui stop words em português)
+- **Score**: Calculado de -1.0 a 1.0 baseado no sentimento Azure
+
+### Models Pydantic v2 (`src/models/schemas.py`)
+
+**TextAnalysisRequest**:
+```python
+texto: str (min_length=10, max_length=5000)
+tipo: str (pattern="^(diario|prontuario|relato|geral)$")
+patient_id: str | None
+```
+- Validador: `validate_texto_not_empty` (mode="after")
+
+**TextAnalysisResponse**:
+```python
+sentimento: str (pattern="^(positivo|negativo|neutro|misto)$")
+score: float (ge=-1.0, le=1.0)
+risco_violencia: str (obrigatório - pattern="^(baixo|medio|alto)$")
+risco_saude_mental: str (obrigatório - pattern="^(baixo|medio|alto)$")
+palavras_chave: list[str]
+indicadores: list[str]
+metadata: AnalysisMetadata
+```
+
+**AnalysisMetadata**:
+```python
+correlation_id: str
+timestamp: datetime
+tempo_processamento_ms: int
+cache_hit: bool
+azure_calls: int
+```
+
+### Endpoints (`src/api/routes/text.py`)
+
+**POST /analyze/text**:
+- Response Model: `TextAnalysisResponse`
+- Responses documentadas: 200, 400, 429, 502, 503
+- Injeção de dependência: `TextAnalysisServiceDep` (Annotated[Type, Depends()])
+- Cache: Verificado automaticamente
+
+**GET /analyze/text/cache/stats**:
+- Retorna estatísticas do cache
+
+**POST /analyze/text/cache/clear**:
+- Limpa todas as entradas do cache
+
+### Configuração (`src/core/config.py`)
+
+**Settings** (Pydantic Settings v2):
+- Carrega de `.env` com `SettingsConfigDict`
+- Validação de endpoints Azure (http/https)
+- Validação de secret_key em produção
+- Propriedades computadas: `max_upload_size_bytes`, extension lists
+
+**Rate Limiting (Azure Free Tier)**:
+```python
+MAX_TEXT_REQUESTS_PER_DAY = 160    # ~5000/mês
+MAX_SPEECH_MINUTES_PER_DAY = 10    # ~300/mês
+MAX_VISION_REQUESTS_PER_DAY = 160  # ~5000/mês
 ```
 
 ---
 
-## Requisitos de Qualidade
+## 🧪 Testes e Qualidade
 
-| Ferramenta | Config | Uso |
-|------------|--------|-----|
-| Ruff | Line 88, Python 3.11 | Lint + Format |
-| mypy | strict mode | Type checking |
-| pytest | cov=src, cov-report=html | Testes + Coverage |
-| Docker | multi-stage, slim | Containerização |
-
----
-
-## Comandos Frequentes
-
-```bash
-# Setup
-poetry install
-poetry shell
-
-# Run dev
-poetry run uvicorn src.api.main:app --reload --port 8000
-
-# Test
-poetry run pytest -v
-poetry run pytest --cov=src --cov-report=html
-
-# Quality
-poetry run ruff check . --fix
-poetry run ruff format .
-poetry run mypy src/
-
-# Docker
-docker-compose up --build -d
-docker-compose logs -f api
-docker-compose down -v
-
-# Test API manual
-curl http://localhost:8000/health
-curl -X POST http://localhost:8000/analyze/text \
-  -H "Content-Type: application/json" \
-  -d '{"texto":"Estou me sentindo ansiosa e com medo"}'
+### Test Configuration (pyproject.toml)
+```toml
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = [
+    "--cov=src",
+    "--cov-fail-under=70",
+    "--cov-report=html:htmlcov",
+]
 ```
 
----
+### Testes Implementados (72 passando, 81% coverage)
 
-## Endpoints da API
+**Unit Tests**:
+- `test_risk_detector.py`: Cálculo de risco com keywords
+- `test_cache.py`: TTL, expiração, clear
+- `test_cache_stress.py`: Concorrência
 
-| Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/health` | GET | Health check + status Azure |
-| `/analyze/text` | POST | Análise de texto (Azure Text Analytics) |
-| `/analyze/audio` | POST | Análise de áudio (Azure Speech) |
-| `/analyze/image` | POST | Análise de imagem (Azure Computer Vision) |
-| `/analyze/multimodal` | POST | Fusão de 3 modalidades |
-| `/docs` | GET | Swagger UI |
+**Integration Tests**:
+- `test_text_endpoint.py`: POST /analyze/text
+- `test_azure_services.py`: Mock de serviços Azure
+- `test_placeholder.py`: Placeholder para futuros testes
 
----
+### CI/CD (`.github/workflows/`)
 
-## Variáveis de Ambiente (Azure)
+**tests.yml**:
+- Ruff linting (line length 88)
+- mypy strict mode
+- pytest com coverage > 70%
+- Python 3.11 matrix
 
-```bash
-# Azure Text Analytics
-AZURE_TEXT_KEY=...
-AZURE_TEXT_ENDPOINT=https://<resource>.cognitiveservices.azure.com/
-
-# Azure Speech Services
-AZURE_SPEECH_KEY=...
-AZURE_SPEECH_REGION=brazilsouth
-
-# Azure Computer Vision
-AZURE_VISION_KEY=...
-AZURE_VISION_ENDPOINT=https://<resource>.cognitiveservices.azure.com/
-
-# Azure Blob Storage (opcional)
-AZURE_STORAGE_CONNECTION_STRING=...
-
-# App
-APP_NAME="Multimodal Health Analysis API"
-APP_VERSION=1.0.0
-ENVIRONMENT=development
-DEBUG=true
-LOG_LEVEL=DEBUG
-```
+**validate-commits.yml**:
+- Conventional Commits em português
+- Título da PR começa com maiúscula
 
 ---
 
-## Próximos Passos (Specs)
+## 🐳 Docker e Infraestrutura
 
-### Spec 001: Bootstrap ✅ CONCLUÍDO
-- [x] Poetry init + dependências (FastAPI + Azure SDKs)
-- [x] Estrutura de diretórios completa
-- [x] Configuração Ruff, mypy, pytest
-- [x] Dockerfile multi-stage
-- [x] docker-compose.yml
-- [x] Scripts auxiliares
-- [x] .env.example com variáveis Azure
+### Docker Compose (`docker-compose.yml`)
+- **API**: FastAPI na porta 8000
+- **Redis**: Opcional (porta 6379)
+- **Healthcheck**: `curl http://localhost:8000/health`
+- **Volumes**: `./data`, `./logs`
 
-### Spec 002: Text Analysis ✅ CONCLUÍDO
-- [x] Integração Azure Text Analytics
-- [x] POST /analyze/text
-- [x] Cache em memória com TTL
-- [x] Detecção de risco
-- [x] Testes (72 passando, 81% coverage)
+### Dockerfile
+- Multi-stage build
+- Python 3.11-slim
+- Poetry para gerenciamento de dependências
+- Non-root user (appuser)
 
-### Spec 003: Análise de Áudio 📝 DRAFT
-- [ ] Integração Azure Speech Services
-- [ ] POST /analyze/audio (upload)
-- [ ] Transcrição + análise prosódica
-- [ ] Testes
+### Dependências Principais (pyproject.toml)
 
-### Spec 004: Análise de Imagem 📝 DRAFT
-- [ ] Integração Azure AI Vision
-- [ ] POST /analyze/image (upload)
-- [ ] Análise de expressões faciais
-- [ ] Extração de frames de vídeo
-- [ ] Testes
+**Core**:
+- fastapi >=0.104.0
+- uvicorn >=0.24.0
+- pydantic >=2.5.0, pydantic-settings >=2.1.0
 
-### Spec 005: Fusão Multimodal 📝 DRAFT
-- [ ] Combinar 3 modalidades
-- [ ] POST /analyze/multimodal
-- [ ] Late fusion com ponderação
-- [ ] Testes
+**Azure AI Services**:
+- azure-ai-textanalytics >=5.4.0
+- azure-cognitiveservices-speech >=1.48.0
+- azure-ai-vision-imageanalysis >=1.0.0
+- azure-storage-blob >=12.0.0
 
-### Spec 006: Rate Limiting 📝 DRAFT
-- [ ] Proteção quotas Azure
-- [ ] Hard stop automático
-- [ ] Monitoramento de quotas
+**Processamento de Mídia**:
+- opencv-python >=4.8.0
+- pillow >=10.0.0
+- numpy >=1.24.0
 
-### Spec 007: Security Hardening 📝 DRAFT
-- [ ] Correções de vulnerabilidades
-- [ ] Headers de segurança
-- [ ] Validação de uploads
+**Banco de Dados**:
+- sqlalchemy >=2.0.0 (async)
+- aiosqlite >=0.19.0
 
-### Spec 008: Testes 📝 DRAFT
-- [ ] Testes unitários completos
-- [ ] Testes de integração
-- [ ] Testes de carga (Locust)
+**Logging e Utilidades**:
+- structlog >=23.2.0
+- slowapi >=0.1.0
+- httpx >=0.25.0
 
-### Spec 009: Deploy Azure 📝 DRAFT - **OBRIGATÓRIO**
-- [ ] App Service criado (Free Tier F1)
-- [ ] API deployada e acessível publicamente
-- [ ] Variáveis de ambiente configuradas
-- [ ] URL de produção documentada
-
-### Spec 010: Documentação 📝 DRAFT
-- [ ] README final
-- [ ] Vídeo YouTube 5-10 min
+**Dev Dependencies**:
+- pytest + pytest-asyncio + pytest-cov
+- ruff >=0.1.0
+- mypy >=1.7.0
+- locust >=2.18.0 (load testing)
 
 ---
 
-## Convenções
+## 📋 Convenções do Projeto
 
-- **Código**: Inglês (PEP 8, type hints obrigatórios)
-- **Docs**: Português (contexto brasileiro)
-- **Commits**: Conventional commits (feat:, fix:, docs:, test:)
-- **Branches**: main, feature/*, fix/*
-- **PRs**: Small, focused, com testes
-- **Security**: Nunca commitar secrets (.env no gitignore)
+### Código
+- **Idioma**: Inglês (variáveis, funções, classes)
+- **Documentação**: Português (comentários, docstrings)
+- **Type Hints**: Obrigatórios (mypy strict mode)
+- **Linting**: Ruff (line length 88)
+- **Async/Await**: Todas as chamadas I/O
 
----
+### Commits
+- **Idioma**: Português
+- **Formato**: Conventional Commits
+- **Tipos**: feat, fix, docs, style, refactor, test, chore, ci, build, perf
+- **Exemplo**: `feat: Adiciona análise de áudio com Azure Speech`
 
-## Ferramentas de Qualidade (MCP Context7)
+### Branches
+- **Padrão**: `feature/XXX-nome-descritivo`
+- **Exemplo**: `feature/003-audio-analysis`
+- **Nunca commitar direto na main**
 
-### Uso Obrigatório:
-Toda implementação de código deve ser validada com MCP Context7 para:
-- FastAPI best practices
-- Azure SDK Python patterns
-- Async/await patterns
-- Error handling
-
-### Buscar no Context7:
-```
-- "FastAPI best practices 2024"
-- "Azure SDK Python async patterns"
-- "FastAPI dependency injection patterns"
-- "Azure Cognitive Services error handling"
-- "Python type hints best practices"
-```
-
-### Documento de Referência:
-`docs/technical/context7-best-practices.md` - Contém padrões atualizados de 2026
+### Pull Requests
+- **Idioma**: Português
+- **Título**: Começa com letra maiúscula após o tipo
+- **Exemplo**: `feat: Implementa endpoint de análise de áudio`
+- **Nunca adicionar commits em PR já mergeada**
 
 ---
 
-## Links Úteis
+## ⚠️ Restrições CRÍTICAS
 
-- Fase 1: https://github.com/vagnerbarbosa/tech-challenge-fase-1
-- Fase 2: https://github.com/vagnerbarbosa/tech-challenge-fase-2
-- Fase 3: https://github.com/vagnerbarbosa/tech-challenge-fase-3
-- Documentação PDF: `POSTECH - IADT - Tech Challenge - Fase 4.pdf` (arquivo local)
-- Azure Free Tier: https://azure.microsoft.com/free
-- Azure Cognitive Services: https://azure.microsoft.com/services/cognitive-services/
-- Melhores Práticas: `docs/technical/context7-best-practices.md`
+### MUST HAVE
+- ✅ Campos obrigatórios em TODAS as respostas:
+  - `risco_violencia`: baixo | medio | alto
+  - `risco_saude_mental`: baixo | medio | alto
+- ✅ Azure Free Tier (custo zero)
+- ✅ **Deploy em produção Azure** (obrigatório)
+- ✅ Docker funciona com `docker-compose up`
+- ✅ Swagger em `/docs`
+- ✅ LGPD compliance (anonimização, consentimento)
+- ✅ Hard Stop: Sistema interrompe automaticamente quando quotas atingidas
 
----
-
-## Preferências Globais de Memória (Obrigatórias)
-
-### 1. MCP Preference (feedback_mcp_preference_global.md)
-**Regra:** Sempre priorizar MCP quando custo for menor que alternativas (CLI, APIs diretas)
-
-**Aplicação neste projeto:**
-- ✅ Azure SDK via pip (Python nativo) - já é MCP-friendly
-- ✅ FastAPI nativo - não precisa de MCP adicional
-- ⚠️ Se usar GitHub Actions: preferir MCP GitHub sobre `gh` CLI
-- ⚠️ Se usar banco de dados: preferir MCP BD sobre queries manuais
-
-**How to apply:**
-- Antes de cada operação, verificar se MCP server está disponível
-- Comparar custo: número de chamadas, complexidade
-- Usar MCP se igual ou melhor em custo
-
-### 2. PR Status Check (feedback_pr_status_check.md)
-**Regra:** Antes de atualizar uma PR, sempre verificar seu status. Se já foi mergeada, abrir uma nova PR.
-
-**Aplicação neste projeto:**
-- Antes de fazer alterações em branch existente:
-  ```bash
-  gh pr view <num> --json state
-  ```
-- Se state = "MERGED" → criar nova branch e nova PR
-- Se state = "OPEN" → pode adicionar commits
-
-**Como aplicar:**
-1. Verificar estado da PR antes de push
-2. Se mergeada → criar feature/<nova-funcionalidade>
-3. Nunca adicionar commits em PR já mergeada
+### MUST NOT
+- ❌ Exceder quotas do Azure Free Tier
+- ❌ Armazenar dados pessoais identificáveis
+- ❌ Processar sem consentimento explícito
+- ❌ Expor secrets Azure no código
+- ❌ Logar conteúdo de arquivos de mídia
 
 ---
 
-## Checklist Final de Entrega
+## 🚀 Próximos Passos
 
-- [ ] Repositório GitHub público
-- [ ] README.md completo (descrição, como executar, exemplos)
-- [ ] API REST funciona (`docker-compose up`)
-- [ ] Endpoints `/analyze/text`, `/analyze/audio`, `/analyze/image`, `/analyze/multimodal`
-- [ ] Endpoint `/health` funciona
-- [ ] Swagger em `/docs`
-- [ ] Dockerfile multi-stage
-- [ ] docker-compose.yml completo
-- [ ] Integração Azure funcionando
-- [ ] Testes unitários + integração (pytest)
-- [ ] Testes de carga (Locust)
-- [ ] Cobertura de código > 70%
-- [ ] Ruff/mypy passando
-- [ ] Vídeo demonstrativo no YouTube (5-10 min)
-- [ ] Código limpo, organizado, com type hints
-- [ ] **Regras de memória aplicadas**: MCP preference + PR status check
+### Prioridade P1 (Obrigatórias para entrega)
+
+1. **Spec 003: Análise de Áudio**
+   - Azure Speech Services (Speech-to-Text)
+   - Análise prosódica: pitch, energia, pausas
+   - Detecção de voz tremida
+   - Formatos: WAV, MP3, OGG (max 50MB)
+
+2. **Spec 004: Análise de Imagem**
+   - Azure AI Vision (análise facial/emocional)
+   - OpenCV para extração de frames de vídeo
+   - Vídeos: MP4 (max 30s)
+   - Imagens: JPEG, PNG (max 20MB)
+
+3. **Spec 005: Fusão Multimodal**
+   - Late fusion com ponderação por confiança
+   - `asyncio.gather()` para processamento paralelo
+   - Alerta quando risco alto em 2+ modalidades
+   - Fallback gracioso se uma modalidade falhar
+
+4. **Spec 007: Security Hardening**
+   - Validação de uploads (magic numbers)
+   - Headers de segurança HTTP (CSP, HSTS, etc.)
+   - API Key authentication
+   - Sanitização de inputs
+
+5. **Spec 009: Deploy Azure**
+   - Azure App Service (Free Tier F1)
+   - HTTPS obrigatório
+   - Azure Key Vault para secrets
+   - Health check configurado
+
+### Prioridade P2
+
+6. **Spec 006: Rate Limiting**
+   - Hard stop automático quando quota atingida
+   - Headers X-RateLimit-Limit, X-RateLimit-Remaining
+   - Redis opcional para rate limiting distribuído
+
+7. **Spec 008: Testes**
+   - Testes de carga com Locust
+   - Cobertura > 70%
+
+8. **Spec 010: Documentação**
+   - Vídeo demonstrativo YouTube (5-10 min)
+   - README final completo
+
+---
+
+## 👥 Integrantes do Grupo 27
+
+| Nome | GitHub |
+|------|--------|
+| Adriel Santos | [@AdrielCandido](https://github.com/AdrielCandido) |
+| Leticia Nepomucena | [@LeticiaNepomucena](https://github.com/LeticiaNepomucena) |
+| Lucas Silva | [@lucfsilva](https://github.com/lucfsilva) |
+| Vagner Barbosa | [@vagnerbarbosa](https://github.com/vagnerbarbosa) |
+
+**Curso**: FIAP/Alura - AI para Devs (IADT)
+**Fase**: 4 (Análise Multimodal de Dados em Saúde da Mulher)
+**Copyright**: MIT License - Copyright (c) 2026 Grupo 27 Tech Challenge
+
+---
+
+## 🔗 Links Importantes
+
+- **Repositório**: https://github.com/vagnerbarbosa/tech-challenge-fase-4
+- **Specs**: `specs/README.md`
+- **Constitution**: `specs/constitution.md` (regras do projeto)
+- **Melhores Práticas**: `docs/technical/context7-best-practices.md`
+- **Azure Free Tier**: https://azure.microsoft.com/free
+- **Context7 MCP**: Documentação atualizada das bibliotecas
+
+---
+
+## 📝 Notas de Desenvolvimento
+
+### Padrões Aplicados (2026)
+- Dependency Injection com `Annotated[Type, Depends()]` (Python 3.11+)
+- Pydantic v2 com `mode="after"` validators
+- Azure SDK com `@lru_cache` singleton
+- Cache em memória com TTL (60 min)
+- Type hints strict (mypy strict mode)
+- Ruff para linting e formatação
+
+### Decisões Arquiteturais
+- **Late Fusion**: Escolhido para MVP (simpler que Early Fusion)
+- **SQLite**: Para desenvolvimento (Azure SQL opcional em produção)
+- **Redis**: Opcional (cache em memória suficiente para MVP)
+- **Azure Blob Storage**: Para arquivos temporários de mídia
+
+---
+
+## 🎯 Critérios de Avaliação
+
+| Critério | Peso | Status |
+|----------|------|--------|
+| Funcionalidade | 30% | 🔄 Em progresso (1/4 endpoints) |
+| Código | 25% | ✅ Alto (Ruff, mypy, type hints) |
+| Containerização | 20% | ✅ Docker + Compose funcionando |
+| Testes | 15% | ✅ 81% cobertura (>70%) |
+| Documentação | 10% | 🔄 Em progresso |
+
+---
+
+*Este documento foi gerado durante Deep Dive de hyper-contextualização em 2026-04-11*
+*Para atualizar, edite este arquivo ou solicite um novo deep dive*
