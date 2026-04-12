@@ -141,6 +141,12 @@ Antes de considerar uma feature completa:
 4. **Implementar**: Executar tasks em ordem
 5. **Validar**: Rodar testes, lint, type check
 6. **Documentar**: Atualizar README se necessário
+7. **Auditar**: Usar `@speckit.clarify` para auditar código implementado contra Spec e Constitution
+   - Executar auditoria automatizada via Spec Kit
+   - Identificar discrepâncias entre implementação e requisitos
+   - Se encontrar discrepâncias: criar tasks de correção (ex: T055+)
+   - Se não encontrar discrepâncias: seguir para finalização
+   - Documentar resultado da auditoria no tasks.md
 
 ## Contato e Responsabilidades
 
