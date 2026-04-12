@@ -31,8 +31,7 @@
 |------------|--------|----------|------------|--------|
 | 📝 **Texto** | ✅ Concluído | `POST /analyze/text` | Azure AI Language (Text Analytics) | 5.4.0 |
 | 🎙️ **Áudio** | 📝 Draft | `POST /analyze/audio` | Azure AI Speech | 1.48.0 |
-| 🖼️ **Imagem** | 📝 Draft | `POST /analyze/image` | Azure AI Vision | 1.0.x |
-| 🎥 **Vídeo (YOLOv8)** | 📝 Draft | `POST /analyze/video` | **YOLOv8 Local** + Azure Vision (fallback) | 8.x |
+| 🎥 **Vídeo (YOLOv8)** | 📝 Draft | `POST /analyze/video` | **YOLOv8 Local** (análise imagem + vídeo) | 8.x |
 | 🔀 **Multimodal** | 📝 Draft | `POST /analyze/multimodal` | Fusão das 3 modalidades | - |
 
 ### Status das Specs
@@ -309,15 +308,11 @@ addopts = [
    - Detecção de voz tremida
    - Formatos: WAV, MP3, OGG (max 50MB)
 
-2. **Spec 004a: Análise de Imagem (Azure Vision)**
-   - Azure AI Vision (análise facial/emocional)
-   - Imagens: JPEG, PNG (max 20MB)
-   - Endpoint: `POST /analyze/image`
-
-3. **Spec 004b: Análise de Vídeo (YOLOv8)**
-   - YOLOv8 local para detecção de objetos
+2. **Spec 004: Análise de Vídeo (YOLOv8)**
+   - YOLOv8 local para detecção de objetos em vídeo
    - OpenCV para extração de frames
    - Vídeos: MP4 (max 30s)
+   - Imagens: JPEG, PNG (enviadas como vídeo de 1 frame)
    - Endpoint: `POST /analyze/video`
 
 4. **Spec 005: Fusão Multimodal**

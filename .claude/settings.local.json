@@ -35,7 +35,8 @@
       "Bash(gh repo:*)",
       "Bash(gh release:*)",
       "WebSearch",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(git mv:*)"
     ]
   },
   "mcpServers": {
