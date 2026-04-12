@@ -1,14 +1,14 @@
 # Contexto do Projeto - Tech Challenge Fase 4
 
 > Arquivo mantido pelo Claude Code para contexto entre sessões.
-> Última atualização: 2026-04-11 (Deep Dive Completo - Hyper Contextualização)
+> Última atualização: 2026-04-12 (Deep Dive Completo - Hyper Contextualização)
 
 ## 📊 Estado Atual do Projeto
 
 **Branch**: `main` (atualizada e sincronizada)
 **Specs Concluídas**: 2/10
 **Cobertura de Testes**: 81% (72 testes passando)
-**Último Commit**: docs: atualiza copyright de Equipe Tech Challenge para Grupo 27
+**Último Commit**: Revert "docs: Atualiza context.md com hyper-contextualização do projeto"
 
 ---
 
@@ -293,6 +293,7 @@ addopts = [
 - ❌ Processar sem consentimento explícito
 - ❌ Expor secrets Azure no código
 - ❌ Logar conteúdo de arquivos de mídia
+- ❌ Commitar direto na main (sempre usar PR)
 
 ---
 
@@ -403,5 +404,5 @@ addopts = [
 
 ---
 
-*Este documento foi gerado durante Deep Dive de hyper-contextualização em 2026-04-11*
+*Este documento foi gerado durante Deep Dive de hyper-contextualização em 2026-04-12*
 *Para atualizar, edite este arquivo ou solicite um novo deep dive*
