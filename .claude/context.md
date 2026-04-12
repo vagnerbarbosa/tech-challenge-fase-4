@@ -41,9 +41,8 @@
 | 001 | Bootstrap do Projeto | ✅ Concluído | P0 | - |
 | 002 | Análise de Texto | ✅ Concluído | P1 | 001 |
 | 003 | Análise de Áudio | 📝 Draft | P1 | 001 |
-| **004a** | **Análise Vídeo YOLOv8** | 📝 **Draft** | **P1** | **001** |
-| 004b | Análise Imagem Azure | 📝 Draft | P1 | 001 |
-| 005 | Fusão Multimodal | 📝 Draft | P1 | 002, 003, 004a |
+| **004** | **Análise Vídeo (YOLOv8)** | 📝 **Draft** | **P1** | **001** |
+| 005 | Fusão Multimodal | 📝 Draft | P1 | 002, 003, 004 |
 | 006 | Rate Limiting | 📝 Draft | P2 | 002-004 |
 | 007 | Security Hardening | 📝 Draft | P1 | Todos |
 | 008 | Testes Automatizados | 📝 Draft | P1 | 005 |
@@ -315,19 +314,19 @@ addopts = [
    - Imagens: JPEG, PNG (enviadas como vídeo de 1 frame)
    - Endpoint: `POST /analyze/video`
 
-4. **Spec 005: Fusão Multimodal**
+3. **Spec 005: Fusão Multimodal**
    - Late fusion com ponderação por confiança
    - `asyncio.gather()` para processamento paralelo
    - Alerta quando risco alto em 2+ modalidades
    - Fallback gracioso se uma modalidade falhar
 
-5. **Spec 007: Security Hardening**
+4. **Spec 007: Security Hardening**
    - Validação de uploads (magic numbers)
    - Headers de segurança HTTP (CSP, HSTS, etc.)
    - API Key authentication
    - Sanitização de inputs
 
-6. **Spec 009: Deploy Azure**
+5. **Spec 009: Deploy Azure**
    - Azure App Service (Free Tier F1)
    - HTTPS obrigatório
    - Azure Key Vault para secrets
@@ -335,16 +334,16 @@ addopts = [
 
 ### Prioridade P2
 
-7. **Spec 006: Rate Limiting**
+6. **Spec 006: Rate Limiting**
    - Hard stop automático quando quota atingida
    - Headers X-RateLimit-Limit, X-RateLimit-Remaining
    - Redis opcional para rate limiting distribuído
 
-8. **Spec 008: Testes**
+7. **Spec 008: Testes**
    - Testes de carga com Locust
    - Cobertura > 70%
 
-9. **Spec 010: Documentação**
+8. **Spec 010: Documentação**
    - Vídeo demonstrativo YouTube (5-10 min)
    - README final completo
 
