@@ -205,3 +205,16 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Windows special files (criados acidentalmente por redirecionamento)
+nul
+NUL
+con
+CON
+aux
+AUX
+prn
+PRN
+
+# Claude Code local settings
+.claude/settings.local.json
