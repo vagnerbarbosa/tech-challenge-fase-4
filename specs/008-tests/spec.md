@@ -119,7 +119,7 @@ tests/
 │   ├── services/
 │   │   ├── test_text_analysis.py
 │   │   ├── test_audio_analysis.py
-│   │   ├── test_image_analysis.py
+│   │   ├── test_video_analysis.py
 │   │   └── test_fusion.py
 │   └── core/
 │       ├── test_rate_limit.py
@@ -146,5 +146,5 @@ addopts = "--cov=src --cov-report=html --cov-report=term-missing"
 
 ### Locustfile
 - Simular usuários reais
-- Cenários: análise de texto, áudio, imagem, multimodal
+- Cenários: análise de texto, áudio, video, multimodal
 - Métricas: RPS, latência, falhas

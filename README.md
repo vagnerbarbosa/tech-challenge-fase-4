@@ -1,5 +1,8 @@
 # 🏥💜 Tech Challenge Fase 4 - Sistema multimodal de análise de saúde da mulher usando Azure AI Services
 
+> **📅 Última Atualização**: 2026-04-12
+> **✅ Status**: 2/4 Módulos Core Implementados (Texto + Áudio)
+
 ## Objetivo
 
 **Realizar a análise e fusão de diferentes tipos de dados médicos específicos da saúde da mulher** — incluindo **texto, áudio e vídeo**.
@@ -63,10 +66,12 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 
 ### Pré-requisitos
 
-- **Python 3.11+**
-- **Poetry** (gerenciamento de dependências)
-- **Docker e Docker Compose** (opcional, para modo com mocks)
+- **Python 3.11+** (se rodando localmente)
+- **Poetry** (gerenciamento de dependências, se rodando localmente)
+- **Docker e Docker Compose** (⚠️ **Recomendado** para desenvolvimento e **Obrigatório** para testes - veja [Executando Testes](#executando-testes))
 - **Git**
+
+> 💡 **Dica**: Mesmo que você escolha rodar a API localmente, **recomendamos fortemente** usar Docker para executar os testes devido a dependências nativas complexas (librosa, python-magic).
 
 ---
 
@@ -92,7 +97,7 @@ docker-compose -f docker-compose.mock.yml up -d
 # Health check
 curl http://localhost:8000/health
 
-# Deve retornar: {"status": "ok", "version": "0.2.0"}
+# Deve retornar: {"status": "ok", "version": "0.3.0"}
 ```
 
 ### Passo 3: Testar o Endpoint de Análise de Texto
@@ -207,11 +212,14 @@ A pasta `/scripts` contém utilitários para facilitar o desenvolvimento:
 | `setup.sh` | Configuração inicial do projeto | `./scripts/setup.sh` |
 | `run-mock.sh` | Inicia com Docker + Mocks | `./scripts/run-mock.sh` |
 | `run.sh` | Inicia localmente com Poetry | `./scripts/run.sh` |
-| `test.sh` | Executa testes | `./scripts/test.sh [unit\|integration\|coverage]` |
+| `test.sh` | Executa testes localmente | `./scripts/test.sh [unit\|integration\|coverage]` |
+| `test-docker.sh` | Executa testes via Docker (recomendado) | `./scripts/test-docker.sh [unit\|coverage\|lint\|all]` |
 | `lint.sh` | Verifica código (Ruff + mypy) | `./scripts/lint.sh` |
 | `check-azure.sh` | Verifica credenciais Azure | `./scripts/check-azure.sh` |
 
 **Nota para Windows:** Execute os scripts via Git Bash, WSL ou use `bash ./scripts/nome-do-script.sh`.
+
+> 💡 **Dica**: Use sempre `./scripts/test-docker.sh` para testes! Ele garante um ambiente Linux consistente e evita problemas com dependências nativas no Windows.
 
 ---
 
@@ -283,6 +291,92 @@ O campo `tipo` indica a origem/contexto do texto para classificação:
 
 ## Executando Testes
 
+> 🔗 **Rápido**: [Por que Docker?](#-por-que-usar-docker-para-testes) | [Testes Unitários](#passo-2-executar-testes-unitários) | [Linting](#passo-3-executar-linting-e-type-check) | [Testes Locais](#-opção-alternativa-testes-locais-sem-docker)
+
+### ⚠️ Por que usar Docker para testes?
+
+Os testes deste projeto **dependem de bibliotecas nativas complexas** (especialmente `librosa` e `python-magic`) que podem apresentar problemas no Windows:
+
+- **Librosa**: Requer FFmpeg para processamento de áudio
+- **python-magic**: Depende da biblioteca system `libmagic` (Linux/Mac)
+- **Segmentation faults**: Ocorrências comuns no Windows devido a incompatibilidades de bibliotecas C
+
+**A solução**: Executar testes via Docker garante um ambiente Linux consistente e funcional.
+
+---
+
+### 🐳 Opção Recomendada: Testes via Docker
+
+> 💡 **Opção mais fácil**: Use o script `./scripts/test-docker.sh` que automatiza todo o processo:
+> ```bash
+> # Testes unitários
+> ./scripts/test-docker.sh unit
+>
+> # Todos os checks (lint + typecheck + testes)
+> ./scripts/test-docker.sh all
+>
+> # Ver todas as opções
+> ./scripts/test-docker.sh help
+> ```
+
+#### Passo 1: Build da Imagem de Teste
+
+```bash
+# Build da imagem Docker específica para testes
+docker build -f Dockerfile.test -t health-api-test:latest .
+
+# Ou use o script que faz build automaticamente:
+# ./scripts/test-docker.sh build
+```
+
+#### Passo 2: Executar Testes Unitários
+
+```bash
+# Executar todos os testes unitários
+docker run --rm health-api-test:latest \
+  poetry run pytest tests/unit/ -v
+
+# Executar testes específicos do módulo de áudio
+docker run --rm health-api-test:latest \
+  poetry run pytest tests/unit/services/test_audio_analysis.py -v
+
+# Executar testes com cobertura
+docker run --rm health-api-test:latest \
+  poetry run pytest tests/unit/ -v --cov=src --cov-report=term
+```
+
+#### Passo 3: Executar Linting e Type Check
+
+```bash
+# Ruff linting
+docker run --rm health-api-test:latest \
+  poetry run ruff check src/
+
+# mypy type checking
+docker run --rm health-api-test:latest \
+  poetry run mypy src/services/audio_analysis.py
+```
+
+#### Passo 4: Testes de Integração (requer API rodando)
+
+```bash
+# Iniciar a API em um container
+docker-compose up -d api
+
+# Executar testes de integração
+docker run --rm --network=host health-api-test:latest \
+  poetry run pytest tests/integration/ -v
+
+# Parar a API
+docker-compose down
+```
+
+---
+
+### 💻 Opção Alternativa: Testes Locais (sem Docker)
+
+> ⚠️ **Nota**: Esta opção pode apresentar erros no Windows devido a dependências nativas.
+
 ```bash
 # Todos os testes
 ./scripts/test.sh
@@ -320,14 +414,20 @@ poetry run mypy src/
 
 ## Endpoints
 
-| Endpoint | Método | Descrição | Tecnologia | Modalidade |
-|----------|--------|-----------|------------|------------|
-| `/health` | GET | Health check da API | - | - |
-| `/analyze/text` | POST | Análise de texto | Azure AI Language | 📝 Texto |
-| `/analyze/audio` | POST | Análise de áudio | Azure AI Speech | 🎙️ Áudio |
-| `/analyze/video` | POST | Análise de vídeo/imagem | **YOLOv8 Local** | 🎥 Vídeo/Imagem |
-| `/analyze/multimodal` | POST | Fusão de 3 modalidades | Combinação serviços | 📝🎙️🎥 |
-| `/docs` | GET | Documentação Swagger | - | - |
+| Endpoint | Método | Status | Descrição | Tecnologia | Modalidade |
+|----------|--------|--------|-----------|------------|------------|
+| `/health` | GET | ✅ Implementado | Health check com quotas Azure | - | - |
+| `/analyze/text` | POST | ✅ Implementado | Análise de sentimento e riscos | Azure AI Language | 📝 Texto |
+| `/analyze/audio` | POST | ✅ Implementado | Transcrição + análise prosódica | Azure AI Speech + librosa | 🎙️ Áudio |
+| `/analyze/audio/formats` | GET | ✅ Implementado | Lista formatos suportados | - | 🎙️ Áudio |
+| `/analyze/video` | POST | ⏳ Pendente | Análise com YOLOv8 | YOLOv8 Local | 🎥 Vídeo |
+| `/analyze/multimodal` | POST | ⏳ Pendente | Fusão de 3 modalidades | Combinação | 📝🎙️🎥 |
+| `/docs` | GET | ✅ Implementado | Documentação Swagger interativa | - | - |
+
+**Legenda:**
+- ✅ Implementado e testado
+- 🔄 Parcialmente implementado
+- ⏳ Pendente
 
 ---
 
@@ -358,51 +458,85 @@ curl -X POST "http://localhost:8000/analyze/text" \
 
 ### Análise de Áudio
 
+Analisa arquivos de áudio (WAV, MP3, OGG) extraindo transcrição e features prosódicas.
+
+**Exemplo de Request:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/audio" \
   -H "Content-Type: multipart/form-data" \
-  -F "audio=@consulta.wav" \
-  -F "metadata={\"tipo_consulta\":\"pré-natal\"}"
+  -F "file=@consulta.wav" \
+  -F "patient_id=550e8400-e29b-41d4-a716-446655440000"
 ```
 
-**Resposta:**
+**Exemplo de Response:**
 ```json
 {
-  "transcricao": "Doutor, eu não sei se posso contar isso...",
+  "transcricao": "Doutor, eu estou muito ansiosa e com medo quando ele chega em casa",
+  "idioma_detectado": "pt-BR",
   "sentimento": "negativo",
   "entonação": "hesitante",
-  "risco_violencia": "medio",
+  "voz_tremida": true,
   "pausas_suspeitas": 3,
-  "voz_tremida": true
+  "duracao_segundos": 32.5,
+  "risco_violencia": "alto",
+  "risco_saude_mental": "alto",
+  "metadata": {
+    "correlation_id": "audio-1234567890",
+    "timestamp": "2026-04-12T14:30:00Z",
+    "tempo_processamento_ms": 8200,
+    "cache_hit": false,
+    "azure_calls": 1
+  }
 }
 ```
 
-### Análise de Vídeo (YOLOv8 Local)
+**Parâmetros:**
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `file` | file | Sim | Arquivo de áudio (WAV, MP3, OGG) - máx 50MB |
+| `patient_id` | string | Não | ID anônimo do paciente (UUID recomendado) |
 
-> **Nota**: YOLOv8 roda localmente no container (custo zero). Aceita vídeos MP4 ou imagens (JPEG, PNG) que são processadas como vídeo de 1 frame.
+**Features Extraídas:**
+- ✅ Transcrição via Azure Speech Services
+- ✅ Pitch analysis (detecção de voz tremida)
+- ✅ Energy analysis (classificação: calmo/hesitante/agitado)
+- ✅ Detecção de pausas suspeitas
+- ✅ Análise de risco combinando texto + prosódia
 
-> **Nota**: YOLOv8 roda localmente no container (custo zero). Extrai frames automaticamente e detecta instrumentos cirúrgicos, sangramento e linguagem corporal.
+### Análise de Vídeo (YOLOv8 Local) ⏳ PENDENTE
 
+> **Status**: Especificação criada em `specs/004-video-analysis/`, aguardando implementação.
+
+> **Nota**: YOLOv8 rodará localmente no container (custo zero), detectando instrumentos cirúrgicos, sangramento e linguagem corporal.
+
+**Especificação planejada:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/video" \
   -H "Content-Type: multipart/form-data" \
-  -F "video=@cirurgia.mp4" \
-  -F "tipo=cirurgia"
+  -F "file=@cirurgia.mp4" \
+  -F "patient_id=uuid-aqui"
 ```
 
-**Resposta:**
+**Response esperado:**
 ```json
 {
-  "emoção_principal": "tristeza",
-  "confiança": 0.89,
-  "expressoes": ["evitando_olho", "expressao_tensa"],
-  "sinais_alertas": [],
-  "risco_violencia": "medio"
+  "frames_analisados": 150,
+  "deteccoes": [
+    {"classe": "instrumento_cirurgico", "confianca": 0.95},
+    {"classe": "sangramento", "confianca": 0.82}
+  ],
+  "risco_violencia": "baixo",
+  "risco_saude_mental": "medio"
 }
 ```
 
-### Análise Multimodal
+### Análise Multimodal ⏳ PENDENTE
 
+> **Status**: Depende da implementação do endpoint `/analyze/video` (Spec 004).
+
+> **Especificação planejada**: Combinação das análises de texto, áudio e vídeo com algoritmo de fusão.
+
+**Request planejado:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/multimodal" \
   -H "Content-Type: multipart/form-data" \
@@ -411,7 +545,7 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
   -F "video=@cirurgia.mp4"
 ```
 
-**Resposta:**
+**Response esperado:**
 ```json
 {
   "fusao": {
@@ -419,9 +553,9 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
     "confiança": 0.92,
     "alerta": true
   },
-  "texto": { ... },
-  "audio": { ... },
-  "video": { ... },
+  "texto": { "risco_violencia": "medio", ... },
+  "audio": { "risco_violencia": "alto", ... },
+  "video": { "risco_violencia": "medio", ... },
   "recomendacao": "Encaminhar para equipe multidisciplinar"
 }
 ```
@@ -501,6 +635,28 @@ O sistema implementa uma **estratégia de hard stop** que garante **zero custos*
 
 ## Testes
 
+⚠️ **Importante**: Veja a seção [Executando Testes](#executando-testes) acima para instruções detalhadas.
+
+### 🚀 Modo Fácil (Script Recomendado)
+
+```bash
+# Executar via script (faz build e roda testes automaticamente)
+./scripts/test-docker.sh unit        # Testes unitários
+./scripts/test-docker.sh coverage    # Com cobertura
+./scripts/test-docker.sh all         # Lint + typecheck + testes
+./scripts/test-docker.sh help        # Ver todas as opções
+```
+
+### Comandos Manuais (Docker)
+
+```bash
+# Build e execução completa
+docker build -f Dockerfile.test -t health-api-test:latest . && \
+docker run --rm health-api-test:latest poetry run pytest tests/unit/ -v --cov=src
+```
+
+### Comandos Locais (sem Docker)
+
 ```bash
 # Testes unitários e integração
 poetry run pytest -v
@@ -514,13 +670,25 @@ poetry run locust -f locustfile.py
 
 ## Documentação
 
-- [📋 Especificações do Projeto](specs/README.md)
-- [🚀 Task 001 - Bootstrap](specs/001-bootstrap/spec.md)
-- [📝 Task 002 - Análise de Texto](specs/002-text-analysis/spec.md)
-- [🎙️ Task 003 - Análise de Áudio](specs/003-audio-analysis/spec.md)
-- [🎥 Task 004 - Análise de Imagem](specs/004-image-analysis/spec.md)
-- [🔀 Task 005 - Fusão Multimodal](specs/005-multimodal-fusion/spec.md)
+### Specs Kit (Status)
+
+| ID | Feature | Status | Link |
+|----|---------|--------|------|
+| 001 | Bootstrap do Projeto | ✅ Concluído | [spec.md](specs/001-bootstrap/spec.md) |
+| 002 | Análise de Texto | ✅ Concluído | [spec.md](specs/002-text-analysis/spec.md) |
+| 003 | Análise de Áudio | ✅ Concluído | [spec.md](specs/003-audio-analysis/spec.md) |
+| 004 | Análise de Vídeo (YOLOv8) | ⏳ Pendente | [spec.md](specs/004-video-analysis/spec.md) |
+| 005 | Fusão Multimodal | ⏳ Pendente | [spec.md](specs/005-multimodal-fusion/spec.md) |
+| 006 | Rate Limiting | 🔄 Parcial | [spec.md](specs/006-rate-limiting/spec.md) |
+| 007 | Security Hardening | ⏳ Pendente | [spec.md](specs/007-security-hardening/spec.md) |
+| 008 | Testes Automatizados | 🔄 Parcial | [spec.md](specs/008-tests/spec.md) |
+| 009 | Deploy Azure | ⏳ Pendente | [spec.md](specs/009-deploy-azure/spec.md) |
+| 010 | Documentação Final | ⏳ Pendente | [spec.md](specs/010-documentation/spec.md) |
+
+### Outros Documentos
+- [📋 Índice de Especificações](specs/README.md)
 - [📊 Context7 - Melhores Práticas](docs/technical/context7-best-practices.md)
+- [🔒 Compliance Analysis](docs/technical/compliance-analysis.md)
 
 ---
 
@@ -583,43 +751,54 @@ tech-challenge-fase-4/
 │   ├── api/                  # FastAPI app e rotas
 │   │   ├── main.py
 │   │   └── routes/
-│   │       ├── health.py          # Health check endpoints
-│   │       └── text.py            # Análise de texto (Task 002)
+│   │       ├── health.py          # Health check com quotas
+│   │       ├── text.py            # Análise de texto (✅ Task 002)
+│   │       ├── audio.py           # Análise de áudio (✅ Task 003)
+│   │       └── dependencies.py    # Injeção de dependências
 │   ├── core/                 # Configurações, logging, exceções
 │   │   ├── config.py              # Configurações da aplicação
 │   │   ├── logging_config.py      # Logging estruturado
 │   │   ├── exceptions.py          # Exceções customizadas
-│   │   └── cache.py               # Cache em memória (Task 002)
+│   │   ├── cache.py               # Cache em memória
+│   │   ├── rate_limit.py          # QuotaManager (✅ Task 006 parcial)
+│   │   └── temp_file_manager.py   # LGPD-compliant temp files
 │   ├── services/             # Lógica de negócio
 │   │   ├── text_analysis.py       # Serviço de análise de texto
-│   │   └── risk_detector.py     # Detecção de risco (Task 002)
+│   │   ├── audio_analysis.py      # Serviço de análise de áudio (✅ Task 003)
+│   │   └── risk_detector.py       # Detecção de risco
 │   ├── models/               # Schemas Pydantic
 │   │   └── schemas.py             # Modelos de request/response
 │   ├── infrastructure/       # Clientes Azure
-│   │   └── azure_clients.py       # Singleton Azure Text Analytics
+│   │   ├── azure_clients.py       # Singleton Azure Text Analytics
+│   │   └── azure_speech_client.py # Client Azure Speech (✅ Task 003)
 │   └── utils/                # Helpers
+│       └── file_validation.py     # Validação de arquivos
 ├── tests/                    # Testes
 │   ├── unit/                 # Testes unitários
-│   │   ├── core/                  # Testes de cache
-│   │   └── services/              # Testes de serviços
+│   │   ├── core/
+│   │   ├── services/              # Testes de serviços
+│   │   └── infrastructure/
 │   ├── integration/          # Testes de integração
-│   │   ├── test_text_endpoint.py
-│   │   └── test_azure_services.py
 │   └── load/                 # Testes de carga
 ├── specs/                    # Especificações Spec Kit
-│   ├── 001-bootstrap/
-│   ├── 002-text-analysis/
-│   └── ...
-├── tasks/                    # Status das tasks
+│   ├── 001-bootstrap/        # ✅ Concluído
+│   ├── 002-text-analysis/      # ✅ Concluído
+│   ├── 003-audio-analysis/     # ✅ Concluído
+│   ├── 004-video-analysis/     # ⏳ Pendente
+│   ├── 005-multimodal-fusion/  # ⏳ Pendente
+│   ├── 006-rate-limiting/      # 🔄 Parcial
+│   ├── 007-security-hardening/ # ⏳ Pendente
+│   ├── 008-tests/              # 🔄 Parcial
+│   ├── 009-deploy-azure/       # ⏳ Pendente
+│   └── 010-documentation/        # ⏳ Pendente
 ├── docs/                     # Documentação
 │   └── technical/
 ├── .claude/                  # Configuração Claude Code
 ├── .specify/                 # Configuração Spec Kit
-├── .github/                  # GitHub Actions
 ├── docker-compose.yml
 ├── docker-compose.mock.yml
-├── Dockerfile
-├── Dockerfile.dev
+├── Dockerfile                # Multi-stage production
+├── Dockerfile.test           # ⚠️ Imagem para testes - USE ESTE PARA TESTES
 └── README.md
 ```
 

@@ -10,6 +10,7 @@ from fastapi import APIRouter, status
 
 from src.core.config import settings
 from src.core.logging_config import get_logger
+from src.core.rate_limit import get_quota_status
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -27,11 +28,19 @@ async def health_check() -> dict[str, Any]:
 
     Retorna informações básicas de saúde da API.
     """
+    # Quota status para Azure Free Tier
+    quotas = {
+        "text": get_quota_status("text"),
+        "audio": get_quota_status("audio"),
+        "vision": get_quota_status("vision"),
+    }
+
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "version": settings.app_version,
         "environment": settings.environment,
+        "quotas": quotas,
     }
 
 

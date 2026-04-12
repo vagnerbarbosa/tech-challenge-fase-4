@@ -31,6 +31,9 @@ azure-identity = ">=1.15.0"
 opencv-python = ">=4.8.0"
 numpy = ">=1.24.0"
 pillow = ">=10.0.0"
+librosa = ">=0.10.0"
+python-magic = ">=0.4.27"
+aiofiles = ">=23.0.0"
 
 # Banco de dados
 sqlalchemy = {extras = ["asyncio"], version = ">=2.0.0"}

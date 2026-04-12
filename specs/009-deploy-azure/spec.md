@@ -124,6 +124,5 @@ az webapp create \
 ### Environment Variables no Azure
 - AZURE_TEXT_KEY
 - AZURE_SPEECH_KEY
-- AZURE_VISION_KEY
 - AZURE_SQL_CONNECTION
 - LOG_LEVEL=INFO

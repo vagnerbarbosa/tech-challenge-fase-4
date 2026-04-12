@@ -45,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     APP_HOME=/app \
     PORT=8000
 
-# Instalar dependências de runtime (OpenCV opcional)
+# Instalar dependências de runtime (OpenCV + FFmpeg para librosa)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libgl1 \
@@ -54,6 +54,7 @@ RUN apt-get update \
         libxext6 \
         libxrender1 \
         libgomp1 \
+        ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Diretório de trabalho

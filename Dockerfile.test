@@ -1,0 +1,41 @@
+# Dockerfile para execução de testes
+FROM python:3.11-slim
+
+# Variáveis de ambiente
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false
+
+# Instalar dependências do sistema (incluindo FFmpeg para librosa)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libffi-dev \
+        libgl1 \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
+        libgomp1 \
+        ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Poetry
+RUN pip install --no-cache-dir poetry
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY pyproject.toml poetry.lock* ./
+
+# Instalar todas as dependências (incluindo dev)
+RUN poetry install --no-root
+
+# Copiar código e testes
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Comando padrão para testes
+CMD ["poetry", "run", "pytest", "tests/unit/services/test_audio_analysis.py", "-v", "--cov=src", "--cov-report=term"]

@@ -1,7 +1,7 @@
 # Índice de Especificações
 
 **Projeto**: Tech Challenge Fase 4
-**Atualizado**: 2026-04-11
+**Atualizado**: 2026-04-12
 
 ---
 
@@ -11,14 +11,16 @@
 |----|---------|--------|--------|------------|
 | 001 | Bootstrap do Projeto | ✅ Concluído | `main` | P0 |
 | 002 | Análise de Texto | ✅ Concluído | `main` | P1 |
-| 003 | Análise de Áudio | 📝 Draft | `003-audio-analysis` | P1 |
+| 003 | Análise de Áudio | ✅ Concluído | `main` | P1 |
 | 004 | Análise de Vídeo (YOLOv8) | 📝 Draft | `004-yolo-video-analysis` | P1 |
 | 005 | Fusão Multimodal | 📝 Draft | `005-multimodal-fusion` | P1 |
-| 006 | Rate Limiting | 📝 Draft | `006-rate-limiting` | P2 |
+| 006 | Rate Limiting | ✅ Parcial* | `main` | P2 |
 | 007 | Security Hardening | 📝 Draft | `007-security-hardening` | P1 |
-| 008 | Testes Automatizados | 📝 Draft | `008-tests` | P1 |
+| 008 | Testes Automatizados | ✅ Parcial* | `main` | P1 |
 | 009 | Deploy Azure | 📝 Draft | `009-deploy-azure` | P1 |
 | 010 | Documentação Final | 📝 Draft | `010-documentation` | P1 |
+
+> **Nota**: Rate Limiting e Testes possuem implementação base (QuotaManager, testes unitários para áudio), mas podem ser expandidos.
 
 ---
 

@@ -3,7 +3,7 @@
 **Feature Branch**: `[005-multimodal-fusion]`
 **Created**: 2026-04-11
 **Status**: Draft
-**Input**: User description: "Implementar endpoint de fusão multimodal combinando texto, áudio e imagem"
+**Input**: User description: "Implementar endpoint de fusão multimodal combinando texto, áudio e video"
 
 ---
 
@@ -11,7 +11,7 @@
 
 ### User Story 1 - Fusão Late de Modalidades (Priority: P1)
 
-Como profissional de saúde, quero submeter texto + áudio + imagem simultaneamente para análise combinada mais precisa.
+Como profissional de saúde, quero submeter texto + áudio + vídeo simultaneamente para análise combinada mais precisa.
 
 **Why this priority**: Fusão multimodal é o diferencial principal do projeto e requisito obrigatório.
 
@@ -19,7 +19,7 @@ Como profissional de saúde, quero submeter texto + áudio + imagem simultaneame
 
 **Acceptance Scenarios**:
 
-1. **Given** texto, áudio e imagem válidos, **When** submeto ao endpoint, **Then** processa as 3 modalidades
+1. **Given** texto, áudio e vídeo válidos, **When** submeto ao endpoint, **Then** processa as 3 modalidades
 2. **Given** resultados individuais, **When** combinados, **Then** aplica late fusion ponderado
 3. **Given** risco alto em 2+ modalidades, **When** fusão calculada, **Then** alerta = true
 4. **Given** apenas uma modalidade, **When** submetida, **Then** processa normalmente (fallback)
@@ -48,7 +48,7 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 
 **Acceptance Scenarios**:
 
-1. **Given** 3 modalidades, **When** submetidas, **Then** processa texto, áudio e imagem simultaneamente
+1. **Given** 3 modalidades, **When** submetidas, **Then** processa texto, áudio e video simultaneamente
 2. **Given** processamento paralelo, **When** uma modalidade falha, **Then** outras continuam e retornam resultado parcial
 
 ---
@@ -58,7 +58,7 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 ### Functional Requirements
 
 - **FR-001**: Endpoint POST `/analyze/multimodal` disponível
-- **FR-002**: Aceita texto (form-data) + áudio (file) + imagem (file)
+- **FR-002**: Aceita texto (form-data) + áudio (file) + vídeo (file)
 - **FR-003**: Pelo menos uma modalidade deve ser fornecida
 - **FR-004**: Processa modalidades em paralelo (asyncio.gather)
 - **FR-005**: Implementa late fusion com ponderação por confiança
@@ -70,9 +70,9 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 
 ### Key Entities
 
-- **MultimodalRequest**: multipart/form-data com texto, audio, imagem, patient_id
+- **MultimodalRequest**: multipart/form-data com texto, audio, video, patient_id
 - **FusionResult**: { risco_violencia, risco_saude_mental, confiança, alerta, recomendação }
-- **MultimodalResponse**: { fusao: FusionResult, texto: Result, audio: Result, imagem: Result, metadata }
+- **MultimodalResponse**: { fusao: FusionResult, texto: Result, audio: Result, video: Result, metadata }
 - **FusionService**: Coordena processamento e aplica algoritmo de fusão
 
 ---
@@ -89,7 +89,7 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 
 ## Assumptions
 
-- Dependências: US01, US02, US03 (texto, áudio, imagem) implementados
+- Dependências: US01, US02, US03 (texto, áudio, video) implementados
 - Late fusion é suficiente para MVP (early fusion seria complexo demais)
 - Ponderação por confiança: modalidades com maior confiança têm peso maior
 - Resultados individuais são sempre retornados para transparência
@@ -103,12 +103,12 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 # Ponderação por confiança
 peso_texto = confiança_texto / (soma_confianças)
 peso_audio = confiança_audio / (soma_confianças)
-peso_imagem = confiança_imagem / (soma_confianças)
+peso_video = confiança_video / (soma_confianças)
 
 # Score combinado
 score_fusao = (score_texto * peso_texto + 
                score_audio * peso_audio + 
-               score_imagem * peso_imagem)
+               score_video * peso_video)
 ```
 
 ### Regras de Alerta
@@ -148,7 +148,7 @@ class FusionService:
         self,
         texto: Optional[str] = None,
         audio: Optional[UploadFile] = None,
-        imagem: Optional[UploadFile] = None
+        video: Optional[UploadFile] = None
     ) -> MultimodalResult:
         """
         Processa múltiplas modalidades em paralelo
@@ -165,9 +165,9 @@ class FusionService:
             tasks.append(self._analyze_with_timeout(
                 "audio", self.audio_svc.analyze(audio)
             ))
-        if imagem:
+        if video:
             tasks.append(self._analyze_with_timeout(
-                "imagem", self.image_svc.analyze(imagem)
+                "video", self.image_svc.analyze(video)
             ))
 
         # Executa em paralelo com tratamento de exceções individuais
@@ -311,7 +311,7 @@ class GracefulFusionService:
         self,
         texto: Optional[str] = None,
         audio: Optional[UploadFile] = None,
-        imagem: Optional[UploadFile] = None
+        video: Optional[UploadFile] = None
     ) -> MultimodalResult:
         """
         Processa com fallback: se uma modalidade falhar,
@@ -335,12 +335,12 @@ class GracefulFusionService:
                 logger.warning(f"Audio falhou: {e}")
                 errors.append("audio")
 
-        if imagem:
+        if video:
             try:
-                results["imagem"] = await self.image_svc.analyze(imagem)
+                results["video"] = await self.image_svc.analyze(video)
             except Exception as e:
                 logger.warning(f"Imagem falhou: {e}")
-                errors.append("imagem")
+                errors.append("video")
 
         # Se pelo menos uma deu certo, faz fusão
         if results:

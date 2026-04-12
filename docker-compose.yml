@@ -20,7 +20,7 @@ services:
     environment:
       # App
       - APP_NAME=Multimodal Health Analysis API
-      - APP_VERSION=0.2.0
+      - APP_VERSION=0.3.0
       - ENVIRONMENT=development
       - DEBUG=true
       - LOG_LEVEL=DEBUG
@@ -80,6 +80,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  # -------------------------------------------
+  # Test Runner (para executar testes)
+  # -------------------------------------------
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: health-api-test
+    environment:
+      - ENVIRONMENT=testing
+      - LOG_LEVEL=DEBUG
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY:-}
+      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION:-brazilsouth}
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./pyproject.toml:/app/pyproject.toml
+    command: poetry run pytest tests/unit/services/test_audio_analysis.py -v --cov=src --cov-report=term
+    profiles:
+      - test
 
 volumes:
   redis-data:
