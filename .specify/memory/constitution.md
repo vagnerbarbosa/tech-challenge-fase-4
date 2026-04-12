@@ -103,6 +103,56 @@ Arquitetura preparada para processamento de múltiplas modalidades:
 - [ ] Linting e type check passando
 - [ ] Spec.md atualizado se necessário
 
+## Decisões de Arquitetura (Architecture Decision Records)
+
+### Aprovadas ✅
+- **Async/await** para I/O - Melhor performance em I/O bound
+- **Dependency injection** com FastAPI Depends() - Testabilidade
+- **Late fusion** para combinação multimodal - Simplicidade vs early fusion
+- **Local filesystem** para arquivos temporários (não Azure Blob) - Custo zero
+- **Redis** para cache (opcional) - Performance em rate limiting
+
+### Rejeitadas ❌
+- ~~Early fusion~~ (complexidade excessiva)
+- ~~Modelos locais~~ (requer GPU, custo)
+- ~~Frontend web~~ (fora de escopo)
+- ~~Treinamento customizado~~ (fora de escopo)
+
+## Checklist de Review
+
+Antes de considerar uma feature completa:
+
+- [ ] Código passa em `ruff check .`
+- [ ] Código passa em `mypy src/`
+- [ ] Testes unitários implementados
+- [ ] Testes de integração implementados
+- [ ] Cobertura > 70%
+- [ ] Campos obrigatórios (`risco_violencia`, `risco_saude_mental`) presentes em responses
+- [ ] Validação de entrada implementada
+- [ ] Rate limiting implementado (se usar Azure)
+- [ ] Logging estruturado (sem dados sensíveis)
+- [ ] Documentação atualizada (README, CLAUDE.md se necessário)
+
+## Processo de Desenvolvimento (Spec Kit)
+
+1. **Especificar**: Criar spec.md na pasta specs/XXX-feature/
+2. **Planejar**: Criar plan.md com abordagem técnica
+3. **Taskificar**: Criar tasks.md com tarefas executáveis
+4. **Implementar**: Executar tasks em ordem
+5. **Validar**: Rodar testes, lint, type check
+6. **Documentar**: Atualizar README se necessário
+
+## Contato e Responsabilidades
+
+- **Autores**: Grupo 27
+  - Adriel Santos ([@AdrielCandido](https://github.com/AdrielCandido))
+  - Leticia Nepomuceno ([@LeticiaNepomucena](https://github.com/LeticiaNepomucena))
+  - Lucas Silva ([@lucfsilva](https://github.com/lucfsilva))
+  - Vagner Barbosa ([@vagnerbarbosa](https://github.com/vagnerbarbosa))
+- **Projeto**: FIAP/Alura - AI para Devs
+- **Fase**: 4 (Multimodal AI)
+- **Repositório**: vagnerbarbosa/tech-challenge-fase-4
+
 ## Governance
 
 Esta Constitution é a fonte da verdade para decisões arquiteturais do projeto. Em caso de conflito:
@@ -110,6 +160,6 @@ Esta Constitution é a fonte da verdade para decisões arquiteturais do projeto.
 2. Alterações requerem documentação e aprovação
 3. Novos princípios são adicionados via PR com justificativa
 
-**Version**: 1.0  
+**Version**: 1.1  
 **Ratified**: 2026-04-12  
 **Last Amended**: 2026-04-12
