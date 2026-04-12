@@ -4,12 +4,13 @@ Este módulo valida arquivos de áudio usando magic numbers (conteúdo real),
 além da extensão, para prevenir spoofing de tipo de arquivo.
 """
 
-import sys
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from structlog.stdlib import BoundLogger
 
 from fastapi import HTTPException, UploadFile
-
 
 # ===========================================
 # Constantes (devem ser definidas antes de usadas)
@@ -40,10 +41,10 @@ except (ImportError, OSError):
     pass
 
 # Logger lazy
-_logger: Optional = None
+_logger: Optional["BoundLogger"] = None
 
 
-def _get_logger():
+def _get_logger() -> "BoundLogger":
     """Lazy initialization do logger."""
     global _logger
     if _logger is None:
@@ -161,11 +162,7 @@ async def validate_audio_file(file: UploadFile) -> None:
 
         # Verificar assinaturas básicas
         is_valid = False
-        if ext == ".wav" and content.startswith(b"RIFF"):
-            is_valid = True
-        elif ext == ".mp3" and (content.startswith(b"\xff\xfb") or content.startswith(b"ID3")):
-            is_valid = True
-        elif ext == ".ogg" and content.startswith(b"OggS"):
+        if ext == ".wav" and content.startswith(b"RIFF") or ext == ".mp3" and (content.startswith(b"\xff\xfb") or content.startswith(b"ID3")) or ext == ".ogg" and content.startswith(b"OggS"):
             is_valid = True
 
         if not is_valid and len(content) > 0:

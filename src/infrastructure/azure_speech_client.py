@@ -3,7 +3,7 @@
 import asyncio
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import azure.cognitiveservices.speech as speechsdk
 from azure.cognitiveservices.speech import ResultReason, SpeechConfig, SpeechRecognizer
@@ -12,7 +12,6 @@ from structlog import get_logger
 from src.core.config import get_settings
 from src.core.exceptions import (
     AzureAuthenticationError,
-    AzureConnectionError,
     AzureQuotaExceededError,
     AzureServiceError,
 )
@@ -20,8 +19,8 @@ from src.core.exceptions import (
 logger = get_logger()
 
 
-@lru_cache()
-def get_speech_config() -> Optional[SpeechConfig]:
+@lru_cache
+def get_speech_config() -> SpeechConfig | None:
     """Retorna configuração singleton do Azure Speech.
 
     Returns:
@@ -48,7 +47,7 @@ class AzureSpeechClient:
     - Configuração de timeout e retry
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = get_speech_config()
         self.settings = get_settings()
         self.mock_mode = self.config is None
@@ -58,7 +57,7 @@ class AzureSpeechClient:
         audio_path: Path,
         language: str = "pt-BR",
         timeout_secs: int = 30,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Transcreve arquivo de áudio usando Azure Speech.
 
         Args:
@@ -87,7 +86,8 @@ class AzureSpeechClient:
                 "mock": True,
             }
 
-        # Configura idioma
+        # Configura idioma (self.config não é None aqui pois mock_mode é False)
+        assert self.config is not None  # noqa: S101
         self.config.speech_recognition_language = language
 
         # Cria audio config
@@ -152,9 +152,9 @@ class AzureSpeechClient:
                 logger.error("azure_speech_unknown_reason", reason=str(result.reason))
                 raise AzureServiceError(f"Erro desconhecido: {result.reason}")
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("azure_speech_timeout", timeout=timeout_secs)
-            raise TimeoutError(f"Tempo limite excedido ({timeout_secs}s)")
+            raise TimeoutError(f"Tempo limite excedido ({timeout_secs}s)") from None
 
         except Exception as e:
             logger.error("azure_speech_error", error=str(e))
@@ -169,7 +169,7 @@ class AzureSpeechClient:
         audio_path: Path,
         language: str = "pt-BR",
         max_retries: int = 2,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Transcreve com retry automático em caso de falha.
 
         Args:

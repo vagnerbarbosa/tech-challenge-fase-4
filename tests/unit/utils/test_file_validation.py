@@ -3,7 +3,6 @@
 Validação de arquivos com magic numbers.
 """
 
-from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -119,7 +118,7 @@ class TestConstants:
 
     def test_allowed_extensions(self):
         """Testa extensões permitidas."""
-        assert ALLOWED_EXTENSIONS == {".wav", ".mp3", ".ogg"}
+        assert {".wav", ".mp3", ".ogg"} == ALLOWED_EXTENSIONS
 
     def test_max_file_size(self):
         """Testa tamanho máximo (50MB)."""

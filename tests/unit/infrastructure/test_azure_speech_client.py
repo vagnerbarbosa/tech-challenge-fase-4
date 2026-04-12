@@ -3,13 +3,11 @@
 Mock do Azure Speech SDK para testes unitários.
 """
 
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
 from src.infrastructure.azure_speech_client import AzureSpeechClient, get_speech_config
-from src.core.exceptions import AzureAuthenticationError, AzureServiceError
 
 
 class TestGetSpeechConfig:
@@ -181,7 +179,9 @@ class TestAzureSpeechClientErrors:
             test_file.write_text("fake")
 
             # Patch transcribe para simular timeout
-            with patch.object(client, 'transcribe', side_effect=TimeoutError("Timeout")):
+            with (
+                patch.object(client, 'transcribe', side_effect=TimeoutError("Timeout")),
+                pytest.raises(TimeoutError),
+            ):
                 # Act & Assert
-                with pytest.raises(TimeoutError):
-                    await client.transcribe(test_file, timeout_secs=1)
+                await client.transcribe(test_file, timeout_secs=1)

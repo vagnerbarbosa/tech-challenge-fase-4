@@ -6,13 +6,12 @@ Implementação simples usando arquivo para persistência.
 
 import json
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from structlog import get_logger
 
-from src.core.config import get_settings
 from src.core.exceptions import RateLimitException
 
 logger = get_logger()
@@ -45,12 +44,13 @@ class QuotaManager:
         self._state = self._load_state()
         self._last_save = time.time()
 
-    def _load_state(self) -> dict:
+    def _load_state(self) -> dict[str, Any]:
         """Carrega estado de quota do arquivo."""
         try:
             if QUOTA_FILE.exists():
-                with open(QUOTA_FILE, "r") as f:
-                    return json.load(f)
+                with open(QUOTA_FILE) as f:
+                    result: dict[str, Any] = json.load(f)
+                    return result
         except Exception as e:
             logger.warning("quota_load_error", error=str(e))
         return {"daily": {}, "monthly": {}}
@@ -65,15 +65,15 @@ class QuotaManager:
 
     def _get_day_key(self) -> str:
         """Retorna chave para o dia atual."""
-        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        return datetime.now(UTC).strftime("%Y-%m-%d")
 
     def _get_month_key(self) -> str:
         """Retorna chave para o mês atual."""
-        return datetime.now(timezone.utc).strftime("%Y-%m-%Y")
+        return datetime.now(UTC).strftime("%Y-%m-%Y")
 
     def check_and_increment(
         self, service: str, daily_limit: int, monthly_limit: int, increment: int = 1
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Verifica e incrementa uso da quota.
 
         Args:
@@ -156,7 +156,7 @@ class QuotaManager:
             "monthly_remaining": max(0, monthly_remaining),
         }
 
-    def get_quota_status(self, service: str) -> dict:
+    def get_quota_status(self, service: str) -> dict[str, Any]:
         """Retorna status atual da quota."""
         day_key = self._get_day_key()
         month_key = self._get_month_key()
@@ -192,12 +192,13 @@ def check_rate_limit(service: str, daily_limit: int, monthly_limit: int) -> int:
     """
     manager = QuotaManager()
     status = manager.get_quota_status(service)
-    return status["daily_remaining"]
+    daily_remaining: int = status["daily_remaining"]
+    return daily_remaining
 
 
 def check_and_increment_quota(
     service: str, daily_limit: int, monthly_limit: int, increment: int = 1
-) -> dict:
+) -> dict[str, Any]:
     """Verifica e incrementa uso da quota.
 
     Args:
@@ -213,7 +214,7 @@ def check_and_increment_quota(
     return manager.check_and_increment(service, daily_limit, monthly_limit, increment)
 
 
-def get_quota_status(service: str) -> dict:
+def get_quota_status(service: str) -> dict[str, Any]:
     """Retorna status atual da quota para um serviço."""
     manager = QuotaManager()
     return manager.get_quota_status(service)

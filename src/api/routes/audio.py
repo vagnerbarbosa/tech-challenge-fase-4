@@ -8,15 +8,20 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from structlog import get_logger
 
 from src.api.routes.dependencies import get_temp_manager
-from src.core.config import get_settings
-from src.core.exceptions import AzureAuthenticationError, AzureQuotaExceededError, AzureServiceError
+from src.core.exceptions import (
+    AzureAuthenticationError,
+    AzureQuotaExceededError,
+    AzureServiceError,
+)
 from src.core.rate_limit import check_and_increment_quota
 from src.core.temp_file_manager import TempFileManager
-from src.infrastructure.azure_speech_client import AzureSpeechClient
-from src.models.schemas import AudioAnalysisResponse, AnalysisMetadata
-from src.services.audio_analysis import AudioAnalysisService, ProsodicFeatureExtractor
-from src.services.risk_detector import calculate_risk
-from src.utils.file_validation import check_file_size, check_upload_size, validate_audio_file
+from src.models.schemas import AnalysisMetadata, AudioAnalysisResponse
+from src.services.audio_analysis import AudioAnalysisService
+from src.utils.file_validation import (
+    check_file_size,
+    check_upload_size,
+    validate_audio_file,
+)
 
 logger = get_logger()
 
@@ -72,7 +77,7 @@ async def analyze_audio(
     """
     import asyncio
     import time
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     start_time = time.perf_counter()
     correlation_id = f"audio-{int(start_time * 1000)}"
@@ -178,7 +183,7 @@ async def analyze_audio(
                 detail="Serviço de transcrição indisponível. Tente novamente mais tarde.",
             ) from e
 
-        except asyncio.TimeoutError as e:
+        except TimeoutError as e:
             logger.error(
                 "audio_analysis_timeout",
                 correlation_id=correlation_id,
@@ -206,7 +211,7 @@ async def analyze_audio(
 
         metadata = AnalysisMetadata(
             correlation_id=correlation_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             tempo_processamento_ms=processing_time_ms,
             cache_hit=False,
             azure_calls=azure_calls,
@@ -253,7 +258,7 @@ async def analyze_audio(
     summary="Formatos de áudio suportados",
     description="Retorna lista de formatos de áudio aceitos e limites.",
 )
-async def get_audio_formats():
+async def get_audio_formats() -> dict[str, list[str] | int | dict[str, int]]:
     """Retorna informações sobre formatos suportados."""
     return {
         "formats": ["audio/wav", "audio/x-wav", "audio/mpeg", "audio/ogg"],

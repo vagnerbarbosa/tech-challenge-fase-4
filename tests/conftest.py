@@ -5,8 +5,7 @@ Fornece fixtures compartilhadas para todos os módulos de teste.
 
 import pytest
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
-from httpx import ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from src.api.main import app
 

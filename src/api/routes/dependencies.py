@@ -3,8 +3,9 @@
 Gerencia singletons como TempFileManager para uso em rotas.
 """
 
-from src.core.temp_file_manager import TempFileManager
+from __future__ import annotations
 
+from src.core.temp_file_manager import TempFileManager
 
 # Singleton para TempFileManager
 _temp_manager: TempFileManager | None = None

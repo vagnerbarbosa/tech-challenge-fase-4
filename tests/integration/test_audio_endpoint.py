@@ -3,8 +3,7 @@
 Valida upload de arquivos, validação, processamento e resposta.
 """
 
-from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import status
@@ -26,13 +25,12 @@ class TestAudioEndpointSuccess:
 
         with patch(
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ):
-            with open(test_audio, "rb") as f:
-                response = await async_client.post(
-                    "/analyze/audio",
-                    files={"file": ("test.wav", f, "audio/wav")},
-                    data={"patient_id": "patient-123"},
-                )
+        ), open(test_audio, "rb") as f:
+            response = await async_client.post(
+                "/analyze/audio",
+                files={"file": ("test.wav", f, "audio/wav")},
+                data={"patient_id": "patient-123"},
+            )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -55,12 +53,11 @@ class TestAudioEndpointSuccess:
 
         with patch(
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ):
-            with open(test_audio, "rb") as f:
-                response = await async_client.post(
-                    "/analyze/audio",
-                    files={"file": ("test.wav", f, "audio/wav")},
-                )
+        ), open(test_audio, "rb") as f:
+            response = await async_client.post(
+                "/analyze/audio",
+                files={"file": ("test.wav", f, "audio/wav")},
+            )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -96,12 +93,11 @@ class TestAudioEndpointValidation:
         with patch(
             "src.utils.file_validation.magic.from_buffer",
             return_value="application/octet-stream",
-        ):
-            with open(test_audio, "rb") as f:
-                response = await async_client.post(
-                    "/analyze/audio",
-                    files={"file": ("test.wav", f, "audio/wav")},
-                )
+        ), open(test_audio, "rb") as f:
+            response = await async_client.post(
+                "/analyze/audio",
+                files={"file": ("test.wav", f, "audio/wav")},
+            )
 
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -115,12 +111,11 @@ class TestAudioEndpointValidation:
 
         with patch(
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ):
-            with open(test_audio, "rb") as f:
-                response = await async_client.post(
-                    "/analyze/audio",
-                    files={"file": ("test.wav", f, "audio/wav")},
-                )
+        ), open(test_audio, "rb") as f:
+            response = await async_client.post(
+                "/analyze/audio",
+                files={"file": ("test.wav", f, "audio/wav")},
+            )
 
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -157,16 +152,14 @@ class TestAudioAzureErrors:
 
         with patch(
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ):
-            with patch(
-                "src.services.audio_analysis.AzureSpeechClient.transcribe_with_retry",
-                side_effect=Exception("Quota exceeded"),
-            ):
-                with open(test_audio, "rb") as f:
-                    response = await async_client.post(
-                        "/analyze/audio",
-                        files={"file": ("test.wav", f, "audio/wav")},
-                    )
+        ), patch(
+            "src.services.audio_analysis.AzureSpeechClient.transcribe_with_retry",
+            side_effect=Exception("Quota exceeded"),
+        ), open(test_audio, "rb") as f:
+            response = await async_client.post(
+                "/analyze/audio",
+                files={"file": ("test.wav", f, "audio/wav")},
+            )
 
         # Assert - deve retornar 500 (erro interno) ou 429 dependendo do tratamento
         assert response.status_code >= 400

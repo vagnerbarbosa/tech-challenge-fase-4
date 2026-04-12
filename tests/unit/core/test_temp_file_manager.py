@@ -4,11 +4,11 @@ LGPD Compliance: Verifica cleanup automático de arquivos temporários.
 """
 
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from src.core.temp_file_manager import TempFileManager, temp_file_manager
+from src.core.temp_file_manager import TempFileManager
 
 
 class TestTempFileManager:
