@@ -110,7 +110,7 @@ class TestAzureSpeechClient:
             # Assert
             assert result["sucesso"] is True
             assert result["transcricao"] == "Olá mundo"
-            assert result["confiança"] == 0.95
+            assert result["confianca"] == 0.95
 
     @pytest.mark.asyncio
     async def test_transcribe_no_match(self, client, mock_config, tmp_path):
