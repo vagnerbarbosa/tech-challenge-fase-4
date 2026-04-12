@@ -11,6 +11,49 @@ from typing import Optional
 from fastapi import HTTPException, UploadFile
 
 
+# ===========================================
+# Constantes (devem ser definidas antes de usadas)
+# ===========================================
+
+# Tamanho máximo: 50MB
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB em bytes
+
+# Tipos MIME permitidos e suas extensões correspondentes
+ALLOWED_AUDIO_TYPES = {
+    "audio/wav": ".wav",
+    "audio/x-wav": ".wav",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
+}
+
+# Extensões permitidas (para validação inicial)
+ALLOWED_EXTENSIONS = {".wav", ".mp3", ".ogg"}
+
+# python-magic pode não estar disponível no Windows
+MAGIC_AVAILABLE = False
+magic = None
+try:
+    import magic as _magic_module
+    magic = _magic_module
+    MAGIC_AVAILABLE = True
+except (ImportError, OSError):
+    pass
+
+# Logger lazy
+_logger: Optional = None
+
+
+def _get_logger():
+    """Lazy initialization do logger."""
+    global _logger
+    if _logger is None:
+        from structlog import get_logger
+        _logger = get_logger()
+        if not MAGIC_AVAILABLE:
+            _logger.warning("python-magic não disponível, usando validação por extensão apenas")
+    return _logger
+
+
 async def check_upload_size(file: UploadFile, max_size: int = MAX_FILE_SIZE) -> None:
     """Verifica tamanho do upload antes de salvar em disco.
 
@@ -44,44 +87,6 @@ async def check_upload_size(file: UploadFile, max_size: int = MAX_FILE_SIZE) -> 
         await file.seek(0)
         if len(sample) == 0:
             raise HTTPException(status_code=400, detail="Arquivo vazio")
-
-# python-magic pode não estar disponível no Windows
-MAGIC_AVAILABLE = False
-magic = None
-try:
-    import magic as _magic_module
-    magic = _magic_module
-    MAGIC_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Tipos MIME permitidos e suas extensões correspondentes
-ALLOWED_AUDIO_TYPES = {
-    "audio/wav": ".wav",
-    "audio/x-wav": ".wav",
-    "audio/mpeg": ".mp3",
-    "audio/ogg": ".ogg",
-}
-
-# Extensões permitidas (para validação inicial)
-ALLOWED_EXTENSIONS = {".wav", ".mp3", ".ogg"}
-
-# Tamanho máximo: 50MB
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB em bytes
-
-# Logger lazy
-_logger: Optional = None
-
-
-def _get_logger():
-    """Lazy initialization do logger."""
-    global _logger
-    if _logger is None:
-        from structlog import get_logger
-        _logger = get_logger()
-        if not MAGIC_AVAILABLE:
-            _logger.warning("python-magic não disponível, usando validação por extensão apenas")
-    return _logger
 
 
 async def validate_audio_file(file: UploadFile) -> None:
