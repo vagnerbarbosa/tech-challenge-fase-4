@@ -1,50 +1,115 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Tech Challenge Fase 4 Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. LGPD Compliance (NON-NEGOTIABLE)
+Toda implementação deve garantir conformidade com a Lei Geral de Proteção de Dados (LGPD):
+- **Anonimização**: Patient IDs devem ser hasheados (SHA256) antes de uso em logs ou filenames
+- **Consentimento**: Dados só são processados com consentimento explícito (quando aplicável)
+- **Minimização**: Coletar apenas dados necessários para a análise
+- **Temporariedade**: Arquivos temporários são removidos imediatamente após processamento (try/finally)
+- **Nunca logar**: Conteúdo de mídia (áudio, vídeo) ou texto identificável não deve ser logado
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Azure Free Tier Protection
+Proteção rigorosa contra exceder limites do Azure Free Tier:
+- **Rate Limiting**: QuotaManager com persistência para tracking diário/mensal
+- **Hard Limits**: Requisições são rejeitadas antes de consumir Azure quando quota excedida
+- **Health Check**: Endpoint `/health` expõe quotas restantes
+- **Mock Mode**: Funciona sem credenciais Azure para desenvolvimento
+- **Limites Atuais**:
+  - Text Analytics: 160 requests/dia (5.000/mês)
+  - Speech Services: 10 minutos/dia (300/mês)
+  - Computer Vision: 160 requests/dia (5.000/mês)
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Test Coverage >70% (TDD Preferred)
+Qualidade de código através de testes comprehensivos:
+- **Unit Tests**: Todos os services e utilities devem ter testes unitários
+- **Integration Tests**: Endpoints devem ter testes de integração
+- **Coverage**: Mínimo 70% de cobertura (report via pytest-cov)
+- **Linting**: Ruff (line length: 88) deve passar sem erros
+- **Type Check**: mypy em modo strict para código novo
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Container-First
+Toda funcionalidade deve funcionar em containers Docker:
+- **Multi-stage Build**: Dockerfile otimizado para produção
+- **Non-root User**: Containers rodam como usuário não-privilegiado
+- **Health Checks**: Implementados no Dockerfile e docker-compose
+- **FFmpeg/Dependências**: Todas as dependências sistema embarcadas no container
+- **Docker Test**: Script `scripts/test-docker.sh` para validação
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Documentação em Português
+Contexto brasileiro (FIAP/Alura) requer documentação localizada:
+- **README**: Em português, com exemplos de uso
+- **Specs**: Toda especificação em português
+- **Commits**: Conventional commits em português
+- **Comentários de Código**: Em inglês (padrão Python)
+- **PRs**: Título e descrição em português obrigatório
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Security-First
+Hardening de segurança em todas as camadas:
+- **Secrets**: Nunca commitar secrets (usar .env)
+- **Validação**: Magic numbers para validação de arquivos (não só extensão)
+- **Input Sanitization**: Todos os inputs validados antes de processamento
+- **Error Handling**: Nunca expor detalhes internos em mensagens de erro
+- **CORS/HTTPS**: Configuração segura para produção
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### VII. Multimodal Architecture
+Arquitetura preparada para processamento de múltiplas modalidades:
+- **Independência**: Cada modalidade (texto, áudio, vídeo) pode funcionar isoladamente
+- **Composição**: Endpoint `/analyze/multimodal` combina resultados
+- **Extensibilidade**: Nova modalidade não requer mudanças nas existentes
+- **Fallback**: Quando uma modalidade falha, outras continuam funcionando
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Additional Constraints
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Technology Stack (Locked)
+- **Core**: Python 3.11+, FastAPI, Pydantic v2
+- **Package Manager**: Poetry (pyproject.toml)
+- **Azure**: azure-ai-textanalytics, azure-cognitiveservices-speech, azure-ai-vision
+- **Audio/Video**: librosa, ultralytics (YOLOv8), opencv-python
+- **Database**: SQLite (dev) / Azure SQL (prod)
+- **Cache**: Redis (optional)
+
+### API Standards
+- **REST**: Endpoints seguem padrão RESTful
+- **OpenAPI**: Documentação automática via FastAPI
+- **Versioning**: URL path (`/v1/...`) quando necessário
+- **Response Format**: JSON consistente com `risco_violencia` e `risco_saude_mental` obrigatórios
+
+### Data Model Standards
+- **Schemas**: Pydantic models em `src/models/schemas.py`
+- **Validation**: Field validators para regras de negócio
+- **Documentation**: docstrings em todas as classes públicas
+
+## Development Workflow
+
+### Branch Strategy
+- **Main**: `main` - código de produção
+- **Features**: `NNN-feature-name` - especs do Spec Kit
+- **PRs**: Requer review antes de merge
+
+### Quality Gates
+1. **Pre-commit**: Ruff check passando
+2. **Tests**: pytest com coverage >70%
+3. **Type Check**: mypy sem erros
+4. **Docker**: Build e testes em container funcionando
+
+### Definition of Done
+- [ ] Código implementado seguindo princípios acima
+- [ ] Testes unitários cobrindo casos principais
+- [ ] Testes de integração para endpoints
+- [ ] Documentação atualizada (README, CLAUDE.md)
+- [ ] Docker build funcionando
+- [ ] Linting e type check passando
+- [ ] Spec.md atualizado se necessário
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Esta Constitution é a fonte da verdade para decisões arquiteturais do projeto. Em caso de conflito:
+1. Constitution > Spec > Implementation
+2. Alterações requerem documentação e aprovação
+3. Novos princípios são adicionados via PR com justificativa
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0  
+**Ratified**: 2026-04-12  
+**Last Amended**: 2026-04-12
