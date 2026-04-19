@@ -42,7 +42,7 @@ Implementar endpoint `/analyze/video` para processamento de vídeos usando YOLOv
 - Máximo 2 minutos de duração
 - ~24 frames máximo por vídeo (amostragem adaptativa)
 
-**Scale/Scope**: MVP - análise síncrona para vídeos curtos, async para vídeos longos
+**Scale/Scope**: MVP - análise síncrona para todos os vídeos (até 2 min), com amostragem adaptativa para garantir performance
 
 ## Constitution Check
 

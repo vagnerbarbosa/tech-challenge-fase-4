@@ -107,14 +107,14 @@ Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certe
 
 - **FR-001**: Endpoint POST `/analyze/video` disponível (multipart/form-data)
 - **FR-002**: Suporta vídeos MP4, AVI, MOV (máx 2 minutos, max 50MB) - amostragem adaptativa: 1 FPS até 30s, 0.2 FPS (1 frame/5s) para vídeos mais longos
-- **FR-003**: Extrai frames automaticamente com amostragem adaptativa: 1 FPS para vídeos ≤30s, 0.2 FPS para vídeos >30s (máx ~24 frames por vídeo)
+- **FR-003**: Extrai frames com amostragem adaptativa por padrão (1 FPS ≤30s, 0.2 FPS >30s), permitindo override via parâmetro `extract_fps` (0.2-5.0)
 - **FR-004**: YOLOv8 roda localmente em container (custo zero)
 - **FR-005**: Detecta classes configuráveis: instrumentos_cirurgicos, sangramento, desconforto_postura
 - **FR-006**: Retorna bounding boxes com coordenadas (x, y, width, height) e confiança
 - **FR-007**: [POST-MVP] Integração opcional com Azure Vision como fallback (consome quota)
 - **FR-008**: Gera alerta quando risco detectado (violência, sangramento excessivo)
 - **FR-009**: Campos obrigatórios risco_violencia e risco_saude_mental em todas respostas
-- **FR-010**: Cache de frames processados para evitar reprocessamento
+- **FR-010**: Cache de resultados de análise (não frames) para evitar reprocessamento do mesmo vídeo
 
 ### Key Entities
 
@@ -624,6 +624,10 @@ class FrameCache:
 - **Q**: Qual deve ser o limite oficial de tamanho de arquivo para vídeos? → **A**: 50MB (igual ao áudio) - mantém consistência entre modalidades
 - **Q**: Implementar Azure Vision fallback no MVP? → **A**: Não - foco no YOLOv8 local (custo zero), fallback avaliado post-MVP se necessário
 - **Q**: Como tratar vídeos que excedem o limite de processamento? → **A**: Aceitar até 2 minutos com amostragem adaptativa (1 FPS até 30s, 0.2 FPS depois)
+- **Q**: FPS é adaptativo ou configurável? → **A**: Adaptativo por padrão, mas usuário pode sobrescrever via `extract_fps`
+- **Q**: Cache de frames ou resultados? → **A**: Cache de resultados (VideoAnalysisResponse), não frames (LGPD)
+- **Q**: Processamento async no MVP? → **A**: Não - todos os vídeos são síncronos, async é post-MVP
+- **Q**: Dependência ultralytics adicionada? → **A**: Sim, ultralytics>=8.0.0 adicionado ao pyproject.toml
 
 ### Session 2026-04-12
 
@@ -759,7 +763,7 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 - [ ] Implementar BleedingDetector (CV clássico)
 - [ ] Implementar endpoint POST `/analyze/video`
 - [ ] Adicionar risco_violencia/risco_saude_mental nas respostas
-- [ ] Implementar processamento assíncrono para vídeos longos
+- [ ] [POST-MVP] Avaliar processamento assíncrono para vídeos longos (>1 min) se necessário
 - [ ] Adicionar validação de tamanho de arquivo (50MB, igual ao áudio)
 - [ ] Testar com vídeos de exemplo
 - [ ] Documentar limitações (COCO genérico vs instrumentos médicos)
