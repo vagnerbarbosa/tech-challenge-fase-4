@@ -54,7 +54,24 @@ Como profissional de saúde, quero identificar sinais não-verbais de desconfort
 3. **Given** expressões faciais de medo/ansiedade, **When** detectadas, **Then** combina com análise de texto se disponível
 4. **Given** movimentos normais de consulta, **When** analisados, **Then** não gera falsos positivos
 
-### User Story 4 - Integração com Azure Vision (Priority: P2)
+### User Story 4 - Triagem de Violência e Saúde Mental (Priority: P1)
+
+Como profissional de saúde, quero que o sistema identifique sinais visuais de risco em consultas de telemedicina para triagem precoce de violência doméstica e problemas de saúde mental.
+
+**Why this priority**: Requisito do projeto para identificação precoce de riscos em saúde materna e ginecológica, complementando as análises de texto e áudio.
+
+**Independent Test**: POST `/analyze/video` retorna campos `risco_violencia` e `risco_saude_mental` mesmo quando outros riscos não são detectados.
+
+**Acceptance Scenarios**:
+
+1. **Given** um vídeo de consulta médica em formato MP4, **When** o profissional faz upload via API, **Then** o sistema processa o vídeo e retorna análise com objetos detectados e nível de risco avaliado
+2. **Given** um vídeo contendo sinais visuais de agitação (movimentos rápidos), **When** processado pelo sistema, **Then** o sistema identifica alto nível de agitação e reporta como possível indicador de ansiedade
+3. **Given** vídeo com objetos potencialmente perigosos visíveis (facas, tesouras), **When** analisado pelo YOLOv8, **Then** o sistema lista os objetos detectados com nível de confiança e alerta de risco
+4. **Given** um vídeo sem conteúdo relevante, **When** processado, **Then** o sistema retorna "nenhum sinal detectado" sem erro, mantendo os campos obrigatórios de risco preenchidos
+
+---
+
+### User Story 5 - Integração com Azure Vision (Priority: P2)
 
 Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certeza, garantindo análise robusta.
 
@@ -67,6 +84,20 @@ Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certe
 1. **Given** YOLOv8 confiança < 50%, **When** processa imagem, **Then** chama Azure Vision automaticamente
 2. **Given** Azure Vision indisponível, **When** YOLOv8 não detecta, **Then** retorna resultado parcial (sem erro)
 3. **Given** ambos disponíveis, **When** analisam mesmo vídeo, **Then** combina resultados com ponderação por confiança
+
+---
+
+### Edge Cases
+
+- **Vídeo corrompido ou formato inválido**: Sistema deve retornar erro 400 com mensagem clara sobre formatos aceitos (MP4, AVI, MOV)
+- **Vídeo muito longo (> 10 minutos)**: Sistema deve processar amostras representativas ou retornar erro de limite excedido
+- **Resolução muito baixa**: Sistema deve informar que a qualidade pode afetar a precisão da detecção
+- **Ausência de pessoas no vídeo**: Sistema deve retornar "nenhuma pessoa detectada" sem erro, mantendo campos obrigatórios preenchidos
+- **Múltiplas pessoas no vídeo**: Sistema deve focar na pessoa principal (maior área) ou analisar todas
+- **Falha no modelo YOLOv8**: Sistema deve fallback para modo de análise simplificada ou retornar erro apropriado
+- **Vídeo excede limite de tamanho (100MB)**: Sistema deve retornar erro 413 (Payload Too Large) antes de iniciar processamento
+- **Timeout no processamento**: Sistema deve cancelar processamento após limite configurável e retornar erro 504
+- **Falha na extração de frames**: Sistema deve tentar formatos alternativos ou retornar erro específico sobre codificação de vídeo não suportada
 
 ---
 
@@ -713,6 +744,7 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## Checklist de Implementação
 
+- [x] Especificação consolidada (2026-04-19) - incorporou requisitos de análise comportamental
 - [ ] Instalar YOLOv8 no Dockerfile
 - [ ] Baixar modelo yolov8n.pt (6MB)
 - [ ] Implementar VideoProcessor (extração frames)
@@ -720,6 +752,8 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 - [ ] Implementar BleedingDetector (CV clássico)
 - [ ] Implementar endpoint POST `/analyze/video`
 - [ ] Adicionar risco_violencia/risco_saude_mental nas respostas
+- [ ] Implementar processamento assíncrono para vídeos longos
+- [ ] Adicionar validação de tamanho de arquivo (100MB)
 - [ ] Testar com vídeos de exemplo
 - [ ] Documentar limitações (COCO genérico vs instrumentos médicos)
 - [ ] Criar plano de fine-tuning se necessário (pós-MVP)
