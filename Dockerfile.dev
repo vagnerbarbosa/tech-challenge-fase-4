@@ -4,44 +4,41 @@ FROM python:3.11-slim
 # Evitar buffering do Python
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONFAULTHANDLER=1
+    PYTHONFAULTHANDLER=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false
 
-# Instalar dependências de sistema (incluindo FFmpeg para librosa)
+# Instalar dependências de sistema (incluindo FFmpeg para librosa + OpenCV)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         ffmpeg \
         libsndfile1 \
+        libgl1 \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libgomp1 \
     && rm -rf /var/lib/apt/lists/*
+
+# Instalar Poetry
+RUN pip install --no-cache-dir poetry
 
 # Diretório de trabalho
 WORKDIR /app
 
-# Copiar requirements e instalar dependências Python
-RUN pip install --no-cache-dir \
-    fastapi>=0.104.0 \
-    uvicorn[standard]>=0.24.0 \
-    python-multipart \
-    pydantic>=2.5.0 \
-    pydantic-settings>=2.1.0 \
-    python-dotenv \
-    structlog \
-    httpx \
-    pytest \
-    pytest-asyncio \
-    aiofiles>=23.0.0 \
-    librosa>=0.10.0 \
-    soundfile>=0.12.0 \
-    python-magic \
-    numpy \
-    scikit-learn \
-    azure-ai-textanalytics>=5.4.0 \
-    azure-cognitiveservices-speech \
-    azure-ai-vision-imageanalysis \
-    azure-storage-blob
+# Copiar arquivos de dependências primeiro (cache eficiente)
+COPY pyproject.toml ./
+
+# Gerar poetry.lock e instalar dependências
+RUN poetry lock \
+    && poetry install --no-root --without dev
 
 # Criar diretórios necessários
-RUN mkdir -p data logs uploads
+RUN mkdir -p data logs uploads models
+
+# Download do modelo YOLOv8n (se não existir)
+RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')" || echo "Modelo será baixado no runtime"
 
 # Expor porta
 EXPOSE 8000

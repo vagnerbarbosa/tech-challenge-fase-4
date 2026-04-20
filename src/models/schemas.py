@@ -183,3 +183,112 @@ class AudioAnalysisResponse(BaseModel):
         ...,
         description="Metadados da análise",
     )
+
+
+# ===========================================
+# Video Analysis Schemas
+# ===========================================
+
+
+class BoundingBox(BaseModel):
+    """Bounding box em coordenadas normalizadas (0-1)."""
+
+    x: float = Field(..., ge=0.0, le=1.0, description="Posição X do canto superior esquerdo")
+    y: float = Field(..., ge=0.0, le=1.0, description="Posição Y do canto superior esquerdo")
+    w: float = Field(..., ge=0.0, le=1.0, description="Largura da caixa")
+    h: float = Field(..., ge=0.0, le=1.0, description="Altura da caixa")
+
+
+class Detection(BaseModel):
+    """Objeto detectado no vídeo."""
+
+    classe: str = Field(..., description="Classe do objeto detectada (ex: person, scissors)")
+    confianca: float = Field(..., ge=0.0, le=1.0, description="Score de confiança (0-1)")
+    bbox: BoundingBox = Field(..., description="Bounding box normalizado")
+    frame: int = Field(..., ge=0, description="Número do frame onde foi detectado")
+    timestamp: float = Field(..., ge=0.0, description="Timestamp em segundos no vídeo")
+
+
+class Alert(BaseModel):
+    """Alerta de risco detectado no vídeo."""
+
+    tipo: str = Field(..., description="Tipo de alerta (ex: sangramento_detectado)")
+    severidade: str = Field(..., pattern="^(baixa|media|alta)$", description="Nível de severidade")
+    descricao: str = Field(..., description="Descrição do alerta")
+    frame_referencia: int = Field(..., ge=0, description="Frame de referência do alerta")
+
+
+class VideoAnalysisMetadata(BaseModel):
+    """Metadados específicos da análise de vídeo."""
+
+    correlation_id: str = Field(..., description="ID único de correlação")
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Timestamp da análise")
+    tempo_processamento_ms: int = Field(..., description="Tempo de processamento em ms")
+    cache_hit: bool = Field(default=False, description="Se o resultado veio do cache")
+    frames_analisados: int = Field(..., ge=0, description="Número de frames analisados")
+    duracao_video_segundos: float = Field(..., ge=0.0, description="Duração do vídeo em segundos")
+    modelo: str = Field(default="yolov8n", description="Modelo YOLO utilizado")
+    local_processing: bool = Field(default=True, description="Processamento local (sem Azure)")
+
+
+class VideoAnalysisResponse(BaseModel):
+    """Modelo de resposta para o endpoint de análise de vídeo."""
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "risco_violencia": "baixo",
+                "risco_saude_mental": "medio",
+                "detecoes": [
+                    {
+                        "classe": "person",
+                        "confianca": 0.89,
+                        "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.5},
+                        "frame": 5,
+                        "timestamp": 5.0,
+                    }
+                ],
+                "alertas": [
+                    {
+                        "tipo": "sangramento_detectado",
+                        "severidade": "media",
+                        "descricao": "Possível sangramento detectado no vídeo",
+                        "frame_referencia": 12,
+                    }
+                ],
+                "metadata": {
+                    "correlation_id": "vid-abc123",
+                    "timestamp": "2026-04-19T15:30:00Z",
+                    "tempo_processamento_ms": 4500,
+                    "cache_hit": False,
+                    "frames_analisados": 24,
+                    "duracao_video_segundos": 45.5,
+                    "modelo": "yolov8n",
+                    "local_processing": True,
+                },
+            }
+        }
+    }
+
+    risco_violencia: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de violência - CAMPO OBRIGATÓRIO",
+    )
+    risco_saude_mental: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de saúde mental - CAMPO OBRIGATÓRIO",
+    )
+    detecoes: list[Detection] = Field(
+        default_factory=list,
+        description="Lista de objetos detectados no vídeo",
+    )
+    alertas: list[Alert] = Field(
+        default_factory=list,
+        description="Alertas de risco gerados",
+    )
+    metadata: VideoAnalysisMetadata = Field(
+        ...,
+        description="Metadados da análise de vídeo",
+    )

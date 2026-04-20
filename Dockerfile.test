@@ -37,6 +37,10 @@ RUN poetry install --no-root
 # Copiar código e testes
 COPY src/ ./src/
 COPY tests/ ./tests/
+COPY scripts/ ./scripts/
+
+# Baixar modelo YOLOv8n para testes
+RUN python scripts/download_yolo_model.py || echo "Modelo será baixado no runtime"
 
 # Comando padrão para testes
 CMD ["poetry", "run", "pytest", "tests/unit/services/test_audio_analysis.py", "-v", "--cov=src", "--cov-report=term"]

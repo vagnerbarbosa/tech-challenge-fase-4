@@ -31,7 +31,13 @@ def get_speech_config() -> SpeechConfig | None:
     """
     settings = get_settings()
 
-    if not settings.azure_speech_key:
+    # Verifica se a chave é válida (não vazia, não é fake/mock)
+    if not settings.azure_speech_key or settings.azure_speech_key in (
+        "fake-key-for-local-dev",
+        "mock",
+        "test",
+        "",
+    ):
         logger.warning("azure_speech_key não configurada, usando modo mock")
         return None
 

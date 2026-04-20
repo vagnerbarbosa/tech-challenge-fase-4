@@ -4,6 +4,8 @@ Endpoint para upload e análise de arquivos de áudio,
 integrando transcrição Azure Speech com análise prosódica librosa.
 """
 
+from typing import Any
+
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from structlog import get_logger
 
@@ -25,7 +27,7 @@ from src.utils.file_validation import (
 
 logger = get_logger()
 
-router = APIRouter(prefix="/analyze", tags=["audio"])
+router = APIRouter(prefix="/analyze", tags=["Audio Analysis"])
 
 # Rate limits do Azure Free Tier
 AUDIO_DAILY_LIMIT = 10  # minutos por dia
@@ -270,3 +272,31 @@ async def get_audio_formats() -> dict[str, list[str] | int | dict[str, int]]:
             "monthly_minutes": AUDIO_MONTHLY_LIMIT,
         },
     }
+
+
+@router.get(
+    "/audio/cache/stats",
+    summary="Estatísticas do cache de áudio",
+    description="Retorna informações sobre o cache de análises de áudio em memória.",
+)
+async def get_audio_cache_stats() -> dict[str, Any]:
+    """Retorna estatísticas do cache de análises de áudio."""
+    from src.core.cache import get_cache
+
+    cache = get_cache()
+    return cache.get_stats()
+
+
+@router.post(
+    "/audio/cache/clear",
+    summary="Limpa o cache de áudio",
+    description="Remove todas as entradas do cache de análises de áudio.",
+)
+async def clear_audio_cache() -> dict[str, str]:
+    """Limpa todas as entradas do cache de áudio."""
+    from src.core.cache import get_cache
+
+    cache = get_cache()
+    cache.clear_all()
+    logger.info("audio_cache_cleared")
+    return {"message": "Cache de áudio limpo com sucesso"}

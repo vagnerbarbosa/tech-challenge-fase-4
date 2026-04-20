@@ -67,6 +67,10 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copiar código da aplicação
 COPY --chown=appuser:appgroup src/ ./src/
+COPY --chown=appuser:appgroup scripts/ ./scripts/
+
+# Baixar modelo YOLOv8n (executa como root para ter permissões)
+RUN python scripts/download_yolo_model.py || echo "Modelo será baixado no runtime"
 
 # Mudar para usuário não-root
 USER appuser

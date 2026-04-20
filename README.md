@@ -1,7 +1,7 @@
 # 🏥💜 Tech Challenge Fase 4 - Sistema multimodal de análise de saúde da mulher usando Azure AI Services
 
-> **📅 Última Atualização**: 2026-04-12
-> **✅ Status**: 2/4 Módulos Core Implementados (Texto + Áudio)
+> **📅 Última Atualização**: 2026-04-19
+> **✅ Status**: 3/4 Módulos Core Implementados (Texto + Áudio + Vídeo)
 
 ## Objetivo
 
@@ -420,7 +420,12 @@ poetry run mypy src/
 | `/analyze/text` | POST | ✅ Implementado | Análise de sentimento e riscos | Azure AI Language | 📝 Texto |
 | `/analyze/audio` | POST | ✅ Implementado | Transcrição + análise prosódica | Azure AI Speech + librosa | 🎙️ Áudio |
 | `/analyze/audio/formats` | GET | ✅ Implementado | Lista formatos suportados | - | 🎙️ Áudio |
-| `/analyze/video` | POST | ⏳ Pendente | Análise com YOLOv8 | YOLOv8 Local | 🎥 Vídeo |
+| `/analyze/audio/cache/stats` | GET | ✅ Implementado | Estatísticas do cache de áudio | - | 🎙️ Áudio |
+| `/analyze/audio/cache/clear` | POST | ✅ Implementado | Limpa cache de áudio | - | 🎙️ Áudio |
+| `/analyze/video` | POST | ✅ Implementado | Análise com YOLOv8 | YOLOv8 Local | 🎥 Vídeo |
+| `/analyze/video/formats` | GET | ✅ Implementado | Lista formatos suportados | - | 🎥 Vídeo |
+| `/analyze/video/cache/stats` | GET | ✅ Implementado | Estatísticas do cache de vídeo | - | 🎥 Vídeo |
+| `/analyze/video/cache/clear` | POST | ✅ Implementado | Limpa cache de vídeo | - | 🎥 Vídeo |
 | `/analyze/multimodal` | POST | ⏳ Pendente | Fusão de 3 modalidades | Combinação | 📝🎙️🎥 |
 | `/docs` | GET | ✅ Implementado | Documentação Swagger interativa | - | - |
 
@@ -503,32 +508,78 @@ curl -X POST "http://localhost:8000/analyze/audio" \
 - ✅ Detecção de pausas suspeitas
 - ✅ Análise de risco combinando texto + prosódia
 
-### Análise de Vídeo (YOLOv8 Local) ⏳ PENDENTE
+### Análise de Vídeo (YOLOv8 Local) ✅ IMPLEMENTADO
 
-> **Status**: Especificação criada em `specs/004-video-analysis/`, aguardando implementação.
+Analisa vídeos (MP4, AVI, MOV) usando YOLOv8 localmente para detecção de objetos, instrumentos médicos e comportamento. Processamento em CPU com modelo YOLOv8n (nano, ~6MB).
 
-> **Nota**: YOLOv8 rodará localmente no container (custo zero), detectando instrumentos cirúrgicos, sangramento e linguagem corporal.
-
-**Especificação planejada:**
+**Exemplo de Request:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/video" \
   -H "Content-Type: multipart/form-data" \
-  -F "file=@cirurgia.mp4" \
-  -F "patient_id=uuid-aqui"
+  -F "video=@consulta.mp4" \
+  -F "tipo=consulta" \
+  -F "patient_id=550e8400-e29b-41d4-a716-446655440000"
 ```
 
-**Response esperado:**
+**Exemplo de Response:**
 ```json
 {
-  "frames_analisados": 150,
-  "deteccoes": [
-    {"classe": "instrumento_cirurgico", "confianca": 0.95},
-    {"classe": "sangramento", "confianca": 0.82}
+  "risco_violencia": "medio",
+  "risco_saude_mental": "baixo",
+  "detecoes": [
+    {
+      "classe": "person",
+      "confianca": 0.9234,
+      "bbox": {"x": 0.2341, "y": 0.1567, "w": 0.4532, "h": 0.6789},
+      "frame": 1,
+      "timestamp": 0.0
+    },
+    {
+      "classe": "scissors",
+      "confianca": 0.8765,
+      "bbox": {"x": 0.5678, "y": 0.4321, "w": 0.1234, "h": 0.0876},
+      "frame": 5,
+      "timestamp": 5.0
+    }
   ],
-  "risco_violencia": "baixo",
-  "risco_saude_mental": "medio"
+  "alertas": [
+    {
+      "tipo": "instrumento_cirurgico",
+      "severidade": "media",
+      "mensagem": "Instrumento cirúrgico detectado (scissors) com confiança 87.65%"
+    }
+  ],
+  "metadata": {
+    "correlation_id": "video-1234567890",
+    "tempo_processamento_ms": 1250,
+    "cache_hit": false,
+    "frames_analisados": 12,
+    "duracao_video_segundos": 60.0,
+    "modelo": "yolov8n",
+    "local_processing": true
+  }
 }
 ```
+
+**Parâmetros:**
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `video` | file | Sim | Arquivo de vídeo (MP4, AVI, MOV) - máx 50MB |
+| `tipo` | string | Não | Tipo de análise: `consulta`, `procedimento`, `exame` (padrão: consulta) |
+| `patient_id` | string | Não | ID anônimo do paciente (UUID recomendado) |
+
+**Features Extraídas:**
+- ✅ Detecção de objetos via YOLOv8 (pessoas, tesouras, facas)
+- ✅ Detecção de sangramento via análise de cor HSV
+- ✅ Cálculo de risco de violência e saúde mental
+- ✅ FPS adaptativo (1 FPS ≤30s, 0.2 FPS >30s)
+- ✅ Cache de resultados para reprocessamento
+
+**Limites:**
+- Formatos: MP4, AVI, MOV
+- Tamanho máximo: 50MB
+- Duração máxima: 2 minutos
+- Processamento local (sem custo Azure)
 
 ### Análise Multimodal ⏳ PENDENTE
 
