@@ -215,7 +215,7 @@ class Alert(BaseModel):
     tipo: str = Field(..., description="Tipo de alerta (ex: sangramento_detectado)")
     severidade: str = Field(..., pattern="^(baixa|media|alta)$", description="Nível de severidade")
     descricao: str = Field(..., description="Descrição do alerta")
-    frame_referencia: int = Field(..., ge=0, description="Frame de referência do alerta")
+    frame_referencia: int = Field(default=0, ge=0, description="Frame de referência do alerta (opcional, default=0)")
 
 
 class VideoAnalysisMetadata(BaseModel):
