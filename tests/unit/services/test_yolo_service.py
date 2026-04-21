@@ -100,13 +100,24 @@ class TestYOLOv8ServiceMock:
             def __init__(self, model_name):
                 self.model_name = model_name
 
-            def __call__(self, image, verbose=False):
+            def __call__(self, image, verbose=False, imgsz=320):
                 # Retorna resultados mock
+                class MockTensor:
+                    """Mock de tensor PyTorch."""
+                    def __init__(self, data):
+                        self._data = np.array(data)
+
+                    def cpu(self):
+                        return self
+
+                    def numpy(self):
+                        return self._data
+
                 class MockBox:
                     def __init__(self, conf, cls, xyxy):
-                        self.conf = [conf]
-                        self.cls = [cls]
-                        self.xyxy = [xyxy]
+                        self.conf = np.array([conf])
+                        self.cls = np.array([cls])
+                        self.xyxy = [MockTensor(xyxy)]
 
                 class MockResult:
                     def __init__(self):

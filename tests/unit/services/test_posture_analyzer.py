@@ -138,7 +138,7 @@ class TestNormalPostureDetection:
         result = analyzer.analyze_frame(detections, frame_number=1, timestamp=0.0)
 
         assert len(result.metrics) == 1
-        assert result.metrics[0].aspect_ratio == 3.0
+        assert result.metrics[0].aspect_ratio == pytest.approx(3.0)
         assert result.metrics[0].is_defensive is False
         assert "postura_defensiva" not in result.risk_indicators
 
