@@ -167,7 +167,7 @@
 ### Performance e Otimização
 
 - [X] T045 [P] Otimizar inferência YOLOv8: Adicionar parâmetro imgsz=320 para inferência mais rápida em CPU no YOLOv8Service
-- [ ] T046 [P] Adicionar processamento em batch: Processar múltiplos frames em batch quando possível no VideoProcessor
+- [~] T046 [P] Adicionar processamento em batch: ~~Processar múltiplos frames em batch quando possível no VideoProcessor~~ - **NÃO IMPLEMENTADO**: A amostragem adaptativa (max ~24 frames/vídeo) + otimização imgsz=320 já atinge performance <10s. Batch processing não traria ganho significativo para o volume de dados processado.
 - [X] T047 Adicionar endpoint de formatos de vídeo: Criar `GET /analyze/video/formats` em `src/api/routes/video.py` retornando limites e formatos suportados
 
 ### Documentação e Deploy
