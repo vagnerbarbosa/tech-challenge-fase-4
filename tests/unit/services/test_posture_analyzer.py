@@ -4,14 +4,13 @@ Testa a análise de postura e linguagem corporal para identificar
 sinais de desconforto, medo, agitação e rigidez.
 """
 
+
 import pytest
-import numpy as np
-from typing import Any
 
 from src.services.posture_analyzer import (
+    FramePostureAnalysis,
     PostureAnalyzer,
     PostureMetrics,
-    FramePostureAnalysis,
     calculate_posture_risk,
 )
 

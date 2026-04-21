@@ -3,7 +3,7 @@
 Valida upload de vídeos, processamento YOLOv8 e resposta com riscos.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import status
@@ -241,6 +241,7 @@ class TestVideoEndpointValidation:
             # O check_video_duration deve lançar HTTPException quando duração é excedida
             # Vamos mockar o comportamento real
             from fastapi import HTTPException
+
             import src.utils.file_validation as file_validation
 
             def mock_check_duration(path):

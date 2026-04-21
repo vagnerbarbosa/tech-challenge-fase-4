@@ -9,7 +9,10 @@ from pathlib import Path
 # Adicionar src ao path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-from src.services.risk_calculator_video import _combine_risk_levels, calculate_video_risk
+from src.services.risk_calculator_video import (
+    _combine_risk_levels,
+    calculate_video_risk,
+)
 
 
 class TestCombineRiskLevels:
