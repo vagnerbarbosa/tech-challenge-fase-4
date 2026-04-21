@@ -24,5 +24,13 @@ else
     exit 1
 fi
 
+# Verificar se usuário tem permissão docker (está no grupo docker)
+if ! docker ps &> /dev/null; then
+    echo "⚠️  Permissão Docker necessária. Usando sudo..."
+    SUDO="sudo"
+else
+    SUDO=""
+fi
+
 # Subir serviços
-$COMPOSE -f docker-compose.mock.yml up --build "$@"
+$SUDO $COMPOSE -f docker-compose.mock.yml up --build "$@"
