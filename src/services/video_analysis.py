@@ -11,11 +11,9 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-from src.services.risk_calculator_video import calculate_video_risk
-from src.services.posture_analyzer import PostureAnalyzer, calculate_posture_risk
-
-# Type imports for annotations
 from src.services.bleeding_detector import BleedingDetector
+from src.services.posture_analyzer import PostureAnalyzer, calculate_posture_risk
+from src.services.risk_calculator_video import calculate_video_risk
 from src.services.video_processor import VideoProcessor
 from src.services.yolo_service import YOLOv8Service
 
