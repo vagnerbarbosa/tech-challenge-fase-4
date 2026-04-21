@@ -1,7 +1,17 @@
 # 🏥💜 Tech Challenge Fase 4 - Sistema multimodal de análise de saúde da mulher usando Azure AI Services
 
-> **📅 Última Atualização**: 2026-04-19
-> **✅ Status**: 3/4 Módulos Core Implementados (Texto + Áudio + Vídeo)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?style=flat-square&logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
+[![Azure](https://img.shields.io/badge/Azure%20AI-0089D6?style=flat-square&logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-111F4D?style=flat-square&logo=ultralytics&logoColor=white)](https://ultralytics.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=flat-square&logo=poetry&logoColor=white)](https://python-poetry.org/)
+[![Ruff](https://img.shields.io/badge/Ruff-EF3939?style=flat-square&logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+
+> **📅 Última Atualização**: 2026-04-21
+> **✅ Status**: 3/4 Módulos Core Implementados (Texto + Áudio + Vídeo), Multimodal em planejamento
 
 ## Objetivo
 
@@ -97,7 +107,7 @@ docker-compose -f docker-compose.mock.yml up -d
 # Health check
 curl http://localhost:8000/health
 
-# Deve retornar: {"status": "ok", "version": "0.3.0"}
+# Deve retornar: {"status": "healthy", "version": "0.4.0"}
 ```
 
 ### Passo 3: Testar o Endpoint de Análise de Texto
@@ -169,9 +179,23 @@ cd tech-challenge-fase-4
 cp .env.example .env
 
 # Edite o arquivo .env com suas credenciais Azure (opcional para testes locais)
-# AZURE_TEXT_KEY=sua_chave_aqui
-# AZURE_TEXT_ENDPOINT=https://<seu-resource>.cognitiveservices.azure.com/
 ```
+
+**Principais variáveis:**
+
+| Categoria | Variável | Descrição | Padrão |
+|-----------|----------|-----------|--------|
+| **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
+| **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
+| **App** | `APP_VERSION` | Versão da API | `0.4.0` |
+| **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
+| **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
+| **Rate Limit** | `MAX_TEXT_REQUESTS_PER_DAY` | Limite diário texto | `160` |
+| **Rate Limit** | `MAX_SPEECH_MINUTES_PER_DAY` | Limite diário áudio | `10` |
+| **Upload** | `MAX_UPLOAD_SIZE_MB` | Tamanho máximo arquivo | `50` |
+| **Upload** | `ALLOWED_VIDEO_EXTENSIONS` | Formatos vídeo permitidos | `mp4,avi,mov` |
+| **LGPD** | `DATA_RETENTION_DAYS` | Retenção de dados | `30` |
+| **LGPD** | `ANONYMIZE_PII` | Anonimização de PII | `true` |
 
 ### Passo 3: Iniciar o Servidor
 
@@ -282,10 +306,15 @@ O campo `tipo` indica a origem/contexto do texto para classificação:
 
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
-| `/health` | GET | Verifica status da API |
+| `/health` | GET | Health check com quotas Azure |
+| `/ready` | GET | Readiness check (Kubernetes) |
 | `/` | GET | Informações da API |
 | `/docs` | GET | Swagger UI (documentação interativa) |
 | `/analyze/text` | POST | Análise de texto |
+| `/analyze/audio` | POST | Análise de áudio |
+| `/analyze/audio/formats` | GET | Lista formatos de áudio suportados |
+| `/analyze/video` | POST | Análise de vídeo YOLOv8 |
+| `/analyze/video/formats` | GET | Lista formatos de vídeo suportados |
 
 ---
 
@@ -730,8 +759,8 @@ poetry run locust -f locustfile.py
 | 003 | Análise de Áudio | ✅ Concluído | [spec.md](specs/003-audio-analysis/spec.md) |
 | 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | [spec.md](specs/004-video-analysis/spec.md) |
 | 005 | Fusão Multimodal | ⏳ Pendente | [spec.md](specs/005-multimodal-fusion/spec.md) |
-| 006 | Rate Limiting | 🔄 Parcial | [spec.md](specs/006-rate-limiting/spec.md) |
-| 007 | Security Hardening | ⏳ Pendente | [spec.md](specs/007-security-hardening/spec.md) |
+| 006 | Rate Limiting | ✅ Concluído | [spec.md](specs/006-rate-limiting/spec.md) |
+| 007 | Security Hardening | 🔄 Parcial | [spec.md](specs/007-security-hardening/spec.md) |
 | 008 | Testes Automatizados | ✅ Concluído | [spec.md](specs/008-tests/spec.md) |
 | 009 | Deploy Azure | ⏳ Pendente | [spec.md](specs/009-deploy-azure/spec.md) |
 | 010 | Documentação Final | ⏳ Pendente | [spec.md](specs/010-documentation/spec.md) |
@@ -800,37 +829,58 @@ Arquivos de coleção compatíveis com **Postman**, **Insomnia** e **Bruno** est
 tech-challenge-fase-4/
 ├── src/                      # Código fonte
 │   ├── api/                  # FastAPI app e rotas
-│   │   ├── main.py
+│   │   ├── main.py                # Ponto de entrada FastAPI
 │   │   └── routes/
-│   │       ├── health.py          # Health check com quotas
+│   │       ├── health.py          # Health check com quotas Azure
 │   │       ├── text.py            # Análise de texto (✅ Task 002)
 │   │       ├── audio.py           # Análise de áudio (✅ Task 003)
+│   │       ├── video.py           # Análise de vídeo YOLOv8 (✅ Task 004)
 │   │       └── dependencies.py    # Injeção de dependências
 │   ├── core/                 # Configurações, logging, exceções
-│   │   ├── config.py              # Configurações da aplicação
-│   │   ├── logging_config.py      # Logging estruturado
-│   │   ├── exceptions.py          # Exceções customizadas
-│   │   ├── cache.py               # Cache em memória
-│   │   ├── rate_limit.py          # QuotaManager (✅ Task 006 parcial)
-│   │   └── temp_file_manager.py   # LGPD-compliant temp files
+│   │   ├── config.py              # Configurações da aplicação (Pydantic Settings)
+│   │   ├── logging_config.py      # Logging estruturado (structlog)
+│   │   ├── exceptions.py          # Exceções customizadas da aplicação
+│   │   ├── cache.py               # Cache em memória com TTL
+│   │   ├── rate_limit.py          # QuotaManager - proteção Azure Free Tier (✅ Task 006)
+│   │   └── temp_file_manager.py   # Gerenciamento LGPD-compliant de arquivos temporários
 │   ├── services/             # Lógica de negócio
-│   │   ├── text_analysis.py       # Serviço de análise de texto
+│   │   ├── text_analysis.py       # Serviço de análise de texto Azure
 │   │   ├── audio_analysis.py      # Serviço de análise de áudio (✅ Task 003)
-│   │   └── risk_detector.py       # Detecção de risco
+│   │   ├── video_analysis.py      # Análise de vídeo com YOLOv8 (✅ Task 004)
+│   │   ├── video_processor.py     # Processamento de frames de vídeo
+│   │   ├── yolo_service.py        # Serviço YOLOv8 local
+│   │   ├── bleeding_detector.py   # Detecção de sangramento via HSV
+│   │   ├── posture_analyzer.py    # Análise de postura/locomoção
+│   │   ├── risk_calculator_video.py # Cálculo de risco para vídeo
+│   │   └── risk_detector.py       # Detecção unificada de risco
 │   ├── models/               # Schemas Pydantic
 │   │   └── schemas.py             # Modelos de request/response
-│   ├── infrastructure/       # Clientes Azure
-│   │   ├── azure_clients.py       # Singleton Azure Text Analytics
+│   ├── infrastructure/       # Clientes Azure e externo
+│   │   ├── azure_clients.py       # Client Azure AI Language (Text Analytics)
 │   │   └── azure_speech_client.py # Client Azure Speech (✅ Task 003)
-│   └── utils/                # Helpers
-│       └── file_validation.py     # Validação de arquivos
+│   └── utils/                # Helpers e utilitários
+│       ├── file_validation.py     # Validação de uploads (MIME, magic bytes)
+│       └── text_utils.py          # Utilitários de processamento de texto
 ├── tests/                    # Testes
 │   ├── unit/                 # Testes unitários
-│   │   ├── core/
-│   │   ├── services/              # Testes de serviços
-│   │   └── infrastructure/
-│   ├── integration/          # Testes de integração
-│   └── load/                 # Testes de carga
+│   │   ├── core/                  # Testes de cache, temp manager
+│   │   ├── services/              # Testes de todos os serviços
+│   │   │   ├── test_text_analysis.py
+│   │   │   ├── test_audio_analysis.py
+│   │   │   ├── test_video_analysis.py
+│   │   │   ├── test_yolo_service.py
+│   │   │   ├── test_video_processor.py
+│   │   │   ├── test_bleeding_detector.py
+│   │   │   ├── test_posture_analyzer.py
+│   │   │   └── test_risk_calculator_video.py
+│   │   ├── utils/                 # Testes de utilitários
+│   │   └── infrastructure/        # Testes de clientes Azure
+│   ├── integration/          # Testes de integração (end-to-end)
+│   │   ├── test_text_endpoint.py
+│   │   ├── test_audio_endpoint.py
+│   │   ├── test_video_endpoint.py
+│   │   └── test_azure_services.py
+│   └── load/                 # Testes de carga (Locust)
 ├── specs/                    # Especificações Spec Kit
 │   ├── 001-bootstrap/        # ✅ Concluído
 │   ├── 002-text-analysis/      # ✅ Concluído
