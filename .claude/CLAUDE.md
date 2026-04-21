@@ -1,25 +1,68 @@
 # Configuração Claude Code - Tech Challenge Fase 4
 
-## MCP Servers Configurados
+## MCP Servers Configurados ✅
 
-Este projeto utiliza dois servidores MCP (Model Context Protocol):
+Este projeto utiliza dois servidores MCP (Model Context Protocol) configurados em `.mcp.json`:
 
-### 1. Context7 MCP Server
+### 1. GitHub MCP Server
 
-O Context7 está configurado para fornecer acesso à documentação atualizada das bibliotecas utilizadas.
+**Comando:** `npx -y @modelcontextprotocol/server-github`
 
-### 2. GitHub MCP Server
+**Token:** Usa variável de ambiente `GITHUB_TOKEN`
 
-O GitHub MCP Server está configurado para acesso à API do GitHub diretamente pelo Claude.
+**Uso:**
+- Listar PRs, issues, branches
+- Criar comentários, reviews
+- Buscar código no repositório
+- Operações GitHub ricas com contexto estruturado
 
-Para usar, configure seu token:
-```bash
-# Crie o arquivo .env com seu token
-cp .env.example .env
-# Edite e adicione: GITHUB_TOKEN=ghp_seu_token_aqui
-```
+**Quando usar:**
+- Operações ricas com contexto estruturado (listar PRs com filtros complexos)
+- Múltiplas operações GitHub em sequência
+- Queries GraphQL complexas
+- Acesso a objetos aninhados (ex: PR + comments + reviews)
 
-Veja [GITHUB_MCP.md](GITHUB_MCP.md) para instruções completas.
+### 2. Context7 MCP Server
+
+**Comando:** `npx -y @upstash/context7-mcp@latest`
+
+**Uso:**
+- Buscar documentação atualizada de bibliotecas
+- Obter exemplos de código
+- Verificar melhores práticas
+- Validar padrões de implementação
+
+**Bibliotecas indexadas:**
+- FastAPI (framework web)
+- Pydantic v2 (validação de dados)
+- Azure SDK Python (integração Azure)
+- pytest (testes)
+- Poetry (gerenciamento de dependências)
+
+## Configuração
+
+1. Copie o arquivo `.mcp.json` para seu diretório home se desejar configuração global:
+   ```bash
+   cp .mcp.json ~/.mcp.json
+   ```
+
+2. Configure seu token do GitHub:
+   ```bash
+   # Adicione ao seu .bashrc/.zshrc ou execute na sessão:
+   export GITHUB_TOKEN=ghp_seu_token_aqui
+   ```
+
+## Estratégia de Ferramentas GitHub
+
+| Operação | Ferramenta Recomendada |
+|----------|----------------------|
+| Listar PRs com filtros complexos | MCP Server |
+| Queries GraphQL | MCP Server |
+| Checkout rápido | GitHub CLI (`gh pr checkout`) |
+| Merge | GitHub CLI (`gh pr merge`) |
+| Verificação simples | API REST (`curl`) |
+
+Mais detalhes em: `memory/github_tools_strategy.md`
 
 ---
 
