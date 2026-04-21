@@ -32,6 +32,22 @@ jobs:
         run: |
           npm install -g @commitlint/cli @commitlint/config-conventional
 
+      - name: Criar configuração do commitlint
+        run: |
+          cat > commitlint.config.js << 'CONFIG'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'type-enum': [2, 'always', [
+                'feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore',
+                'ci', 'build', 'perf', 'revert',
+                'spec', 'clarify', 'plan', 'research'
+              ]],
+              'subject-case': [0],
+            },
+          };
+          CONFIG
+
       - name: Validar commits da PR
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -49,7 +65,7 @@ jobs:
             COMMIT_MSG=$(git log --format=%B -n 1 $commit)
             echo "Mensagem: $COMMIT_MSG"
 
-            if ! echo "$COMMIT_MSG" | npx commitlint; then
+            if ! echo "$COMMIT_MSG" | npx commitlint --config commitlint.config.js; then
               echo "❌ Commit $commit não segue o padrão Conventional Commits"
               EXIT_CODE=1
             else
@@ -65,7 +81,8 @@ jobs:
             echo "📖 Formato esperado:"
             echo "   <tipo>[escopo opcional]: <descrição>"
             echo ""
-            echo "   Tipos válidos: feat, fix, docs, style, refactor, test, chore, ci, build, perf"
+            echo "   Tipos válidos: feat, fix, docs, style, refactor, test, chore, ci, build, perf, revert"
+            echo "   Tipos Specify: spec, clarify, plan, research"
             echo ""
             echo "   Exemplos:"
             echo "   - feat: adiciona nova funcionalidade"
@@ -102,6 +119,11 @@ jobs:
             ci
             build
             perf
+            revert
+            spec
+            clarify
+            plan
+            research
           requireScope: false
           subjectPattern: ^[A-Z].+$
           subjectPatternError: |
