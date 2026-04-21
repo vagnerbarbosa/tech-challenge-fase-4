@@ -6,8 +6,6 @@
 # Este arquivo sobe a API com mocks dos serviços Azure,
 # permitindo desenvolvimento local sem conta Azure.
 
-version: "3.8"
-
 services:
   # -------------------------------------------
   # Mock Server - Simula Azure AI Services
