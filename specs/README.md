@@ -1,7 +1,7 @@
 # Índice de Especificações
 
 **Projeto**: Tech Challenge Fase 4
-**Atualizado**: 2026-04-12
+**Atualizado**: 2026-04-20
 
 ---
 
@@ -12,11 +12,11 @@
 | 001 | Bootstrap do Projeto | ✅ Concluído | `main` | P0 |
 | 002 | Análise de Texto | ✅ Concluído | `main` | P1 |
 | 003 | Análise de Áudio | ✅ Concluído | `main` | P1 |
-| 004 | Análise de Vídeo (YOLOv8) | 📝 Draft | `004-yolo-video-analysis` | P1 |
+| 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | `main` | P1 |
 | 005 | Fusão Multimodal | 📝 Draft | `005-multimodal-fusion` | P1 |
-| 006 | Rate Limiting | ✅ Parcial* | `main` | P2 |
-| 007 | Security Hardening | 📝 Draft | `007-security-hardening` | P1 |
-| 008 | Testes Automatizados | ✅ Parcial* | `main` | P1 |
+| 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
+| 007 | Security Hardening | 🔄 Em Progresso | `011-video-analysis-yolov8` | P1 |
+| 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
 | 009 | Deploy Azure | 📝 Draft | `009-deploy-azure` | P1 |
 | 010 | Documentação Final | 📝 Draft | `010-documentation` | P1 |
 

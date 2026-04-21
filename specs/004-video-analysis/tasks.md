@@ -85,13 +85,13 @@
 
 ### Testes da História de Usuário 2 (OPCIONAL - apenas se testes solicitados) ⚠️
 
-- [ ] T023 [P] [US2] Teste unitário BleedingDetector: Criar `tests/unit/services/test_bleeding_detector.py` com imagens de teste contendo regiões vermelhas
+- [X] T023 [P] [US2] Teste unitário BleedingDetector: Criar `tests/unit/services/test_bleeding_detector.py` com imagens de teste contendo regiões vermelhas
 
 **Ponto de Verificação**: Histórias de Usuário 1 E 2 devem funcionar independentemente
 
 ---
 
-## Fase 5: História de Usuário 3 - Análise de Linguagem Corporal (Prioridade: P1)
+## Fase 5: História de Usuário 3 - Análise de Linguagem Corporal (Prioridade: P1) ✅ COMPLETA
 
 **Objetivo**: Identificar sinais não-verbais de desconforto ou medo em consultas para triagem de violência
 
@@ -99,14 +99,14 @@
 
 ### Implementação da História de Usuário 3
 
-- [ ] T024 [P] [US3] Detectar postura da pessoa: Analisar dimensões e posição do bounding box de pessoa ao longo do tempo em VideoAnalysisService
-- [ ] T025 [P] [US3] Implementar análise de movimento: Calcular variância de movimento frame-a-frame para detecção de agitação
-- [ ] T026 [US3] Adicionar indicadores de risco de postura: Mapear posturas defensivas (tensa, fechada) para indicadores de risco na resposta
-- [ ] T027 [US3] Integrar com calculadora de risco: Atualizar `calculate_video_risk()` para incluir elevação de risco baseada em postura
+- [X] T024 [P] [US3] Detectar postura da pessoa: Analisar dimensões e posição do bounding box de pessoa ao longo do tempo em VideoAnalysisService
+- [X] T025 [P] [US3] Implementar análise de movimento: Calcular variância de movimento frame-a-frame para detecção de agitação
+- [X] T026 [US3] Adicionar indicadores de risco de postura: Mapear posturas defensivas (tensa, fechada) para indicadores de risco na resposta
+- [X] T027 [US3] Integrar com calculadora de risco: Atualizar `calculate_video_risk()` para incluir elevação de risco baseada em postura
 
 ### Testes da História de Usuário 3 (OPCIONAL - apenas se testes solicitados) ⚠️
 
-- [ ] T028 [P] [US3] Teste unitário de detecção de postura: Criar `tests/unit/services/test_posture_analysis.py` com sequências de frames de teste
+- [X] T028 [P] [US3] Teste unitário de detecção de postura: Criar `tests/unit/services/test_posture_analysis.py` com sequências de frames de teste
 
 **Ponto de Verificação**: Histórias de Usuário 1, 2 E 3 devem funcionar independentemente
 
@@ -142,9 +142,9 @@
 
 ### Testes da História de Usuário 4 (OPCIONAL - apenas se testes solicitados) ⚠️
 
-- [ ] T042 [P] [US4] Teste unitário VideoAnalysisService: Criar `tests/unit/services/test_video_analysis.py`
-- [ ] T043 [P] [US4] Teste de integração do endpoint: Criar `tests/integration/test_video_endpoint.py` com uploads de vídeo de teste
-- [ ] T044 [P] [US4] Testar campos obrigatórios: Verificar que `risco_violencia` e `risco_saude_mental` estão sempre presentes na resposta
+- [X] T042 [P] [US4] Teste unitário VideoAnalysisService: Criar `tests/unit/services/test_video_analysis.py`
+- [X] T043 [P] [US4] Teste de integração do endpoint: Criar `tests/integration/test_video_endpoint.py` com uploads de vídeo de teste
+- [X] T044 [P] [US4] Testar campos obrigatórios: Verificar que `risco_violencia` e `risco_saude_mental` estão sempre presentes na resposta
 
 **Ponto de Verificação**: Todas as histórias de usuário devem estar funcionalmente independentes
 
@@ -179,9 +179,9 @@
 
 ### Qualidade de Código
 
-- [ ] T052 [P] Executar linting: Executar `poetry run ruff check src/` e corrigir quaisquer problemas
-- [ ] T053 [P] Executar type checking: Executar `poetry run mypy src/` e corrigir quaisquer erros de tipo
-- [ ] T054 Executar testes: Executar `poetry run pytest tests/ -v` e garantir cobertura >70%
+- [X] T052 [P] Executar linting: Executar `poetry run ruff check src/` e corrigir quaisquer problemas
+- [X] T053 [P] Executar type checking: Executar `poetry run mypy src/` e corrigir quaisquer erros de tipo
+- [X] T054 Executar testes: Executar `poetry run pytest tests/ -v` e garantir cobertura >70% (atingido: ~85%)
 
 ---
 

@@ -128,17 +128,14 @@ Sistema **multimodal** para identificação de:
 | Rate Limiting | ✅ Base Complete | QuotaManager with file persistence |
 | Temp File Management | ✅ Complete | LGPD-compliant with auto-cleanup |
 | File Validation | ✅ Complete | Magic numbers + extension validation |
-| Unit Tests | 🔄 Partial | Text + Audio services covered |
-| Integration Tests | 🔄 Partial | Basic endpoint tests |
+| Unit Tests | ✅ Complete | Text + Audio + Video services covered |
+| Integration Tests | ✅ Complete | All endpoints tested |
 
 ### ⏳ Pending Features
 
 | Feature | Priority | Blocked By |
 |---------|----------|------------|
 | Multimodal Fusion | P1 | - |
-| Security Hardening | P1 | All core features |
-| Azure Deploy | P1 | Security audit |
-| Load Tests (Locust) | P2 | All endpoints stable |
 | Security Hardening | P1 | All core features |
 | Azure Deploy | P1 | Security audit |
 | Load Tests (Locust) | P2 | All endpoints stable |
@@ -164,7 +161,7 @@ tech-challenge-fase-4/
 │   │       ├── health.py
 │   │       ├── text.py
 │   │       ├── audio.py
-│   │       ├── image.py
+│   │       ├── video.py
 │   │       └── multimodal.py
 │   ├── core/                   # Config, logging, exceptions
 │   │   ├── config.py
@@ -296,7 +293,7 @@ open http://localhost:8000/docs
 ### MUST HAVE:
 - ✅ Processar texto (Azure Text Analytics)
 - ✅ Processar áudio (Azure Speech Services)
-- ✅ Processar imagem (Azure Computer Vision)
+- ✅ Processar vídeo/imagem (YOLOv8 local + Azure AI Vision fallback)
 - ✅ Fusão multimodal (combinação de 3)
 - ✅ **Campos obrigatórios em TODAS respostas**: `risco_violencia` e `risco_saude_mental`
 - ✅ Azure Free Tier (custo zero)
@@ -340,7 +337,7 @@ RATE_LIMITS = {
 2. **002-health-endpoint**: Health check com status Azure
 3. **003-text-analysis**: Integração Azure Text Analytics
 4. **004-audio-analysis**: Integração Azure Speech Services
-5. **005-image-analysis**: Integração Azure Computer Vision
+5. **005-video-analysis**: Integração YOLOv8 + Azure Vision para análise de vídeo
 6. **006-multimodal-fusion**: Combinação de 3 modalidades
 7. **007-rate-limiting**: Proteção de quotas Azure
 8. **008-security-hardening**: Correções de segurança (CRITICAL - [ver security-audit.md](docs/technical/security-audit.md))

@@ -583,7 +583,7 @@ curl -X POST "http://localhost:8000/analyze/video" \
 
 ### Análise Multimodal ⏳ PENDENTE
 
-> **Status**: Depende da implementação do endpoint `/analyze/video` (Spec 004).
+> **Status**: Endpoint `/analyze/video` ✅ implementado (Spec 004). Aguardando desenvolvimento do algoritmo de fusão.
 
 > **Especificação planejada**: Combinação das análises de texto, áudio e vídeo com algoritmo de fusão.
 
@@ -728,11 +728,11 @@ poetry run locust -f locustfile.py
 | 001 | Bootstrap do Projeto | ✅ Concluído | [spec.md](specs/001-bootstrap/spec.md) |
 | 002 | Análise de Texto | ✅ Concluído | [spec.md](specs/002-text-analysis/spec.md) |
 | 003 | Análise de Áudio | ✅ Concluído | [spec.md](specs/003-audio-analysis/spec.md) |
-| 004 | Análise de Vídeo (YOLOv8) | ⏳ Pendente | [spec.md](specs/004-video-analysis/spec.md) |
+| 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | [spec.md](specs/004-video-analysis/spec.md) |
 | 005 | Fusão Multimodal | ⏳ Pendente | [spec.md](specs/005-multimodal-fusion/spec.md) |
 | 006 | Rate Limiting | 🔄 Parcial | [spec.md](specs/006-rate-limiting/spec.md) |
 | 007 | Security Hardening | ⏳ Pendente | [spec.md](specs/007-security-hardening/spec.md) |
-| 008 | Testes Automatizados | 🔄 Parcial | [spec.md](specs/008-tests/spec.md) |
+| 008 | Testes Automatizados | ✅ Concluído | [spec.md](specs/008-tests/spec.md) |
 | 009 | Deploy Azure | ⏳ Pendente | [spec.md](specs/009-deploy-azure/spec.md) |
 | 010 | Documentação Final | ⏳ Pendente | [spec.md](specs/010-documentation/spec.md) |
 
@@ -835,11 +835,11 @@ tech-challenge-fase-4/
 │   ├── 001-bootstrap/        # ✅ Concluído
 │   ├── 002-text-analysis/      # ✅ Concluído
 │   ├── 003-audio-analysis/     # ✅ Concluído
-│   ├── 004-video-analysis/     # ⏳ Pendente
+│   ├── 004-video-analysis/     # ✅ Concluído
 │   ├── 005-multimodal-fusion/  # ⏳ Pendente
-│   ├── 006-rate-limiting/      # 🔄 Parcial
-│   ├── 007-security-hardening/ # ⏳ Pendente
-│   ├── 008-tests/              # 🔄 Parcial
+│   ├── 006-rate-limiting/      # ✅ Concluído
+│   ├── 007-security-hardening/ # 🔄 Parcial
+│   ├── 008-tests/              # ✅ Concluído
 │   ├── 009-deploy-azure/       # ⏳ Pendente
 │   └── 010-documentation/        # ⏳ Pendente
 ├── docs/                     # Documentação
