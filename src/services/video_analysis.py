@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
 from src.services.risk_calculator_video import calculate_video_risk
+from src.services.posture_analyzer import PostureAnalyzer, calculate_posture_risk
 
 # Type imports for annotations
 from src.services.bleeding_detector import BleedingDetector
@@ -34,6 +35,7 @@ class VideoAnalysisService:
         self._yolo_service: YOLOv8Service | None = None
         self._bleeding_detector: BleedingDetector | None = None
         self._video_processor: VideoProcessor | None = None
+        self._posture_analyzer: PostureAnalyzer | None = None
         self._logger: BoundLogger | None = None
 
     def _get_logger(self) -> "BoundLogger":
@@ -67,6 +69,14 @@ class VideoAnalysisService:
 
             self._video_processor = VideoProcessor()
         return self._video_processor
+
+    def _get_posture_analyzer(self) -> "PostureAnalyzer":
+        """Lazy initialization do PostureAnalyzer."""
+        if self._posture_analyzer is None:
+            from src.services.posture_analyzer import PostureAnalyzer
+
+            self._posture_analyzer = PostureAnalyzer()
+        return self._posture_analyzer
 
     def analyze(
         self,
@@ -110,9 +120,11 @@ class VideoAnalysisService:
             duration_seconds=duration_seconds,
         )
 
-        # 2. Processar frames com YOLOv8
+        # 2. Processar frames com YOLOv8 e PostureAnalyzer
         yolo_service = self._get_yolo_service()
+        posture_analyzer = self._get_posture_analyzer()
         all_detections: list[dict[str, Any]] = []
+        posture_analyses: list[Any] = []
 
         for frame_info in frames:
             import cv2
@@ -134,9 +146,21 @@ class VideoAnalysisService:
                 det["timestamp"] = frame_info.timestamp
                 all_detections.append(det)
 
+            # Analisar postura para frames com pessoas
+            posture_analysis = posture_analyzer.analyze_frame(
+                detections, frame_info.frame_number, frame_info.timestamp
+            )
+            if posture_analysis.person_detections:
+                posture_analyses.append(posture_analysis)
+                # Adicionar indicadores de postura às detecções
+                for det in detections:
+                    if det.get("classe") == "person":
+                        det["posture_indicators"] = posture_analysis.risk_indicators
+
         logger.debug(
             "yolo_detection_complete",
             detections_count=len(all_detections),
+            posture_frames_analyzed=len(posture_analyses),
         )
 
         # 3. Detectar sangramento (apenas nos primeiros 5 frames)
@@ -165,8 +189,31 @@ class VideoAnalysisService:
             ),
         )
 
-        # 4. Calcular riscos
+        # 4. Calcular riscos (YOLO + sangramento)
         risk_result = calculate_video_risk(all_detections)
+
+        # 5. Calcular riscos de postura
+        posture_risk = calculate_posture_risk(posture_analyses)
+
+        # 6. Combinar riscos (elevar se necessário)
+        def _combine_risk(risco1: str, risco2: str) -> str:
+            """Combina dois níveis de risco, elevando ao maior."""
+            levels = {"baixo": 0, "medio": 1, "alto": 2}
+            max_level = max(levels.get(risco1, 0), levels.get(risco2, 0))
+            for level, val in levels.items():
+                if val == max_level:
+                    return level
+            return risco1
+
+        combined_risco_violencia = _combine_risk(
+            risk_result["risco_violencia"], posture_risk["risco_violencia"]
+        )
+        combined_risco_saude_mental = _combine_risk(
+            risk_result["risco_saude_mental"], posture_risk["risco_saude_mental"]
+        )
+
+        # Combinar alertas
+        combined_alertas = risk_result["alertas"] + posture_risk.get("alertas", [])
 
         processing_time_ms = int((time.time() - start_time) * 1000)
 
@@ -174,16 +221,22 @@ class VideoAnalysisService:
             "video_analysis_complete",
             frames_processed=len(frames),
             detections_count=len(all_detections),
-            risco_violencia=risk_result["risco_violencia"],
-            risco_saude_mental=risk_result["risco_saude_mental"],
+            posture_frames_analyzed=len(posture_analyses),
+            risco_violencia=combined_risco_violencia,
+            risco_saude_mental=combined_risco_saude_mental,
             processing_time_ms=processing_time_ms,
         )
 
         return {
             "detecoes": all_detections,
-            "risco_violencia": risk_result["risco_violencia"],
-            "risco_saude_mental": risk_result["risco_saude_mental"],
-            "alertas": risk_result["alertas"],
+            "risco_violencia": combined_risco_violencia,
+            "risco_saude_mental": combined_risco_saude_mental,
+            "alertas": combined_alertas,
             "frames_processados": len(frames),
             "tempo_processamento_ms": processing_time_ms,
+            "postura_analise": {
+                "frames_com_pessoas": len(posture_analyses),
+                "indicadores_postura": posture_risk.get("indicadores", []),
+                "estatisticas_postura": posture_risk.get("estatisticas", {}),
+            },
         }

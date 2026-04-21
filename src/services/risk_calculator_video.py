@@ -7,7 +7,30 @@ com base nas detecções do vídeo.
 from typing import Any
 
 
-def calculate_video_risk(detections: list[dict[str, Any]]) -> dict[str, Any]:
+def _combine_risk_levels(risk1: str, risk2: str) -> str:
+    """Combina dois níveis de risco, retornando o mais grave.
+
+    Ordem de gravidade: alto > medio > baixo
+
+    Args:
+        risk1: Primeiro nível de risco
+        risk2: Segundo nível de risco
+
+    Returns:
+        Nível de risco combinado (o mais grave)
+    """
+    priority = {"alto": 3, "medio": 2, "baixo": 1}
+    return "alto" if priority.get(risk1, 0) >= priority.get(risk2, 0) and risk1 == "alto" else \
+           "alto" if priority.get(risk2, 0) >= priority.get(risk1, 0) and risk2 == "alto" else \
+           "medio" if priority.get(risk1, 0) >= priority.get(risk2, 0) and risk1 == "medio" else \
+           "medio" if priority.get(risk2, 0) >= priority.get(risk1, 0) and risk2 == "medio" else \
+           "baixo"
+
+
+def calculate_video_risk(
+    detections: list[dict[str, Any]],
+    posture_analysis: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Calcula risco baseado nas detecções do vídeo.
 
     Analisa as detecções de objetos, sangramento e comportamento
@@ -20,6 +43,11 @@ def calculate_video_risk(detections: list[dict[str, Any]]) -> dict[str, Any]:
             - bbox: dict (opcional)
             - frame: int (opcional)
             - timestamp: float (opcional)
+        posture_analysis: Análise de postura opcional contendo:
+            - risco_violencia: str ("baixo", "medio", "alto")
+            - risco_saude_mental: str ("baixo", "medio", "alto")
+            - indicadores: list[str] (indicadores de postura)
+            - alertas: list[dict] (alertas de postura)
 
     Returns:
         Dicionário com:
@@ -30,6 +58,7 @@ def calculate_video_risk(detections: list[dict[str, Any]]) -> dict[str, Any]:
     risco_violencia = "baixo"
     risco_saude_mental = "baixo"
     alertas: list[dict[str, Any]] = []
+    deteccoes_com_postura = detections.copy()
 
     # Contadores para análise
     objetos_perigosos = 0
@@ -95,8 +124,37 @@ def calculate_video_risk(detections: list[dict[str, Any]]) -> dict[str, Any]:
         # Verificar se já não foi elevado
         pass  # Já tratado acima
 
+    # Integrar análise de postura se fornecida
+    if posture_analysis is not None:
+        # Combinar risco de violência
+        risco_violencia_postura = posture_analysis.get("risco_violencia", "baixo")
+        risco_violencia = _combine_risk_levels(risco_violencia, risco_violencia_postura)
+
+        # Combinar risco de saúde mental
+        risco_saude_mental_postura = posture_analysis.get("risco_saude_mental", "baixo")
+        risco_saude_mental = _combine_risk_levels(risco_saude_mental, risco_saude_mental_postura)
+
+        # Adicionar alertas de postura
+        alertas_postura = posture_analysis.get("alertas", [])
+        for alerta in alertas_postura:
+            # Marcar origem do alerta
+            alerta_postura = alerta.copy()
+            alerta_postura["origem"] = "postura"
+            alertas.append(alerta_postura)
+
+        # Adicionar indicadores de postura como detecções virtuais
+        indicadores = posture_analysis.get("indicadores", [])
+        for indicador in indicadores:
+            deteccoes_com_postura.append({
+                "classe": f"postura_{indicador}",
+                "confianca": 0.85,
+                "origem": "analise_postura",
+                "tipo": "deteccao_virtual",
+            })
+
     return {
         "risco_violencia": risco_violencia,
         "risco_saude_mental": risco_saude_mental,
         "alertas": alertas,
+        "deteccoes": deteccoes_com_postura,
     }
