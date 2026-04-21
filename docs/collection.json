@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis\n⏳ Pendente: Multimodal",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis, Multimodal Fusion",
     "version": "1.1.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -267,24 +267,114 @@
       ]
     },
     {
-      "name": "Multimodal Analysis [NÃO IMPLEMENTADO]",
+      "name": "Multimodal Analysis",
       "item": [
         {
-          "name": "Analyze Multimodal",
+          "name": "Analyze Multimodal (1 modalidade - texto)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "texto",
-                  "value": "Relato do paciente...",
+                  "value": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa",
+                  "type": "text"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "uuid-anonimo-123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/multimodal",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "multimodal"]
+            },
+            "description": "Fusão multimodal com apenas texto"
+          },
+          "response": [
+            {
+              "name": "Sucesso - 1 modalidade",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "texto",
+                      "value": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/multimodal",
+                  "host": ["{{base_url}}"],
+                  "path": ["analyze", "multimodal"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"fusao\": {\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\",\n    \"confiança\": 0.75,\n    \"alerta\": false,\n    \"recomendacao\": \"Acompanhamento prioritário recomendado\",\n    \"scores_por_modalidade\": {\n      \"texto\": 0.5\n    }\n  },\n  \"texto\": {\n    \"sentimento\": \"negativo\",\n    \"score\": -0.85,\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\"\n  },\n  \"audio\": null,\n  \"video\": null,\n  \"metadata\": {\n    \"correlation_id\": \"abc-123\",\n    \"timestamp\": \"2026-04-21T14:30:00Z\",\n    \"tempo_processamento_ms\": 12500,\n    \"cache_hit\": false,\n    \"azure_calls\": 1,\n    \"modalidades_processadas\": [\"texto\"]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Analyze Multimodal (2 modalidades - texto + áudio)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "texto",
+                  "value": "Estou muito ansiosa e com medo",
+                  "type": "text"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "/path/to/audio.wav"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "uuid-anonimo-123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/analyze/multimodal",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "multimodal"]
+            },
+            "description": "Fusão multimodal com texto e áudio"
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze Multimodal (3 modalidades)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "texto",
+                  "value": "Estou muito ansiosa e com medo",
                   "type": "text"
                 },
                 {
@@ -296,6 +386,11 @@
                   "key": "video",
                   "type": "file",
                   "src": "/path/to/video.mp4"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "uuid-anonimo-123",
+                  "type": "text"
                 }
               ]
             },
@@ -304,9 +399,51 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "[PENDENTE] Combina análise de texto, áudio e vídeo"
+            "description": "Fusão multimodal completa com texto, áudio e vídeo"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Sucesso - 3 modalidades",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "texto",
+                      "value": "Estou muito ansiosa e com medo",
+                      "type": "text"
+                    },
+                    {
+                      "key": "audio",
+                      "type": "file",
+                      "src": "/path/to/audio.wav"
+                    },
+                    {
+                      "key": "video",
+                      "type": "file",
+                      "src": "/path/to/video.mp4"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/analyze/multimodal",
+                  "host": ["{{base_url}}"],
+                  "path": ["analyze", "multimodal"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"fusao\": {\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\",\n    \"confiança\": 0.72,\n    \"alerta\": false,\n    \"recomendacao\": \"Acompanhamento prioritário recomendado\",\n    \"scores_por_modalidade\": {\n      \"texto\": 0.5,\n      \"audio\": 0.5,\n      \"video\": 0.0\n    }\n  },\n  \"texto\": {\n    \"sentimento\": \"negativo\",\n    \"score\": -0.85,\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\"\n  },\n  \"audio\": {\n    \"transcricao\": \"Estou muito ansiosa\",\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"medio\"\n  },\n  \"video\": {\n    \"risco_violencia\": \"baixo\",\n    \"risco_saude_mental\": \"baixo\"\n  },\n  \"metadata\": {\n    \"correlation_id\": \"abc-123\",\n    \"timestamp\": \"2026-04-21T14:30:00Z\",\n    \"tempo_processamento_ms\": 12500,\n    \"cache_hit\": false,\n    \"azure_calls\": 2,\n    \"modalidades_processadas\": [\"texto\", \"audio\", \"video\"]\n  }\n}"
+            }
+          ]
         }
       ]
     }
