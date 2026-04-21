@@ -4,10 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   validate-commits:
     name: Validar mensagens de commit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Checkout do código
@@ -74,6 +81,9 @@ jobs:
   validate-pr-title:
     name: Validar Título da PR
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Validar título
