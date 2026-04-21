@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import audio, health, multimodal, text, video
+from src.api.routes import audio, health, text, video
 from src.core.config import settings
 from src.core.exceptions import AppException
 from src.core.logging_config import configure_logging, get_logger
@@ -86,7 +86,6 @@ app.include_router(health.router, tags=["Health"])
 app.include_router(text.router)
 app.include_router(audio.router)
 app.include_router(video.router)
-app.include_router(multimodal.router)
 
 
 @app.get("/", tags=["Root"])

@@ -4,7 +4,6 @@ Este módulo orquestra o processamento de vídeos,
 coordenando VideoProcessor, YOLOv8Service e BleedingDetector.
 """
 
-import asyncio
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -77,13 +76,13 @@ class VideoAnalysisService:
             self._posture_analyzer = PostureAnalyzer()
         return self._posture_analyzer
 
-    async def analyze(
+    def analyze(
         self,
         video_path: Path,
         duration_seconds: float,
         temp_dir: Path,
     ) -> dict[str, Any]:
-        """Analisa um vídeo completo (async wrapper).
+        """Analisa um vídeo completo.
 
         Args:
             video_path: Caminho para o arquivo de vídeo.
@@ -91,22 +90,14 @@ class VideoAnalysisService:
             temp_dir: Diretório temporário para salvar frames.
 
         Returns:
-            Dicionário com resultados da análise.
+            Dicionário com:
+                - detecoes: list[dict] (todas as detecções)
+                - risco_violencia: str
+                - risco_saude_mental: str
+                - alertas: list[dict]
+                - frames_processados: int
+                - tempo_processamento_ms: int
         """
-        return await asyncio.to_thread(
-            self._analyze_sync,
-            video_path,
-            duration_seconds,
-            temp_dir,
-        )
-
-    def _analyze_sync(
-        self,
-        video_path: Path,
-        duration_seconds: float,
-        temp_dir: Path,
-    ) -> dict[str, Any]:
-        """Analisa um vídeo completo (implementação síncrona)."""
         logger = self._get_logger()
         start_time = time.time()
 

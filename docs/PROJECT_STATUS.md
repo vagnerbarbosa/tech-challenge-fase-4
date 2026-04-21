@@ -1,8 +1,8 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-04-21  
-**Versão**: 0.5.0  
-**Branch**: `005-multimodal-fusion`
+**Atualizado**: 2026-04-20  
+**Versão**: 0.4.0  
+**Branch**: `main`
 
 ---
 
@@ -10,10 +10,10 @@
 
 Sistema multimodal para identificação de sinais de violência doméstica e riscos à saúde materna através da análise de texto, áudio e vídeo.
 
-### Progresso Total: **80%**
+### Progresso Total: **65%**
 
 ```
-[████████████████░░░░] 80%
+[███████████████░░░░░] 65%
 ```
 
 ---
@@ -71,13 +71,10 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## ⏳ Módulos Pendentes
 
-### 7. Fusão Multimodal (Spec 005) ✅ 100%
-- [x] Algoritmo de fusão (late fusion ponderado por confiança)
-- [x] Endpoint `/analyze/multimodal`
-- [x] Peso por modalidade
-- [x] Processamento paralelo com timeout
-- [x] Graceful degradation
-- [x] Testes unitários
+### 7. Fusão Multimodal (Spec 005) ⏳ 0%
+- [ ] Algoritmo de fusão
+- [ ] Endpoint `/analyze/multimodal`
+- [ ] Peso por modalidade
 
 ### 8. Security Hardening (Spec 007) ⏳ 0%
 - [ ] Security audit
@@ -108,7 +105,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | `/analyze/video/formats` | GET | ✅ | Formatos de vídeo suportados |
 | `/analyze/video/cache/stats` | GET | ✅ | Estatísticas do cache |
 | `/analyze/video/cache/clear` | POST | ✅ | Limpar cache de vídeo |
-| `/analyze/multimodal` | POST | ✅ | Fusão multimodal (late fusion) |
+| `/analyze/multimodal` | POST | ⏳ | Não implementado |
 | `/docs` | GET | ✅ | Swagger UI |
 
 ---

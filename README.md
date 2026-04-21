@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 > **📅 Última Atualização**: 2026-04-21
-> **✅ Status**: 4/4 Módulos Core Implementados (Texto + Áudio + Vídeo + Multimodal)
+> **✅ Status**: 3/4 Módulos Core Implementados (Texto + Áudio + Vídeo), Multimodal em planejamento
 
 ## Objetivo
 
@@ -107,7 +107,7 @@ docker-compose -f docker-compose.mock.yml up -d
 # Health check
 curl http://localhost:8000/health
 
-# Deve retornar: {"status": "healthy", "version": "0.5.0"}
+# Deve retornar: {"status": "healthy", "version": "0.4.0"}
 ```
 
 ### Passo 3: Testar o Endpoint de Análise de Texto
@@ -187,7 +187,7 @@ cp .env.example .env
 |-----------|----------|-----------|--------|
 | **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
 | **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
-| **App** | `APP_VERSION` | Versão da API | `0.5.0` |
+| **App** | `APP_VERSION` | Versão da API | `0.4.0` |
 | **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
 | **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
 | **Rate Limit** | `MAX_TEXT_REQUESTS_PER_DAY` | Limite diário texto | `160` |
@@ -455,7 +455,7 @@ poetry run mypy src/
 | `/analyze/video/formats` | GET | ✅ Implementado | Lista formatos suportados | - | 🎥 Vídeo |
 | `/analyze/video/cache/stats` | GET | ✅ Implementado | Estatísticas do cache de vídeo | - | 🎥 Vídeo |
 | `/analyze/video/cache/clear` | POST | ✅ Implementado | Limpa cache de vídeo | - | 🎥 Vídeo |
-| `/analyze/multimodal` | POST | ✅ Implementado | Fusão de 3 modalidades (late fusion) | Combinação | 📝🎙️🎥 |
+| `/analyze/multimodal` | POST | ⏳ Pendente | Fusão de 3 modalidades | Combinação | 📝🎙️🎥 |
 | `/docs` | GET | ✅ Implementado | Documentação Swagger interativa | - | - |
 
 **Legenda:**
@@ -610,88 +610,35 @@ curl -X POST "http://localhost:8000/analyze/video" \
 - Duração máxima: 2 minutos
 - Processamento local (sem custo Azure)
 
-### Análise Multimodal ✅ IMPLEMENTADO
+### Análise Multimodal ⏳ PENDENTE
 
-Processa texto, áudio e/ou vídeo em paralelo, combinando resultados via **late fusion ponderado por confiança**.
+> **Status**: Endpoint `/analyze/video` ✅ implementado (Spec 004). Aguardando desenvolvimento do algoritmo de fusão.
 
-**Exemplo de Request (1 modalidade - texto):**
+> **Especificação planejada**: Combinação das análises de texto, áudio e vídeo com algoritmo de fusão.
+
+**Request planejado:**
 ```bash
 curl -X POST "http://localhost:8000/analyze/multimodal" \
   -H "Content-Type: multipart/form-data" \
-  -F "texto=Estou me sentindo muito ansiosa e com medo"
-```
-
-**Exemplo de Request (3 modalidades):**
-```bash
-curl -X POST "http://localhost:8000/analyze/multimodal" \
-  -H "Content-Type: multipart/form-data" \
-  -F "texto=Estou me sentindo muito ansiosa" \
+  -F "texto=@relatorio.txt" \
   -F "audio=@consulta.wav" \
   -F "video=@cirurgia.mp4"
 ```
 
-**Exemplo de Response:**
+**Response esperado:**
 ```json
 {
   "fusao": {
-    "risco_violencia": "medio",
-    "risco_saude_mental": "alto",
-    "confiança": 0.75,
-    "alerta": false,
-    "recomendacao": "Acompanhamento prioritário recomendado",
-    "scores_por_modalidade": {
-      "texto": 0.5,
-      "audio": 0.5,
-      "video": 0.0
-    }
+    "risco_violencia": "alto",
+    "confiança": 0.92,
+    "alerta": true
   },
-  "texto": {
-    "sentimento": "negativo",
-    "score": -0.85,
-    "risco_violencia": "medio",
-    "risco_saude_mental": "alto",
-    ...
-  },
-  "audio": {
-    "transcricao": "Estou muito ansiosa",
-    "risco_violencia": "medio",
-    ...
-  },
-  "video": {
-    "risco_violencia": "baixo",
-    ...
-  },
-  "metadata": {
-    "correlation_id": "abc-123",
-    "timestamp": "2026-04-21T14:30:00Z",
-    "tempo_processamento_ms": 12500,
-    "cache_hit": false,
-    "azure_calls": 2,
-    "modalidades_processadas": ["texto", "audio", "video"]
-  }
+  "texto": { "risco_violencia": "medio", ... },
+  "audio": { "risco_violencia": "alto", ... },
+  "video": { "risco_violencia": "medio", ... },
+  "recomendacao": "Encaminhar para equipe multidisciplinar"
 }
 ```
-
-**Parâmetros:**
-| Campo | Tipo | Obrigatório | Descrição |
-|-------|------|-------------|-----------|
-| `texto` | string | Não | Texto para análise (10-5000 caracteres) |
-| `audio` | file | Não | Arquivo de áudio (WAV, MP3, OGG) - máx 50MB |
-| `video` | file | Não | Arquivo de vídeo (MP4, AVI, MOV) - máx 50MB |
-| `patient_id` | string | Não | ID anônimo do paciente (UUID recomendado) |
-
-**Regras:**
-- Pelo menos uma modalidade deve ser fornecida
-- Processamento paralelo com timeout de 30s por modalidade
-- Se uma modalidade falhar, as demais continuam (graceful degradation)
-- Vídeo não consome quota Azure (processamento local)
-
-**Features:**
-- ✅ Late fusion ponderado por confiança
-- ✅ Alerta automático (2+ riscos altos ou confiança > 0.8)
-- ✅ Recomendação clínica baseada no risco combinado
-- ✅ Fallback para 1 modalidade (retorna resultado direto)
-- ✅ Graceful degradation (continua se uma modalidade falhar)
 
 ---
 
@@ -811,7 +758,7 @@ poetry run locust -f locustfile.py
 | 002 | Análise de Texto | ✅ Concluído | [spec.md](specs/002-text-analysis/spec.md) |
 | 003 | Análise de Áudio | ✅ Concluído | [spec.md](specs/003-audio-analysis/spec.md) |
 | 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | [spec.md](specs/004-video-analysis/spec.md) |
-| 005 | Fusão Multimodal | ✅ Concluído | [spec.md](specs/005-multimodal-fusion/spec.md) |
+| 005 | Fusão Multimodal | ⏳ Pendente | [spec.md](specs/005-multimodal-fusion/spec.md) |
 | 006 | Rate Limiting | ✅ Concluído | [spec.md](specs/006-rate-limiting/spec.md) |
 | 007 | Security Hardening | 🔄 Parcial | [spec.md](specs/007-security-hardening/spec.md) |
 | 008 | Testes Automatizados | ✅ Concluído | [spec.md](specs/008-tests/spec.md) |
@@ -888,7 +835,6 @@ tech-challenge-fase-4/
 │   │       ├── text.py            # Análise de texto (✅ Task 002)
 │   │       ├── audio.py           # Análise de áudio (✅ Task 003)
 │   │       ├── video.py           # Análise de vídeo YOLOv8 (✅ Task 004)
-│   │       ├── multimodal.py      # Fusão multimodal (✅ Task 005)
 │   │       └── dependencies.py    # Injeção de dependências
 │   ├── core/                 # Configurações, logging, exceções
 │   │   ├── config.py              # Configurações da aplicação (Pydantic Settings)
@@ -901,7 +847,6 @@ tech-challenge-fase-4/
 │   │   ├── text_analysis.py       # Serviço de análise de texto Azure
 │   │   ├── audio_analysis.py      # Serviço de análise de áudio (✅ Task 003)
 │   │   ├── video_analysis.py      # Análise de vídeo com YOLOv8 (✅ Task 004)
-│   │   ├── multimodal_fusion.py   # Serviço de fusão multimodal (✅ Task 005)
 │   │   ├── video_processor.py     # Processamento de frames de vídeo
 │   │   ├── yolo_service.py        # Serviço YOLOv8 local
 │   │   ├── bleeding_detector.py   # Detecção de sangramento via HSV
@@ -941,7 +886,7 @@ tech-challenge-fase-4/
 │   ├── 002-text-analysis/      # ✅ Concluído
 │   ├── 003-audio-analysis/     # ✅ Concluído
 │   ├── 004-video-analysis/     # ✅ Concluído
-│   ├── 005-multimodal-fusion/  # ✅ Concluído
+│   ├── 005-multimodal-fusion/  # ⏳ Pendente
 │   ├── 006-rate-limiting/      # ✅ Concluído
 │   ├── 007-security-hardening/ # 🔄 Parcial
 │   ├── 008-tests/              # ✅ Concluído

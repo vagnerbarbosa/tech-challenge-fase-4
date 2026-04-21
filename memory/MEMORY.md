@@ -2,7 +2,6 @@
 
 - [GitHub Tools Strategy](github_tools_strategy.md) — Quando usar MCP vs CLI vs API REST
 - [MCP Servers Config](mcp_servers_config.md) — Configuração dos MCP Servers (GitHub e Context7)
-- [Spec Kit Processo](spec_kit_processo.md) — Processo obrigatório de desenvolvimento
 
 ## Status das Ferramentas
 

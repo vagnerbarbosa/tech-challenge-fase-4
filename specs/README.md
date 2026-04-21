@@ -13,7 +13,7 @@
 | 002 | Análise de Texto | ✅ Concluído | `main` | P1 |
 | 003 | Análise de Áudio | ✅ Concluído | `main` | P1 |
 | 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | `main` | P1 |
-| 005 | Fusão Multimodal | ✅ Concluído | `005-multimodal-fusion` | P1 |
+| 005 | Fusão Multimodal | 📝 Draft | `005-multimodal-fusion` | P1 |
 | 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
 | 007 | Security Hardening | 🔄 Em Progresso | `011-video-analysis-yolov8` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
