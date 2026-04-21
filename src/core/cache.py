@@ -2,14 +2,15 @@
 
 import hashlib
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 
 class AnalysisCache:
-    """Cache em memória thread-safe para resultados de análise de texto.
+    """Cache em memória thread-safe para resultados de análise.
 
     Este cache armazena resultados de análise com TTL (time-to-live) para evitar
-    reprocessamento do mesmo texto e otimizar o uso da API Azure.
+    reprocessamento de textos, arquivos de áudio e vídeo idênticos.
     """
 
     def __init__(self, ttl_minutes: int = 60) -> None:
@@ -25,48 +26,65 @@ class AnalysisCache:
     def _generate_key(self, text: str) -> str:
         """Gera chave de cache a partir do conteúdo do texto.
 
-        Usa hash SHA256 do texto normalizado para criar chaves únicas.
-
-        Args:
-            text: Texto de entrada
-
-        Returns:
-            String da chave de cache
+        Alias para _generate_key_from_text para compatibilidade com testes.
         """
+        return self._generate_key_from_text(text)
+
+    def _generate_key_from_text(self, text: str) -> str:
+        """Gera chave de cache a partir do conteúdo do texto."""
         normalized = text.strip().lower()
         return hashlib.sha256(normalized.encode()).hexdigest()[:32]
 
-    def get(self, text: str) -> Any | None:
+    def _generate_key_from_file(self, file_path: Path) -> str:
+        """Gera chave de cache a partir do conteúdo do arquivo."""
+        chunk_size = 64 * 1024
+        hasher = hashlib.sha256()
+
+        with open(file_path, "rb") as f:
+            chunk = f.read(chunk_size)
+            hasher.update(chunk)
+            file_size = file_path.stat().st_size
+            hasher.update(str(file_size).encode())
+
+        return hasher.hexdigest()[:32]
+
+    def get(self, key_input: str | Path) -> Any | None:
         """Recupera resultado do cache se válido.
 
         Args:
-            text: Texto de entrada para buscar
+            key_input: Texto ou caminho de arquivo para buscar
 
         Returns:
             Resultado cacheado ou None se não encontrado/expirado
         """
-        key = self._generate_key(text)
+        if isinstance(key_input, Path):
+            key = self._generate_key_from_file(key_input)
+        else:
+            key = self._generate_key_from_text(key_input)
 
         if key not in self._cache:
             return None
 
         # Verifica se expirou
         if datetime.now() - self._timestamps[key] >= self._ttl:
-            # Remove entrada expirada
             del self._cache[key]
             del self._timestamps[key]
             return None
 
         return self._cache[key]
 
-    def set(self, text: str, value: Any) -> None:
+    def set(self, key_input: str | Path, value: Any) -> None:
         """Armazena resultado no cache.
 
         Args:
-            text: Texto de entrada (usado como chave)
+            key_input: Texto ou caminho de arquivo (usado como chave)
             value: Resultado a ser cacheado
         """
-        key = self._generate_key(text)
+        if isinstance(key_input, Path):
+            key = self._generate_key_from_file(key_input)
+        else:
+            key = self._generate_key_from_text(key_input)
+
         self._cache[key] = value
         self._timestamps[key] = datetime.now()
 
@@ -99,7 +117,7 @@ class AnalysisCache:
         Returns:
             Dicionário com estatísticas do cache
         """
-        self.clear_expired()  # Limpa primeiro
+        self.clear_expired()
         return {
             "entries": len(self._cache),
             "ttl_minutes": self._ttl.total_seconds() / 60,

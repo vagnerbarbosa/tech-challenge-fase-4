@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis\n⏳ Pendente: Video, Multimodal",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis\n⏳ Pendente: Multimodal",
     "version": "1.1.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -154,22 +154,45 @@
             "description": "Retorna formatos de áudio suportados e limites"
           },
           "response": []
+        },
+        {
+          "name": "Audio Cache Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/audio/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "audio", "cache", "stats"]
+            },
+            "description": "Retorna estatísticas do cache de análises de áudio"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Audio Cache",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/audio/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "audio", "cache", "clear"]
+            },
+            "description": "Limpa todas as entradas do cache de análises de áudio"
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Video Analysis [NÃO IMPLEMENTADO]",
+      "name": "Video Analysis",
       "item": [
         {
           "name": "Analyze Video",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "multipart/form-data"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -180,7 +203,12 @@
                 },
                 {
                   "key": "tipo",
-                  "value": "cirurgia",
+                  "value": "consulta",
+                  "type": "text"
+                },
+                {
+                  "key": "patient_id",
+                  "value": "uuid-anonimo-123",
                   "type": "text"
                 }
               ]
@@ -190,7 +218,49 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "video"]
             },
-            "description": "[PENDENTE] Analisa vídeo (MP4) ou imagem (JPG, PNG) usando YOLOv8 local"
+            "description": "Analisa vídeo (MP4, AVI, MOV) usando YOLOv8 local para detecção de objetos, instrumentos médicos e comportamento"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Video Formats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/video/formats",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "video", "formats"]
+            },
+            "description": "Retorna formatos de vídeo suportados e limites (50MB, 2 minutos)"
+          },
+          "response": []
+        },
+        {
+          "name": "Video Cache Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/video/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "video", "cache", "stats"]
+            },
+            "description": "Retorna estatísticas do cache de análises de vídeo"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Video Cache",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analyze/video/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["analyze", "video", "cache", "clear"]
+            },
+            "description": "Limpa todas as entradas do cache de análises de vídeo"
           },
           "response": []
         }

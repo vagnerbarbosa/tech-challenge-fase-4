@@ -1,19 +1,19 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-04-12  
-**Versão**: 0.3.0  
+**Atualizado**: 2026-04-20  
+**Versão**: 0.4.0  
 **Branch**: `main`
 
 ---
 
 ## 🎯 Visão Geral
 
-Sistema multimodal para identificação de sinais de violência doméstica e riscos à saúde materna através da análise de texto, áudio e vídeo (quando implementado).
+Sistema multimodal para identificação de sinais de violência doméstica e riscos à saúde materna através da análise de texto, áudio e vídeo.
 
-### Progresso Total: **50%**
+### Progresso Total: **65%**
 
 ```
-[████████████░░░░░░░░] 50%
+[███████████████░░░░░] 65%
 ```
 
 ---
@@ -44,28 +44,32 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Rate limiting (QuotaManager)
 - [x] Testes unitários
 
-### 4. Rate Limiting (Spec 006) 🔄 60%
+### 4. Análise de Vídeo (Spec 004) ✅ 100%
+- [x] Integração YOLOv8 (local, custo zero)
+- [x] Extração de frames com OpenCV
+- [x] Detecção de objetos (pessoas, facas, tesouras)
+- [x] Detecção de sangramento (análise HSV)
+- [x] Análise de postura (linguagem corporal)
+- [x] Endpoint POST `/analyze/video`
+- [x] Endpoints de cache e formatos
+- [x] Testes unitários (100% services)
+
+### 5. Rate Limiting (Spec 006) 🔄 60%
 - [x] QuotaManager com persistência
 - [x] Rate limiting por serviço
 - [x] Health check com quotas
 - [ ] Redis integration (opcional)
 - [ ] Alertas de quota
 
-### 5. Testes (Spec 008) 🔄 50%
-- [x] Testes unitários (Texto + Áudio)
+### 6. Testes (Spec 008) 🔄 85%
+- [x] Testes unitários (Texto + Áudio + Vídeo)
 - [x] Testes de integração (básicos)
+- [x] Cobertura >70% (atual: ~85%)
 - [ ] Testes de carga (Locust)
-- [ ] Cobertura >70% (atual: ~50%)
 
 ---
 
 ## ⏳ Módulos Pendentes
-
-### 6. Análise de Vídeo (Spec 004) ⏳ 0%
-- [ ] Integração YOLOv8
-- [ ] Extração de frames
-- [ ] Detecção de objetos
-- [ ] Análise de postura
 
 ### 7. Fusão Multimodal (Spec 005) ⏳ 0%
 - [ ] Algoritmo de fusão
@@ -97,7 +101,10 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | `/analyze/text` | POST | ✅ | Análise de texto |
 | `/analyze/audio` | POST | ✅ | Análise de áudio |
 | `/analyze/audio/formats` | GET | ✅ | Formatos suportados |
-| `/analyze/video` | POST | ⏳ | Não implementado |
+| `/analyze/video` | POST | ✅ | Análise YOLOv8 local (detecta objetos, sangramento, postura) |
+| `/analyze/video/formats` | GET | ✅ | Formatos de vídeo suportados |
+| `/analyze/video/cache/stats` | GET | ✅ | Estatísticas do cache |
+| `/analyze/video/cache/clear` | POST | ✅ | Limpar cache de vídeo |
 | `/analyze/multimodal` | POST | ⏳ | Não implementado |
 | `/docs` | GET | ✅ | Swagger UI |
 
@@ -114,13 +121,13 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ### Azure AI Services
 - ✅ Azure AI Language (Text Analytics)
 - ✅ Azure AI Speech (Speech-to-Text)
-- ⏳ Azure AI Vision (Image Analysis)
+- ✅ Azure AI Vision (Image Analysis) - Fallback para vídeo
 
 ### ML/Análise
 - ✅ scikit-learn
 - ✅ librosa (áudio)
-- ⏳ ultralytics/YOLOv8 (vídeo)
-- ⏳ OpenCV (vídeo)
+- ✅ ultralytics/YOLOv8 (vídeo - local, custo zero)
+- ✅ OpenCV (extração de frames)
 
 ### Infraestrutura
 - ✅ Docker + Docker Compose
@@ -137,8 +144,8 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ### Testes
 | Tipo | Status | Cobertura |
 |------|--------|-----------|
-| Unitários | 🔄 Parcial | ~50% |
-| Integração | 🔄 Parcial | Texto + Áudio |
+| Unitários | ✅ Completo | ~85% |
+| Integração | ✅ Completo | Texto + Áudio + Vídeo |
 | Carga | ⏳ Pendente | - |
 
 ### Linting
@@ -160,31 +167,27 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ## 🚀 Próximos Passos Recomendados
 
 ### Prioridade Alta (P1)
-1. **Spec 004 - Análise de Vídeo (YOLOv8)**
-   - Implementar endpoint `/analyze/video`
-   - Integrar YOLOv8 para detecção local
-   - Extrair frames com OpenCV
-
-2. **Spec 005 - Fusão Multimodal**
+1. **Spec 005 - Fusão Multimodal**
+   - Endpoint `/analyze/video` ✅ implementado (YOLOv8 local)
+   - Implementar algoritmo de fusão das 3 modalidades
    - Implementar endpoint `/analyze/multimodal`
    - Criar algoritmo de fusão de scores
 
 ### Prioridade Média (P2)
-3. **Spec 007 - Security Hardening**
+2. **Spec 007 - Security Hardening**
    - Executar security audit
    - Corrigir vulnerabilidades
 
-4. **Spec 009 - Deploy Azure**
+3. **Spec 009 - Deploy Azure**
    - Configurar App Service
    - CI/CD pipeline
 
 ### Prioridade Baixa (P3)
-5. **Spec 008 - Testes**
-   - Aumentar cobertura >70%
-   - Testes de carga com Locust
+4. **Spec 008 - Testes**
+   - Testes de carga com Locust (opcional)
 
-6. **Spec 010 - Documentação**
-   - Criar vídeo demonstrativo
+5. **Spec 010 - Documentação**
+   - Criar vídeo demonstrativo (YouTube)
 
 ---
 
@@ -228,4 +231,4 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ---
 
 **Grupo 27 - FIAP/Alura AI para Devs**  
-*Última atualização: 2026-04-12*
+*Última atualização: 2026-04-20*

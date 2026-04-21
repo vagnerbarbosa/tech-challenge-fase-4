@@ -1,8 +1,8 @@
 # Feature Specification: Análise de Vídeo com YOLOv8
 
-**Feature Branch**: `feature/004-yolo-video-analysis`  
+**Feature Branch**: `011-video-analysis-yolov8`  
 **Created**: 2026-04-12  
-**Status**: 📝 Draft  
+**Status**: ✅ Implemented  
 **Input**: Tech Challenge PDF exige YOLOv8 customizado para análise de vídeo em saúde da mulher
 
 ---
@@ -54,19 +54,50 @@ Como profissional de saúde, quero identificar sinais não-verbais de desconfort
 3. **Given** expressões faciais de medo/ansiedade, **When** detectadas, **Then** combina com análise de texto se disponível
 4. **Given** movimentos normais de consulta, **When** analisados, **Then** não gera falsos positivos
 
-### User Story 4 - Integração com Azure Vision (Priority: P2)
+### User Story 4 - Triagem de Violência e Saúde Mental (Priority: P1)
+
+Como profissional de saúde, quero que o sistema identifique sinais visuais de risco em consultas de telemedicina para triagem precoce de violência doméstica e problemas de saúde mental.
+
+**Why this priority**: Requisito do projeto para identificação precoce de riscos em saúde materna e ginecológica, complementando as análises de texto e áudio.
+
+**Independent Test**: POST `/analyze/video` retorna campos `risco_violencia` e `risco_saude_mental` mesmo quando outros riscos não são detectados.
+
+**Acceptance Scenarios**:
+
+1. **Given** um vídeo de consulta médica em formato MP4, **When** o profissional faz upload via API, **Then** o sistema processa o vídeo e retorna análise com objetos detectados e nível de risco avaliado
+2. **Given** um vídeo contendo sinais visuais de agitação (movimentos rápidos), **When** processado pelo sistema, **Then** o sistema identifica alto nível de agitação e reporta como possível indicador de ansiedade
+3. **Given** vídeo com objetos potencialmente perigosos visíveis (facas, tesouras), **When** analisado pelo YOLOv8, **Then** o sistema lista os objetos detectados com nível de confiança e alerta de risco
+4. **Given** um vídeo sem conteúdo relevante, **When** processado, **Then** o sistema retorna "nenhum sinal detectado" sem erro, mantendo os campos obrigatórios de risco preenchidos
+
+---
+
+### User Story 5 - Integração com Azure Vision (Priority: P3 - Post-MVP)
 
 Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certeza, garantindo análise robusta.
 
-**Why this priority**: YOLOv8 roda local (custo zero), Azure Vision é fallback quando necessário.
+**Why this priority**: Implementação futura - YOLOv8 COCO já cobre casos principais. Fallback útil apenas se precisão insuficiente em produção.
 
-**Independent Test**: Fallback funciona mesmo quando YOLOv8 está desligado.
+**Status**: Não implementar no MVP. Avaliar necessidade após testes em produção com YOLOv8 local.
 
-**Acceptance Scenarios**:
+**Acceptance Scenarios** (para implementação futura):
 
 1. **Given** YOLOv8 confiança < 50%, **When** processa imagem, **Then** chama Azure Vision automaticamente
 2. **Given** Azure Vision indisponível, **When** YOLOv8 não detecta, **Then** retorna resultado parcial (sem erro)
 3. **Given** ambos disponíveis, **When** analisam mesmo vídeo, **Then** combina resultados com ponderação por confiança
+
+---
+
+### Edge Cases
+
+- **Vídeo corrompido ou formato inválido**: Sistema deve retornar erro 400 com mensagem clara sobre formatos aceitos (MP4, AVI, MOV)
+- **Vídeo muito longo (> 2 minutos)**: Sistema deve rejeitar com erro 400 (limite de duração excedido)
+- **Resolução muito baixa**: Sistema deve informar que a qualidade pode afetar a precisão da detecção
+- **Ausência de pessoas no vídeo**: Sistema deve retornar "nenhuma pessoa detectada" sem erro, mantendo campos obrigatórios preenchidos
+- **Múltiplas pessoas no vídeo**: Sistema deve focar na pessoa principal (maior área) ou analisar todas
+- **Falha no modelo YOLOv8**: Sistema deve fallback para modo de análise simplificada ou retornar erro apropriado
+- **Vídeo excede limite de tamanho (50MB)**: Sistema deve retornar erro 413 (Payload Too Large) antes de iniciar processamento
+- **Timeout no processamento**: Sistema deve cancelar processamento após limite configurável e retornar erro 504
+- **Falha na extração de frames**: Sistema deve tentar formatos alternativos ou retornar erro específico sobre codificação de vídeo não suportada
 
 ---
 
@@ -75,15 +106,15 @@ Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certe
 ### Functional Requirements
 
 - **FR-001**: Endpoint POST `/analyze/video` disponível (multipart/form-data)
-- **FR-002**: Suporta vídeos MP4, AVI, MOV (máx 30 segundos, max 50MB)
-- **FR-003**: Extrai frames automaticamente (1 frame por segundo ou configurável)
+- **FR-002**: Suporta vídeos MP4, AVI, MOV (máx 2 minutos, max 50MB) - amostragem adaptativa: 1 FPS até 30s, 0.2 FPS (1 frame/5s) para vídeos mais longos
+- **FR-003**: Extrai frames com amostragem adaptativa por padrão (1 FPS ≤30s, 0.2 FPS >30s), permitindo override via parâmetro `extract_fps` (0.2-5.0)
 - **FR-004**: YOLOv8 roda localmente em container (custo zero)
 - **FR-005**: Detecta classes configuráveis: instrumentos_cirurgicos, sangramento, desconforto_postura
 - **FR-006**: Retorna bounding boxes com coordenadas (x, y, width, height) e confiança
-- **FR-007**: Integração opcional com Azure Vision como fallback (consome quota)
+- **FR-007**: [POST-MVP] Integração opcional com Azure Vision como fallback (consome quota)
 - **FR-008**: Gera alerta quando risco detectado (violência, sangramento excessivo)
 - **FR-009**: Campos obrigatórios risco_violencia e risco_saude_mental em todas respostas
-- **FR-010**: Cache de frames processados para evitar reprocessamento
+- **FR-010**: Cache de resultados de análise (não frames) para evitar reprocessamento do mesmo vídeo
 
 ### Key Entities
 
@@ -109,17 +140,18 @@ Como sistema, quero usar Azure Vision como fallback quando YOLOv8 não tem certe
 - **SC-003**: Precisão detecção instrumentos > 75% (threshold aceitável)
 - **SC-004**: Falsos positivos sangramento < 15%
 - **SC-005**: Campos obrigatórios sempre presentes
-- **SC-006**: Zero custo Azure para análise YOLOv8 (fallback opcional)
+- **SC-006**: Zero custo Azure para análise de vídeo (sem fallback no MVP)
 
 ---
 
 ## Assumptions
 
 - YOLOv8n (nano) é suficiente para MVP (rápido, leve, menos preciso que medium/large)
-- Modelo pré-treinado COCO pode ser fine-tuned para instrumentos médicos específicos
+- Modelo pré-treinado COCO pode ser fine-tuned para instrumentos médicos específicos (post-MVP)
 - CPU do container suporta inference YOLOv8n (sem GPU necessária para MVP)
-- Azure Vision é fallback opcional (não bloqueia funcionalidade se quota esgotada)
-- Vídeos são processados frame a frame (não análise temporal complexa no MVP)
+- Azure Vision é fallback **post-MVP** (não implementado no MVP - 100% YOLOv8 local)
+- Vídeos são processados com amostragem adaptativa: até 2 minutos, com 1 FPS para ≤30s e 0.2 FPS para vídeos mais longos
+- Limite de arquivo: 50MB (igual ao áudio) para consistência entre modalidades
 
 ---
 
@@ -587,6 +619,16 @@ class FrameCache:
 
 ## Clarifications
 
+### Session 2026-04-19
+
+- **Q**: Qual deve ser o limite oficial de tamanho de arquivo para vídeos? → **A**: 50MB (igual ao áudio) - mantém consistência entre modalidades
+- **Q**: Implementar Azure Vision fallback no MVP? → **A**: Não - foco no YOLOv8 local (custo zero), fallback avaliado post-MVP se necessário
+- **Q**: Como tratar vídeos que excedem o limite de processamento? → **A**: Aceitar até 2 minutos com amostragem adaptativa (1 FPS até 30s, 0.2 FPS depois)
+- **Q**: FPS é adaptativo ou configurável? → **A**: Adaptativo por padrão, mas usuário pode sobrescrever via `extract_fps`
+- **Q**: Cache de frames ou resultados? → **A**: Cache de resultados (VideoAnalysisResponse), não frames (LGPD)
+- **Q**: Processamento async no MVP? → **A**: Não - todos os vídeos são síncronos, async é post-MVP
+- **Q**: Dependência ultralytics adicionada? → **A**: Sim, ultralytics>=8.0.0 adicionado ao pyproject.toml
+
 ### Session 2026-04-12
 
 - **Q1**: YOLOv8 precisa ser treinado do zero ou pode usar modelo pré-treinado?  
@@ -713,6 +755,7 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## Checklist de Implementação
 
+- [x] Especificação consolidada (2026-04-19) - incorporou requisitos de análise comportamental
 - [ ] Instalar YOLOv8 no Dockerfile
 - [ ] Baixar modelo yolov8n.pt (6MB)
 - [ ] Implementar VideoProcessor (extração frames)
@@ -720,6 +763,8 @@ CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 - [ ] Implementar BleedingDetector (CV clássico)
 - [ ] Implementar endpoint POST `/analyze/video`
 - [ ] Adicionar risco_violencia/risco_saude_mental nas respostas
+- [ ] [POST-MVP] Avaliar processamento assíncrono para vídeos longos (>1 min) se necessário
+- [ ] Adicionar validação de tamanho de arquivo (50MB, igual ao áudio)
 - [ ] Testar com vídeos de exemplo
 - [ ] Documentar limitações (COCO genérico vs instrumentos médicos)
 - [ ] Criar plano de fine-tuning se necessário (pós-MVP)

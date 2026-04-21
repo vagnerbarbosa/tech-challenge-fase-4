@@ -127,7 +127,7 @@ tests/
 ├── integration/
 │   ├── test_text_endpoint.py
 │   ├── test_audio_endpoint.py
-│   ├── test_image_endpoint.py
+│   ├── test_video_endpoint.py
 │   └── test_multimodal_endpoint.py
 ├── load/
 │   └── locustfile.py

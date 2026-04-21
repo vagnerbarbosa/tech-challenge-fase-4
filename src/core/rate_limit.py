@@ -21,6 +21,7 @@ RATE_LIMITS = {
     "text": {"daily": 160, "monthly": 5000},
     "audio": {"daily_minutes": 10, "monthly_minutes": 300},
     "vision": {"daily": 160, "monthly": 5000},
+    "video_analysis": {"daily": 50, "monthly": 1000},  # Local processing - more generous limits
 }
 
 # Arquivo para persistência de quota (simples, mas funcional)

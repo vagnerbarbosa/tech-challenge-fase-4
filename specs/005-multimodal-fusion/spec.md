@@ -89,7 +89,7 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 
 ## Assumptions
 
-- Dependências: US01, US02, US03 (texto, áudio, video) implementados
+- Dependências: ✅ US01 (texto), ✅ US02 (áudio), ✅ US03 (video) implementados - Pronto para desenvolvimento
 - Late fusion é suficiente para MVP (early fusion seria complexo demais)
 - Ponderação por confiança: modalidades com maior confiança têm peso maior
 - Resultados individuais são sempre retornados para transparência
@@ -138,11 +138,11 @@ class FusionService:
         self,
         text_service: TextAnalysisService,
         audio_service: AudioAnalysisService,
-        image_service: ImageAnalysisService
+        video_service: VideoAnalysisService
     ):
         self.text_svc = text_service
         self.audio_svc = audio_service
-        self.image_svc = image_service
+        self.video_svc = video_service
 
     async def analyze(
         self,
