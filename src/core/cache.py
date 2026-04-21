@@ -23,6 +23,13 @@ class AnalysisCache:
         self._timestamps: dict[str, datetime] = {}
         self._ttl = timedelta(minutes=ttl_minutes)
 
+    def _generate_key(self, text: str) -> str:
+        """Gera chave de cache a partir do conteúdo do texto.
+
+        Alias para _generate_key_from_text para compatibilidade com testes.
+        """
+        return self._generate_key_from_text(text)
+
     def _generate_key_from_text(self, text: str) -> str:
         """Gera chave de cache a partir do conteúdo do texto."""
         normalized = text.strip().lower()
