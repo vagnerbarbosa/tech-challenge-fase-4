@@ -3,11 +3,21 @@
 Valida upload de vídeos, processamento YOLOv8 e resposta com riscos.
 """
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import status
 from httpx import AsyncClient
+
+
+@pytest.fixture(autouse=True)
+def clear_cache_before_tests():
+    """Limpa o cache global antes de cada teste."""
+    from src.core.cache import get_cache
+    cache = get_cache()
+    cache.clear_all()
+    yield
+    cache.clear_all()
 
 
 class TestVideoEndpointSuccess:
@@ -45,13 +55,22 @@ class TestVideoEndpointSuccess:
             "tempo_processamento_ms": 1200,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=10.0
-        ), patch(
-            "src.api.routes.video.VideoAnalysisService.analyze", return_value=mock_analysis_result
-        ), open(test_video, "rb") as f:
+        # Criar mock da instância
+        mock_instance = MagicMock()
+        mock_instance.analyze.return_value = mock_analysis_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=10.0
+            ),
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -87,13 +106,21 @@ class TestVideoEndpointSuccess:
             "tempo_processamento_ms": 800,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=5.0
-        ), patch(
-            "src.api.routes.video.VideoAnalysisService.analyze", return_value=mock_analysis_result
-        ), open(test_video, "rb") as f:
+        mock_instance = MagicMock()
+        mock_instance.analyze.return_value = mock_analysis_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=5.0
+            ),
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -137,15 +164,27 @@ class TestVideoEndpointSuccess:
             "duracao": 30.0,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=30.0
-        ), patch(
-            "src.core.cache.VideoCache.get", return_value=mock_cached_result
-        ), patch(
-            "src.api.routes.video.VideoAnalysisService.analyze"
-        ) as mock_analyze, open(test_video, "rb") as f:
+        mock_instance = MagicMock()
+
+        # Criar instância mock do cache
+        mock_cache_instance = MagicMock()
+        mock_cache_instance.get.return_value = mock_cached_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=30.0
+            ),
+            patch(
+                "src.api.routes.video.get_cache", return_value=mock_cache_instance
+            ),
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -158,7 +197,7 @@ class TestVideoEndpointSuccess:
         assert data["metadata"]["cache_hit"] is True
         assert data["risco_violencia"] == "alto"
         assert data["risco_saude_mental"] == "alto"
-        mock_analyze.assert_not_called()
+        mock_instance.analyze.assert_not_called()
 
 
 class TestVideoEndpointValidation:
@@ -189,10 +228,13 @@ class TestVideoEndpointValidation:
         test_video = tmp_path / "test.mp4"
         test_video.write_bytes(b"conteudo fake")
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer",
-            return_value="application/octet-stream",
-        ), open(test_video, "rb") as f:
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer",
+                return_value="application/octet-stream",
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -212,9 +254,12 @@ class TestVideoEndpointValidation:
             b"\x00\x00\x00\x20ftypisom\x00\x00\x00\x00isommp41" + b"\x00" * (51 * 1024 * 1024)
         )
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), open(test_video, "rb") as f:
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("large.mp4", f, "video/mp4")},
@@ -232,30 +277,28 @@ class TestVideoEndpointValidation:
         test_video = tmp_path / "long.mp4"
         test_video.write_bytes(b"\x00\x00\x00\x20ftypisom\x00\x00\x00\x00isommp41" + b"\x00" * 100)
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration",
-            side_effect=Exception("exceeded"),
-        ), open(test_video, "rb") as f:
-            # O check_video_duration deve lançar HTTPException quando duração é excedida
-            # Vamos mockar o comportamento real
-            from fastapi import HTTPException
+        from fastapi import HTTPException
 
-            import src.utils.file_validation as file_validation
+        # Criar uma instância de HTTPException para o side_effect
+        http_exception = HTTPException(
+            status_code=400,
+            detail="Vídeo excede o limite de 2 minutos.",
+        )
 
-            def mock_check_duration(path):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Vídeo excede o limite de 2 minutos.",
-                )
-
-            with patch.object(file_validation, "check_video_duration", side_effect=mock_check_duration):
-                response = await async_client.post(
-                    "/analyze/video",
-                    files={"video": ("long.mp4", f, "video/mp4")},
-                    data={"tipo": "consulta"},
-                )
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", side_effect=http_exception
+            ),
+            open(test_video, "rb") as f,
+        ):
+            response = await async_client.post(
+                "/analyze/video",
+                files={"video": ("long.mp4", f, "video/mp4")},
+                data={"tipo": "consulta"},
+            )
 
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -280,13 +323,21 @@ class TestVideoRequiredFields:
             "tempo_processamento_ms": 500,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=5.0
-        ), patch(
-            "src.api.routes.video.VideoAnalysisService.analyze", return_value=mock_result
-        ), open(test_video, "rb") as f:
+        mock_instance = MagicMock()
+        mock_instance.analyze.return_value = mock_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=5.0
+            ),
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -319,13 +370,21 @@ class TestVideoRequiredFields:
             "tempo_processamento_ms": 600,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=8.0
-        ), patch(
-            "src.api.routes.video.VideoAnalysisService.analyze", return_value=mock_result
-        ), open(test_video, "rb") as f:
+        mock_instance = MagicMock()
+        mock_instance.analyze.return_value = mock_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=8.0
+            ),
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -350,12 +409,16 @@ class TestVideoRateLimiting:
         test_video = tmp_path / "test.mp4"
         test_video.write_bytes(b"\x00\x00\x00\x20ftypisom\x00\x00\x00\x00isommp41" + b"\x00" * 100)
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.api.routes.video.check_and_increment_quota",
-            side_effect=Exception("Rate limit exceeded"),
-        ), open(test_video, "rb") as f:
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_and_increment_quota",
+                side_effect=Exception("Rate limit exceeded"),
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
@@ -382,15 +445,24 @@ class TestVideoRateLimiting:
             "tempo_processamento_ms": 500,
         }
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
-        ), patch(
-            "src.utils.file_validation.check_video_duration", return_value=5.0
-        ), patch(
-            "src.api.routes.video.check_and_increment_quota", return_value={"daily_remaining": 45}
-        ) as mock_quota, patch(
-            "src.api.routes.video.VideoAnalysisService.analyze", return_value=mock_result
-        ), open(test_video, "rb") as f:
+        mock_instance = MagicMock()
+        mock_instance.analyze.return_value = mock_result
+
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer", return_value="video/mp4"
+            ),
+            patch(
+                "src.api.routes.video.check_video_duration", return_value=5.0
+            ),
+            patch(
+                "src.api.routes.video.check_and_increment_quota", return_value={"daily_remaining": 45}
+            ) as mock_quota,
+            patch(
+                "src.api.routes.video.VideoAnalysisService", return_value=mock_instance
+            ),
+            open(test_video, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/video",
                 files={"video": ("test.mp4", f, "video/mp4")},
