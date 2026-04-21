@@ -1,398 +1,92 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working with this repository.
 
-## Project Overview - CORRIGIDO
+## WHAT: Project
 
-- **Name**: tech-challenge-fase-4
-- **Full Name**: Tech Challenge Fase 4 - FIAP/Alura AI para Devs
-- **Language**: Python 3.11+
-- **Framework**: FastAPI
-- **License**: MIT License (Copyright 2026 Grupo 27 Tech Challenge)
-- **Stage**: 4 Core Modules Complete (Text + Audio + Video + Multimodal Ready)
+**Tech Challenge Fase 4** - FIAP/Alura AI para Devs
 
-### Objective Principal (Do PDF Oficial)
+Multimodal health analysis API for women's health:
+- **Text**: Azure AI Language (sentiment analysis)
+- **Audio**: Azure AI Speech (transcription + prosody)
+- **Video**: YOLOv8 local detection (instruments, bleeding, posture)
+- **Multimodal**: Fusion endpoint (pending)
 
-**"Realizar a análise e fusão de diferentes tipos de dados médicos específicos da saúde da mulher — incluindo texto, áudio e vídeo."**
+## Stack
 
-### Opções Selecionadas:
-1. ✅ **Detectar precocemente riscos em saúde materna e ginecológica**
-2. ✅ **Identificar sinais de violência doméstica ou abuso**
-4. ✅ **Utilizar serviços em nuvem** (Azure Free Tier)
-
-### Foco do Projeto:
-Sistema **multimodal** para identificação de:
-- Sinais de violência doméstica
-- Riscos em saúde mental feminina
-- Indicadores em gestantes
-
-### Modalidades de Dados:
-- 📝 **Texto**: Prontuários, diários, relatos
-- 🎙️ **Áudio**: Consultas de telemedicina (voz)
-- 🎥 **Imagem/Vídeo**: Expressões faciais, sinais visuais
-
----
-
-## Critical Requirements (From Official Brief)
-
-### Modalidades Obrigatórias:
-- ✅ **Texto** (Azure AI Language / Text Analytics)
-- ✅ **Áudio** (Azure AI Speech)
-- ✅ **Imagem/Vídeo** (Azure AI Vision)
-- ✅ **Fusão multimodal** (combinação das 3)
-
-> **⚠️ NOTA SOBRE REBRANDING**: Os serviços anteriormente chamados "Azure Cognitive Services" foram renomeados para **Azure AI Services** (2024) e agora fazem parte do **Azure AI Foundry** (2025). Os SDKs Python foram atualizados:
-> - ✅ `azure-ai-textanalytics` (Texto - mantido)
-> - ✅ `azure-cognitiveservices-speech` (Áudio - mantido)
-> - ⚠️ `azure-ai-vision-imageanalysis` (Visão - **novo SDK**, o antigo `azure-cognitiveservices-vision-computervision` foi deprecated em nov/2024)
-
-### Azure Free Tier Limits:
-- Text Analytics: 5,000 requests/mês
-- Speech Services: 5 hours áudio/mês
-- Computer Vision: 5,000 transactions/mês
-- Blob Storage: 5GB
-
-### Required Deliverables:
-1. ✅ API REST multimodal (`/analyze/text`, `/analyze/audio`, `/analyze/video` implemented)
-2. ✅ Integração com Azure Cognitive Services
-3. ✅ Swagger/OpenAPI documentation em `/docs`
-4. ✅ Dockerfile (multi-stage)
-5. ✅ docker-compose.yml
-6. 🔄 Testes unitários + integração + carga (Locust) - partial
-7. 🔄 Cobertura de testes > 70% - partial
-8. 🔄 README completo com exemplos
-9. ⏳ Vídeo demonstrativo (YouTube)
-
----
-
-## Technology Stack
-
-### Core:
-- **Framework**: FastAPI (async, OpenAPI auto)
-- **Server**: Uvicorn
-- **Validation**: Pydantic v2
-- **Config**: Pydantic Settings
-
-### Azure AI Services (Foundry Tools):
-> **Nota**: Azure Cognitive Services foi renomeado para Azure AI Services em 2024 e agora faz parte do Azure AI Foundry.
-
-| Serviço | SDK Python | Versão | Uso |
-|---------|------------|--------|-----|
-| **Azure AI Language** (Text Analytics) | `azure-ai-textanalytics` | 5.4.0 | Análise de sentimento, NLP |
-| **Azure AI Speech** | `azure-cognitiveservices-speech` | 1.48.x | Speech-to-text, análise de voz |
-| **Azure AI Vision** | `azure-ai-vision-imageanalysis` | 1.0.x+ | Análise de imagem, expressões faciais (fallback) |
-| **Azure Blob Storage** | `azure-storage-blob` | 12.x+ | Armazenamento temporário de arquivos |
-
-> **⚠️ Importante**: O SDK antigo `azure-cognitiveservices-vision-computervision` foi **deprecated em novembro 2024**. Usar `azure-ai-vision-imageanalysis`.
-
-### Local ML Services (Custo Zero):
-| Serviço | Pacote | Versão | Uso |
-|---------|--------|--------|-----|
-| **YOLOv8** (Ultralytics) | `ultralytics` | 8.x+ | Detecção objetos em vídeo - **Requisito PDF** |
-| **OpenCV** | `opencv-python` | 4.8+ | Extração frames, pré-processamento |
-
-> **💡 Nota YOLOv8**: Atende requisito obrigatório do PDF para "YOLOv8 customizado". Roda localmente no container (sem consumir quota Azure), detectando instrumentos cirúrgicos, sangramento anômalo e linguagem corporal.
-
-### Infrastructure:
-- **Container**: Docker + Docker Compose
-- **Database**: Azure SQL (opcional) ou SQLite (dev)
-- **Cache**: Redis (opcional, para rate limiting)
-
-### Development:
-- **Package Manager**: Poetry (pyproject.toml)
-- **Linter**: Ruff (line length: 88)
-- **Type Checker**: mypy (strict mode)
-- **Test Framework**: pytest + httpx + pytest-asyncio
-- **Load Testing**: Locust
-
----
-
-## Implementation Status (Updated 2026-04-19)
-
-### ✅ Implemented Endpoints
-
-| Endpoint | Status | Description | Azure Service |
-|----------|--------|-------------|---------------|
-| `GET /health` | ✅ Complete | Health check with quota status | - |
-| `POST /analyze/text` | ✅ Complete | Text sentiment analysis | Azure AI Language |
-| `POST /analyze/audio` | ✅ Complete | Audio transcription + prosodic analysis | Azure AI Speech + librosa |
-| `GET /analyze/audio/formats` | ✅ Complete | Supported audio formats info | - |
-| `POST /analyze/video` | ✅ Complete | Video analysis with YOLOv8 | YOLOv8 (local) |
-| `GET /analyze/video/formats` | ✅ Complete | Supported video formats info | - |
-| `POST /analyze/multimodal` | ⏳ Pending | Combined multimodal analysis | Multiple |
-
-### 🔄 Partial Implementation
-
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Rate Limiting | ✅ Base Complete | QuotaManager with file persistence |
-| Temp File Management | ✅ Complete | LGPD-compliant with auto-cleanup |
-| File Validation | ✅ Complete | Magic numbers + extension validation |
-| Unit Tests | ✅ Complete | Text + Audio + Video services covered |
-| Integration Tests | ✅ Complete | All endpoints tested |
-
-### ⏳ Pending Features
-
-| Feature | Priority | Blocked By |
-|---------|----------|------------|
-| Multimodal Fusion | P1 | - |
-| Security Hardening | P1 | All core features |
-| Azure Deploy | P1 | Security audit |
-| Load Tests (Locust) | P2 | All endpoints stable |
-
----
+- **Runtime**: Python 3.11+, FastAPI, Pydantic v2
+- **AI**: Azure AI Services (Text, Speech, Vision)
+- **ML**: YOLOv8 (Ultralytics), OpenCV
+- **Infra**: Docker, Docker Compose, Redis (optional)
+- **Dev**: Poetry, Ruff (line 88), mypy (strict), pytest
 
 ## Project Structure
 
 ```
-tech-challenge-fase-4/
-├── docs/                       # SDD Documentation
-│   ├── product-spec.md         # Requisitos funcionais
-│   ├── user-stories.md         # Histórias (10 total)
-│   ├── architecture.md         # Diagramas e fluxos
-│   ├── api-contracts.md        # OpenAPI specs
-│   ├── objectives.md            # Objetivo do projeto
-│   └── technical/
-│       └── cloud-free-tier-analysis.md  # Análise Azure
-├── src/                        # Source code
-│   ├── api/                    # FastAPI app, routes
-│   │   ├── main.py
-│   │   └── routes/
-│   │       ├── health.py
-│   │       ├── text.py
-│   │       ├── audio.py
-│   │       ├── video.py
-│   │       └── multimodal.py
-│   ├── core/                   # Config, logging, exceptions
-│   │   ├── config.py
-│   │   ├── logging_config.py
-│   │   ├── exceptions.py
-│   │   └── rate_limit.py      # Azure quota management
-│   ├── services/               # Business logic
-│   │   ├── text_analysis.py
-│   │   ├── audio_analysis.py
-│   │   ├── image_analysis.py
-│   │   └── fusion.py           # Multimodal fusion
-│   ├── models/                 # Pydantic schemas
-│   │   └── schemas.py
-│   ├── infrastructure/         # Azure clients
-│   │   └── azure_clients.py
-│   └── utils/                  # Helpers
-├── tests/                      # Test suite
-│   ├── unit/
-│   ├── integration/
-│   └── load/
-│       └── locustfile.py
-├── scripts/                    # Dev scripts
-├── .claude/                    # Claude context
-├── tasks/                      # SDD tasks
-│   └── 001-bootstrap.md
-├── pyproject.toml              # Poetry config
-├── Dockerfile
-├── docker-compose.yml
-└── README.md                   # Main documentation
+src/
+├── api/routes/        # FastAPI endpoints
+├── services/          # Business logic
+├── core/              # Config, logging, rate limiting
+├── infrastructure/    # Azure clients
+└── utils/             # Video validation, etc.
+
+tests/
+├── unit/              # Service tests
+├── integration/       # API endpoint tests
+└── load/              # Locust tests
 ```
 
----
+## HOW: Essential Commands
 
-## Development Commands
-
-### Setup:
+### Run
 ```bash
-# Install dependencies
-poetry install
-
-# Activate shell
-poetry shell
-
-# Configure Azure credentials
-# Criar .env baseado em .env.example
-```
-
-### Run Application:
-```bash
-# Development (hot reload)
+# Development
 poetry run uvicorn src.api.main:app --reload
 
-# Production
-poetry run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
-
-# With Docker
+# Docker
 docker-compose up --build -d
-```
-
-### Quality Checks:
-```bash
-# Linting
-poetry run ruff check .
-poetry run ruff check --fix .
-poetry run ruff format .
-
-# Type checking
-poetry run mypy src/
 
 # Tests
 poetry run pytest -v
 poetry run pytest --cov=src --cov-report=html
 
-# All checks
-poetry run ruff check . && poetry run mypy src/ && poetry run pytest -v
+# Quality
+poetry run ruff check . && poetry run mypy src/
 ```
-
-### Docker Commands:
-```bash
-# Build and run
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f api
-
-# Stop
-docker-compose down -v
-
-# Rebuild from scratch
-docker-compose down -v
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-### Test API:
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Análise de texto
-curl -X POST http://localhost:8000/analyze/text \
-  -H "Content-Type: application/json" \
-  -d '{"texto":"Estou me sentindo ansiosa e com medo"}'
-
-# Análise multimodal (com arquivo)
-curl -X POST http://localhost:8000/analyze/multimodal \
-  -F "texto=Texto aqui..." \
-  -F "audio=@consulta.wav" \
-  -F "imagem=@foto.jpg"
-
-# Swagger UI
-open http://localhost:8000/docs
-```
-
----
-
-## Evaluation Criteria (Weight)
-
-1. **Funcionalidade (30%)**: API multimodal funciona, integração Azure, fusão de dados
-2. **Código (25%)**: Organização, clean code, type hints, Ruff/mypy pass
-3. **Containerização (20%)**: Dockerfile, docker-compose, multi-stage, non-root
-4. **Testes (15%)**: Unit + integration + load tests, >70% coverage
-5. **Documentação (10%)**: README completo, vídeo demonstrativo
-
----
 
 ## Critical Constraints
 
-### MUST HAVE:
-- ✅ Processar texto (Azure Text Analytics)
-- ✅ Processar áudio (Azure Speech Services)
-- ✅ Processar vídeo/imagem (YOLOv8 local + Azure AI Vision fallback)
-- ✅ Fusão multimodal (combinação de 3)
-- ✅ **Campos obrigatórios em TODAS respostas**: `risco_violencia` e `risco_saude_mental`
-- ✅ Azure Free Tier (custo zero)
-- ✅ **Deploy em produção Azure** (obrigatório - Azure App Service ou Container Instances)
-- ✅ Docker funciona com `docker-compose up`
-- ✅ Swagger em `/docs`
-- ✅ LGPD compliance (anonimização, consentimento)
-- ✅ **Hard Stop**: Sistema interrompe automaticamente quando quotas forem atingidas ([ver estratégia](docs/technical/azure-free-tier-hard-stop.md))
-- ✅ **Segurança**: Correções das vulnerabilidades em [security-audit.md](docs/technical/security-audit.md) antes do deploy
+### MUST
+- ✅ Fields in ALL responses: `risco_violencia`, `risco_saude_mental`
+- ✅ Azure Free Tier quotas protected (hard stop when exceeded)
+- ✅ LGPD: anonymize PII, consent required, temp files cleaned
+- ✅ YOLOv8 local for video (no Azure quota consumption)
 
-### MUST NOT:
-- ❌ Exceder quotas do Azure Free Tier
-- ❌ Armazenar dados pessoais identificáveis
-- ❌ Processar sem consentimento explícito
-- ❌ Expor secrets Azure no código
-- ❌ Logar conteúdo de arquivos de mídia
+### MUST NOT
+- ❌ Exceed Azure Free Tier (5K text/mo, 5hr audio/mo, 5K vision/mo)
+- ❌ Commit secrets (use .env)
+- ❌ Log media content
 
----
+## MCP Servers
 
-## Azure Free Tier - Gestão
+Configured in `.mcp.json`:
+- **GitHub MCP**: `npx -y @modelcontextprotocol/server-github`
+- **Context7 MCP**: `npx -y @upstash/context7-mcp@latest`
 
-### Limites e Proteção:
-```python
-RATE_LIMITS = {
-    "text_analytics": {"daily": 160, "monthly": 5000},
-    "speech": {"daily_minutes": 10, "monthly_minutes": 300},
-    "computer_vision": {"daily": 160, "monthly": 5000}
-}
-```
-
-### Monitoramento:
-- Health check mostra quota restante
-- Rate limiting por endpoint
-- Cache para evitar reprocessamento
-
----
-
-## Next Steps (Tasks)
-
-1. **001-bootstrap**: Project structure, Poetry, Docker, Azure setup
-2. **002-health-endpoint**: Health check com status Azure
-3. **003-text-analysis**: Integração Azure Text Analytics
-4. **004-audio-analysis**: Integração Azure Speech Services
-5. **005-video-analysis**: Integração YOLOv8 + Azure Vision para análise de vídeo
-6. **006-multimodal-fusion**: Combinação de 3 modalidades
-7. **007-rate-limiting**: Proteção de quotas Azure
-8. **008-security-hardening**: Correções de segurança (CRITICAL - [ver security-audit.md](docs/technical/security-audit.md))
-9. **009-tests**: Unit + integration + load tests
-10. **010-deploy-azure**: Deploy em produção Azure App Service (Free Tier) - **OBRIGATÓRIO**
-11. **011-documentation**: Final README and video
-
----
+Requires: `export GITHUB_TOKEN=ghp_your_token`
 
 ## Conventions
 
 - **Code**: English (variables, functions, classes)
-- **Documentation**: Portuguese (Brazilian context)
+- **Docs**: Portuguese (Brazilian context)
 - **Commits**: Conventional commits (`feat:`, `fix:`, `docs:`)
-- **PRs**: Small, focused, with tests
 - **Types**: Mandatory type hints on public APIs
 - **Testing**: Tests for all new code
-- **Security**: Never commit secrets, always use .env
 
----
+## References
 
-## Melhores Práticas de Código (MCP Context7)
-
-> **IMPORTANTE**: Todas as implementações de código devem seguir as melhores práticas documentadas em `docs/technical/context7-best-practices.md`
-
-### Validação com Context7:
-Antes de implementar cada módulo, buscar no MCP Context7:
-- "FastAPI best practices 2024"
-- "Azure SDK Python async patterns"
-- "FastAPI dependency injection"
-- "Azure Cognitive Services error handling"
-- "Multimodal ML architecture patterns"
-
-### Padrões Críticos:
-1. **Dependency Injection**: Usar `Depends()` para Azure clients
-2. **Singleton Pattern**: Clientes Azure como singletons
-3. **Async/Await**: Todas as chamadas I/O assíncronas
-4. **Error Handling**: Exception handlers específicos para Azure
-5. **Rate Limiting**: Proteção de quotas Azure
-6. **LGPD**: Anonimização de dados sensíveis
-
----
-
-## Links
-
-- Fase 1: https://github.com/vagnerbarbosa/tech-challenge-fase-1
-- Fase 2: https://github.com/vagnerbarbosa/tech-challenge-fase-2
-- Fase 3: https://github.com/vagnerbarbosa/tech-challenge-fase-3
-- Tech Challenge Brief: `d:\OneDrive\vagner-desktop\Downloads\POSTECH - IADT - Tech Challenge - Fase 4.pdf`
-- Azure Free Tier: https://azure.microsoft.com/free
-- Melhores Práticas: `docs/technical/context7-best-practices.md`
-
-## Active Technologies
-- Python 3.11+ + FastAPI, Azure Speech SDK (azure-cognitiveservices-speech>=1.48.0), librosa>=0.10.0, python-magic>=0.4.27 (003-audio-analysis)
-- Local filesystem (/tmp) - LGPD compliant (003-audio-analysis)
-
-## Recent Changes
-- 003-audio-analysis: Added Python 3.11+ + FastAPI, Azure Speech SDK (azure-cognitiveservices-speech>=1.48.0), librosa>=0.10.0, python-magic>=0.4.27
+- Full architecture: `docs/architecture.md`
+- API contracts: `docs/api-contracts.md`
+- Context7 best practices: `docs/technical/context7-best-practices.md`
+- GitHub tools strategy: `memory/github_tools_strategy.md`
+- Security audit: `docs/technical/security-audit.md`
