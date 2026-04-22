@@ -67,8 +67,8 @@ class ProsodicFeatureExtractor:
             pitch_values = pitches[pitch_mask]
 
             # Variação de pitch (indicativo de tremor na voz)
-            pitch_variation = np.std(pitch_values) if len(pitch_values) > 0 else 0
-            voz_tremida = pitch_variation > self.VOICE_TREMOR_THRESHOLD
+            pitch_variation = float(np.std(pitch_values) if len(pitch_values) > 0 else 0)
+            voz_tremida = bool(pitch_variation > self.VOICE_TREMOR_THRESHOLD)
 
             # Energia (volume)
             rms = librosa.feature.rms(y=y)[0]

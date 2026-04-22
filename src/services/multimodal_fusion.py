@@ -101,7 +101,7 @@ class LateFusionCalculator:
         altos = sum(
             1 for res in results.values() if res.risco_violencia == "alto"
         )
-        alerta = altos >= 2 or confiança_fusao > 0.8
+        alerta = bool(altos >= 2 or confiança_fusao > 0.8)
 
         # Recomendação
         recomendacao = self._generate_recommendation(
