@@ -1,26 +1,19 @@
 """Testes de integração para o endpoint multimodal.
 
-Estes testes requerem que a API esteja rodando (via docker-compose.mock.yml).
+Estes testes usam o AsyncClient com ASGITransport para testar
+o app FastAPI diretamente, sem necessidade de servidor rodando.
 """
 
-import time
 from pathlib import Path
 
-import httpx
 import pytest
-
-BASE_URL = "http://localhost:8000"
-
-
-@pytest.fixture
-def client() -> httpx.AsyncClient:
-    return httpx.AsyncClient(base_url=BASE_URL, timeout=30.0)
+from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_endpoint_texto_apenas(client: httpx.AsyncClient) -> None:
+async def test_endpoint_texto_apenas(async_client: AsyncClient) -> None:
     """T042: POST /analyze/multimodal com texto=string -> 200."""
-    response = await client.post(
+    response = await async_client.post(
         "/analyze/multimodal",
         data={"texto": "Estou me sentindo muito ansiosa e com medo"},
     )
@@ -31,7 +24,7 @@ async def test_endpoint_texto_apenas(client: httpx.AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_endpoint_texto_audio(client: httpx.AsyncClient) -> None:
+async def test_endpoint_texto_audio(async_client: AsyncClient) -> None:
     """T043: Multipart com texto e arquivo de áudio -> 200."""
     # Usar fixture de áudio de teste existente
     audio_path = Path("tests/fixtures/audio_test.wav")
@@ -39,7 +32,7 @@ async def test_endpoint_texto_audio(client: httpx.AsyncClient) -> None:
         pytest.skip("Fixture de áudio não encontrada")
 
     with open(audio_path, "rb") as f:
-        response = await client.post(
+        response = await async_client.post(
             "/analyze/multimodal",
             data={"texto": "Estou muito ansiosa"},
             files={"audio": ("audio_test.wav", f, "audio/wav")},
@@ -50,7 +43,7 @@ async def test_endpoint_texto_audio(client: httpx.AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_endpoint_3_modalidades(client: httpx.AsyncClient) -> None:
+async def test_endpoint_3_modalidades(async_client: AsyncClient) -> None:
     """T044: Multipart com texto, áudio e vídeo -> 200, verificar estrutura."""
     audio_path = Path("tests/fixtures/audio_test.wav")
     video_path = Path("tests/fixtures/video_test.mp4")
@@ -58,7 +51,7 @@ async def test_endpoint_3_modalidades(client: httpx.AsyncClient) -> None:
         pytest.skip("Fixtures não encontradas")
 
     with open(audio_path, "rb") as af, open(video_path, "rb") as vf:
-        response = await client.post(
+        response = await async_client.post(
             "/analyze/multimodal",
             data={"texto": "Estou com medo"},
             files={
@@ -77,16 +70,16 @@ async def test_endpoint_3_modalidades(client: httpx.AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_endpoint_sem_modalidade(client: httpx.AsyncClient) -> None:
+async def test_endpoint_sem_modalidade(async_client: AsyncClient) -> None:
     """T045: POST sem nenhuma modalidade -> 400."""
-    response = await client.post("/analyze/multimodal", data={})
+    response = await async_client.post("/analyze/multimodal", data={})
     assert response.status_code == 400
 
 
 @pytest.mark.asyncio
-async def test_campos_obrigatorios_resposta(client: httpx.AsyncClient) -> None:
+async def test_campos_obrigatorios_resposta(async_client: AsyncClient) -> None:
     """T046: Verificar que response sempre contém risco_violencia e risco_saude_mental."""
-    response = await client.post(
+    response = await async_client.post(
         "/analyze/multimodal",
         data={"texto": "Estou muito ansiosa"},
     )
@@ -99,11 +92,14 @@ async def test_campos_obrigatorios_resposta(client: httpx.AsyncClient) -> None:
     assert fusion["risco_saude_mental"] in {"baixo", "medio", "alto"}
 
 
+@pytest.mark.slow
 @pytest.mark.asyncio
-async def test_latencia_15s(client: httpx.AsyncClient) -> None:
+async def test_latencia_15s(async_client: AsyncClient) -> None:
     """T047: Medir tempo de resposta com texto apenas (mock)."""
+    import time
+
     start = time.perf_counter()
-    response = await client.post(
+    response = await async_client.post(
         "/analyze/multimodal",
         data={"texto": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa"},
     )

@@ -3,7 +3,7 @@
 Valida upload de vídeos, processamento YOLOv8 e resposta com riscos.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import status
@@ -57,7 +57,7 @@ class TestVideoEndpointSuccess:
 
         # Criar mock da instância
         mock_instance = MagicMock()
-        mock_instance.analyze.return_value = mock_analysis_result
+        mock_instance.analyze = AsyncMock(return_value=mock_analysis_result)
 
         with (
             patch(
@@ -107,7 +107,7 @@ class TestVideoEndpointSuccess:
         }
 
         mock_instance = MagicMock()
-        mock_instance.analyze.return_value = mock_analysis_result
+        mock_instance.analyze = AsyncMock(return_value=mock_analysis_result)
 
         with (
             patch(
@@ -324,7 +324,7 @@ class TestVideoRequiredFields:
         }
 
         mock_instance = MagicMock()
-        mock_instance.analyze.return_value = mock_result
+        mock_instance.analyze = AsyncMock(return_value=mock_result)
 
         with (
             patch(
@@ -371,7 +371,7 @@ class TestVideoRequiredFields:
         }
 
         mock_instance = MagicMock()
-        mock_instance.analyze.return_value = mock_result
+        mock_instance.analyze = AsyncMock(return_value=mock_result)
 
         with (
             patch(
@@ -446,7 +446,7 @@ class TestVideoRateLimiting:
         }
 
         mock_instance = MagicMock()
-        mock_instance.analyze.return_value = mock_result
+        mock_instance.analyze = AsyncMock(return_value=mock_result)
 
         with (
             patch(

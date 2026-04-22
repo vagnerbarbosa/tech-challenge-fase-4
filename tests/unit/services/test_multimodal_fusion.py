@@ -128,9 +128,9 @@ class TestLateFusionCalculator:
         })
         assert "urgente" in alerta_result.recomendacao.lower()
 
-        # alto sem alerta
+        # alto sem alerta (confiança < 0.8 para não disparar alerta)
         alto_result = calculator.calculate({
-            "texto": ModalidadeResult("alto", "medio", 1.0),
+            "texto": ModalidadeResult("alto", "medio", 0.7),
         })
         assert "prioritário" in alto_result.recomendacao.lower()
 
