@@ -18,7 +18,7 @@ services:
     environment:
       # App
       - APP_NAME=Multimodal Health Analysis API
-      - APP_VERSION=0.4.0
+      - APP_VERSION=0.5.0
       - ENVIRONMENT=development
       - DEBUG=true
       - LOG_LEVEL=DEBUG
@@ -42,6 +42,8 @@ services:
       # Security
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
       - API_KEY=${API_KEY}
+      # Multimodal
+      - MULTIMODAL_TIMEOUT_SECONDS=30
       # LGPD
       - ANONYMIZE_PII=true
       - CONSENT_REQUIRED=true

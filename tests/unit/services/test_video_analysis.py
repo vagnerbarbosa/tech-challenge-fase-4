@@ -172,7 +172,7 @@ class TestVideoAnalysisService:
         }
 
         # Executar análise
-        result = service.analyze(video_path, duration_seconds=10.0, temp_dir=temp_dir)
+        result = service._analyze_sync(video_path, duration_seconds=10.0, temp_dir=temp_dir)
 
         # Verificar resultado
         assert "detecoes" in result
@@ -247,7 +247,7 @@ class TestVideoAnalysisService:
                 "alertas": [],
             }
 
-            _result = service.analyze(video_path, duration_seconds=10.0, temp_dir=temp_dir)
+            _result = service._analyze_sync(video_path, duration_seconds=10.0, temp_dir=temp_dir)
 
             # Verificar que apenas os frames lidos com sucesso foram processados
             assert mock_yolo_service.detect.call_count == 3  # Apenas frames que foram lidos
@@ -299,7 +299,7 @@ class TestVideoAnalysisService:
                 ],
             }
 
-            result = service.analyze(video_path, duration_seconds=10.0, temp_dir=temp_dir)
+            result = service._analyze_sync(video_path, duration_seconds=10.0, temp_dir=temp_dir)
 
             # Verificar que sangramento foi adicionado às detecções
             detecoes = result["detecoes"]
@@ -355,7 +355,7 @@ class TestVideoAnalysisService:
                 "alertas": [],
             }
 
-            service.analyze(video_path, duration_seconds=10.0, temp_dir=temp_dir)
+            service._analyze_sync(video_path, duration_seconds=10.0, temp_dir=temp_dir)
 
             # Verificar que cada detecção tem frame e timestamp
             # Pegar as chamadas feitas ao YOLO
@@ -418,7 +418,7 @@ class TestVideoAnalysisService:
                 "alertas": [],
             }
 
-            _result = service.analyze(video_path, duration_seconds=5.0, temp_dir=temp_dir)
+            _result = service._analyze_sync(video_path, duration_seconds=5.0, temp_dir=temp_dir)
 
             # 2 frames * 2 detecções = 4 detecções totais
             assert _result is not None  # Usar resultado para evitar F841
@@ -450,7 +450,7 @@ class TestVideoAnalysisService:
                 "alertas": [],
             }
 
-            service.analyze(video_path, duration_seconds=5.0, temp_dir=temp_dir)
+            service._analyze_sync(video_path, duration_seconds=5.0, temp_dir=temp_dir)
 
             # Verificar que extract_frames foi chamado com o diretório correto
             call_args = mock_video_processor.extract_frames.call_args
@@ -481,7 +481,7 @@ class TestVideoAnalysisService:
                     "alertas": [],
                 }
 
-                result = service.analyze(video_path, duration_seconds=5.0, temp_dir=temp_dir)
+                result = service._analyze_sync(video_path, duration_seconds=5.0, temp_dir=temp_dir)
 
                 # Tempo deve estar em ms e ser >= 0 (tempo foi calculado)
                 assert result["tempo_processamento_ms"] >= 0
@@ -545,7 +545,7 @@ class TestVideoAnalysisServiceIntegration:
                     "alertas": [],
                 }
 
-                result = service.analyze(
+                result = service._analyze_sync(
                     video_path, duration_seconds=5.0, temp_dir=temp_dir
                 )
 

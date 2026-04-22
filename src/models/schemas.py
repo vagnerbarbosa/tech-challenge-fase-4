@@ -1,8 +1,10 @@
 """Schemas Pydantic para a API de Análise Multimodal de Saúde."""
 
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from fastapi import UploadFile
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class AnalysisMetadata(BaseModel):
@@ -13,6 +15,10 @@ class AnalysisMetadata(BaseModel):
     tempo_processamento_ms: int = Field(..., description="Tempo de processamento em milissegundos")
     cache_hit: bool = Field(default=False, description="Se o resultado veio do cache")
     azure_calls: int = Field(default=0, description="Número de chamadas à API Azure realizadas")
+    modalidades_processadas: list[str] = Field(
+        default_factory=list,
+        description="Lista de modalidades enviadas e processadas na requisição",
+    )
 
 
 class TextAnalysisRequest(BaseModel):
@@ -291,4 +297,129 @@ class VideoAnalysisResponse(BaseModel):
     metadata: VideoAnalysisMetadata = Field(
         ...,
         description="Metadados da análise de vídeo",
+    )
+
+
+# ===========================================
+# Multimodal Fusion Schemas
+# ===========================================
+
+
+class FusionResult(BaseModel):
+    """Resultado da fusão multimodal via late fusion."""
+
+    risco_violencia: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de violência combinado - CAMPO OBRIGATÓRIO",
+    )
+    risco_saude_mental: str = Field(
+        ...,
+        pattern="^(baixo|medio|alto)$",
+        description="Nível de risco de saúde mental combinado - CAMPO OBRIGATÓRIO",
+    )
+    confiança: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Confiança combinada da fusão (0-1)",
+    )
+    alerta: bool = Field(
+        ...,
+        description="True se 2+ riscos altos ou confiança_fusão > 0.8",
+    )
+    recomendacao: str = Field(
+        ...,
+        description="Recomendação clínica baseada no risco combinado",
+    )
+    scores_por_modalidade: dict[str, float] = Field(
+        default_factory=dict,
+        description="Scores individuais de cada modalidade usados na fusão",
+    )
+
+
+class MultimodalRequest(BaseModel):
+    """Modelo de requisição para o endpoint de análise multimodal."""
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "texto": "Estou com muito medo e ansiedade",
+                "patient_id": "uuid-anonimo-123",
+            }
+        }
+    }
+
+    texto: str | None = Field(
+        default=None,
+        min_length=10,
+        max_length=5000,
+        description="Texto para análise (opcional, 10-5000 caracteres)",
+    )
+    audio: UploadFile | None = Field(
+        default=None,
+        description="Arquivo de áudio para análise (opcional)",
+    )
+    video: UploadFile | None = Field(
+        default=None,
+        description="Arquivo de vídeo para análise (opcional)",
+    )
+    patient_id: str | None = Field(
+        default=None,
+        description="ID anônimo do paciente (formato UUID recomendado)",
+    )
+
+    @model_validator(mode="after")
+    def validate_at_least_one_modality(self) -> "MultimodalRequest":
+        """Garante que pelo menos uma modalidade foi fornecida."""
+        if self.texto is None and self.audio is None and self.video is None:
+            raise ValueError("Pelo menos uma modalidade deve ser fornecida (texto, áudio ou vídeo)")
+        return self
+
+
+class MultimodalResponse(BaseModel):
+    """Modelo de resposta para o endpoint de análise multimodal."""
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "fusao": {
+                    "risco_violencia": "medio",
+                    "risco_saude_mental": "alto",
+                    "confiança": 0.75,
+                    "alerta": False,
+                    "recomendacao": "Acompanhamento prioritário recomendado",
+                    "scores_por_modalidade": {"texto": 0.5, "audio": 0.5, "video": 0.0},
+                },
+                "texto": None,
+                "audio": None,
+                "video": None,
+                "metadata": {
+                    "correlation_id": "abc-123",
+                    "timestamp": "2026-04-21T14:30:00Z",
+                    "tempo_processamento_ms": 12500,
+                    "cache_hit": False,
+                    "azure_calls": 2,
+                    "modalidades_processadas": ["texto", "audio"],
+                },
+            }
+        }
+    }
+
+    fusao: FusionResult = Field(..., description="Resultado combinado da fusão multimodal")
+    texto: TextAnalysisResponse | None = Field(
+        default=None,
+        description="Resultado da análise de texto (se fornecido)",
+    )
+    audio: dict[str, Any] | None = Field(
+        default=None,
+        description="Resultado da análise de áudio (se fornecido)",
+    )
+    video: dict[str, Any] | None = Field(
+        default=None,
+        description="Resultado da análise de vídeo (se fornecido)",
+    )
+    metadata: AnalysisMetadata = Field(
+        ...,
+        description="Metadados da análise multimodal",
     )

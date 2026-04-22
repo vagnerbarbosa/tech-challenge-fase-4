@@ -219,3 +219,10 @@ PRN
 # Claude Code local settings
 .claude/settings.local.json
 .mcp.json
+
+# Modelos ML
+*.pt
+*.pth
+*.onnx
+*.tflite
+models/*.pt
