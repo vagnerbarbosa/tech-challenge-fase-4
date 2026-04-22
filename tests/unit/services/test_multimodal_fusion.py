@@ -134,15 +134,15 @@ class TestLateFusionCalculator:
         })
         assert "prioritário" in alto_result.recomendacao.lower()
 
-        # medio
+        # medio (confiança < 0.8 para não disparar alerta)
         medio_result = calculator.calculate({
-            "texto": ModalidadeResult("medio", "medio", 1.0),
+            "texto": ModalidadeResult("medio", "medio", 0.7),
         })
         assert "monitorar" in medio_result.recomendacao.lower()
 
-        # baixo
+        # baixo (confiança < 0.8 para não disparar alerta)
         baixo_result = calculator.calculate({
-            "texto": ModalidadeResult("baixo", "baixo", 1.0),
+            "texto": ModalidadeResult("baixo", "baixo", 0.7),
         })
         assert "rotina" in baixo_result.recomendacao.lower()
 
