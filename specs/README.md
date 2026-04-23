@@ -15,7 +15,7 @@
 | 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | `main` | P1 |
 | 005 | Fusão Multimodal | ✅ Concluído | `005-multimodal-fusion` | P1 |
 | 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
-| 007 | Security Hardening | 🔄 Em Progresso | `011-video-analysis-yolov8` | P1 |
+| 007 | Security Hardening | 🔄 Em Progresso | `007-security-hardening` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
 | 009 | Deploy Azure | 📝 Draft | `009-deploy-azure` | P1 |
 | 010 | Documentação Final | 📝 Draft | `010-documentation` | P1 |
