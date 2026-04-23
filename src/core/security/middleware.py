@@ -74,7 +74,7 @@ class CORSValidation(BaseHTTPMiddleware):
                 count=len(self.allowed_origins),
             )
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:  # type: ignore[override,misc]
         """Processa a requisição e valida CORS.
 
         Args:
@@ -269,7 +269,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.hsts_preload = hsts_preload
         self.csp_report_only = csp_report_only
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:  # type: ignore[override,misc]
         """Processa a requisição e adiciona headers de segurança na resposta.
 
         Args:

@@ -134,8 +134,8 @@ async def analyze_text(
             patient_id=analysis_request.patient_id,
             modalities=["text"],
             risk_detected=(
-                result.get("risco_violencia") == "alto"
-                or result.get("risco_saude_mental") == "alto"
+                result.risco_violencia == "alto"
+                or result.risco_saude_mental == "alto"
             ),
             ip_address=request.client.host if request.client else None,
         )
