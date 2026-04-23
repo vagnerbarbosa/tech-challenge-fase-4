@@ -115,7 +115,7 @@ class CORSValidation(BaseHTTPMiddleware):
                 method=method,
             )
 
-        response = await call_next(request)
+        response = await call_next(request)  # type: ignore[misc]
 
         # Adiciona headers CORS na resposta se necessário
         if origin:
@@ -279,7 +279,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         Returns:
             Response com headers de segurança adicionados
         """
-        response = await call_next(request)
+        response = await call_next(request)  # type: ignore[misc]
 
         # Adiciona header HSTS (T051)
         self._add_hsts_header(response)
