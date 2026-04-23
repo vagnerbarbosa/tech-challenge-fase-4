@@ -119,10 +119,12 @@ async def analyze_video(
             correlation_id=correlation_id,
             error=e.detail,
         )
-        # Customizar mensagem para extensão inválida
+        # Customizar mensagem para extensão e MIME type inválidos
         detail = e.detail
         if "Extensão não permitida" in detail:
             detail = detail.replace("Extensão não permitida:", "Formato de vídeo não suportado:")
+        elif "Tipo de arquivo não suportado" in detail:
+            detail = detail.replace("Tipo de arquivo não suportado", "Tipo de vídeo não suportado")
         raise HTTPException(
             status_code=e.status_code,
             detail=detail,
