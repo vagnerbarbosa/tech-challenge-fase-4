@@ -96,9 +96,6 @@ class SecretMasker:
         Returns:
             Dicionário sanitizado
         """
-        if not isinstance(data, dict):
-            return data
-
         sanitized: dict[str, Any] = {}
         sensitive_keys = {
             "api_key", "apikey", "key", "secret", "password", "token",
@@ -295,9 +292,6 @@ class LogSanitizer:
         Returns:
             Dicionário seguro para logs de auditoria
         """
-        if not isinstance(data, dict):
-            return {}
-
         sanitized: dict[str, Any] = {}
         sensitive_content_keys = {
             "content", "texto", "transcricao", "text", "raw_content",

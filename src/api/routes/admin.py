@@ -6,7 +6,6 @@ e exportação de dados em formato compatível com ANPD conforme exigido pela LG
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from typing import Annotated, Any
 

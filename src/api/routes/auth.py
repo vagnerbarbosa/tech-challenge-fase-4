@@ -162,7 +162,7 @@ async def get_auth_rate_limit_status(request: Request) -> dict[str, Any]:
     }
 
 
-async def check_limiter(identifier: str, limiter_type: str) -> tuple[bool, dict]:
+async def check_limiter(identifier: str, limiter_type: str) -> tuple[bool, dict[str, Any]]:
     """Check rate limit and return info.
 
     Helper function to check rate limit and return info.
