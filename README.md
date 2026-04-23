@@ -107,7 +107,7 @@ docker-compose -f docker-compose.mock.yml up -d
 # Health check
 curl http://localhost:8000/health
 
-# Deve retornar: {"status": "healthy", "version": "0.5.0"}
+# Deve retornar: {"status": "healthy", "version": "0.6.0"}
 ```
 
 ### Passo 3: Testar o Endpoint de Análise de Texto
@@ -187,7 +187,7 @@ cp .env.example .env
 |-----------|----------|-----------|--------|
 | **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
 | **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
-| **App** | `APP_VERSION` | Versão da API | `0.5.0` |
+| **App** | `APP_VERSION` | Versão da API | `0.6.0` |
 | **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
 | **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
 | **Rate Limit** | `MAX_TEXT_REQUESTS_PER_DAY` | Limite diário texto | `160` |

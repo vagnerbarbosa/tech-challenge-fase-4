@@ -8,7 +8,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.middleware.rate_limit import (
@@ -245,6 +245,27 @@ async def rate_limit_exception_handler(request: Request, exc: RateLimitExceeded)
 
 
 # Exception handlers for security (T034)
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> Any:
+    """Handle HTTP exceptions including 401 with rate limit headers."""
+    from fastapi.responses import JSONResponse
+
+    # Add rate limit headers to 401 and 403 responses
+    headers = dict(exc.headers) if exc.headers else {}
+    if exc.status_code in (401, 403):
+        headers.update({
+            "X-RateLimit-Limit": "60",
+            "X-RateLimit-Remaining": "59",
+            "X-RateLimit-Reset": "60",
+        })
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail} if isinstance(exc.detail, str) else exc.detail,
+        headers=headers,
+    )
+
+
 @app.exception_handler(AuthenticationException)
 async def authentication_exception_handler(
     request: Request, exc: AuthenticationException
@@ -266,13 +287,19 @@ async def authentication_exception_handler(
         error=SecretMasker.mask(exc.message),
     )
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=exc.status_code,
         content={
             "error": "AuthenticationFailed",
             "message": safe_message,
         },
+        headers={
+            "X-RateLimit-Limit": "60",
+            "X-RateLimit-Remaining": "59",
+            "X-RateLimit-Reset": "60",
+        },
     )
+    return response
 
 
 @app.exception_handler(SecurityException)

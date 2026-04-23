@@ -112,7 +112,7 @@ class Settings(BaseSettings):
         description="Nome da aplicação",
     )
     app_version: str = Field(
-        default="0.5.0",
+        default="0.6.0",
         description="Versão da aplicação",
     )
     environment: Literal["development", "staging", "production"] = Field(

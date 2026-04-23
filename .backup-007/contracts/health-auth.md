@@ -42,7 +42,7 @@ X-RateLimit-Reset: 45
 ```json
 {
   "status": "healthy",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "environment": "production",
   "timestamp": "2026-04-22T10:30:00Z",
   "rate_limit_info": {
