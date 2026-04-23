@@ -7,17 +7,24 @@ combinando resultados via late fusion ponderado por confiança.
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from structlog import get_logger
 
+from src.api.routes.dependencies import require_api_key
 from src.core.rate_limit import RATE_LIMITS, check_and_increment_quota
+from src.models.audit_log import AuditEventType
 from src.models.schemas import MultimodalResponse
+from src.utils.audit_logger import get_audit_logger
 from src.services.multimodal_fusion import get_fusion_service
 from src.utils.file_validation import validate_audio_file, validate_video_file
 
 logger = get_logger()
 
-router = APIRouter(prefix="/analyze", tags=["Multimodal Analysis"])
+router = APIRouter(
+    prefix="/analyze",
+    tags=["Multimodal Analysis"],
+    dependencies=[Depends(require_api_key)],  # T018: Require auth for all routes
+)
 
 
 @router.post(
@@ -163,11 +170,71 @@ async def analyze_multimodal(
             alerta=response.fusao.alerta,
         )
 
+        # Log audit event
+        modalities = []
+        if texto:
+            modalities.append("text")
+        if audio:
+            modalities.append("audio")
+        if video:
+            modalities.append("video")
+
+        audit = get_audit_logger()
+        audit.log_analysis_created(
+            correlation_id=correlation_id,
+            resource="/analyze/multimodal",
+            patient_id=patient_id,
+            modalities=modalities,
+            risk_detected=(
+                response.fusao.risco_violencia == "alto"
+                or response.fusao.risco_saude_mental == "alto"
+            ),
+            ip_address=None,
+        )
+
         return response
 
     except HTTPException:
+        # Log failed analysis
+        modalities = []
+        if texto:
+            modalities.append("text")
+        if audio:
+            modalities.append("audio")
+        if video:
+            modalities.append("video")
+
+        audit = get_audit_logger()
+        audit.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/multimodal",
+            resource="/analyze/multimodal",
+            result="failure",
+            patient_id=patient_id,
+            details={"modalities": modalities},
+        )
         raise
     except Exception as e:
+        # Log failed analysis
+        modalities = []
+        if texto:
+            modalities.append("text")
+        if audio:
+            modalities.append("audio")
+        if video:
+            modalities.append("video")
+
+        audit = get_audit_logger()
+        audit.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/multimodal",
+            resource="/analyze/multimodal",
+            result="error",
+            patient_id=patient_id,
+            details={"error": str(e), "modalities": modalities},
+        )
         logger.error(
             "multimodal_error",
             correlation_id=correlation_id,

@@ -6,10 +6,14 @@ integrando transcrição Azure Speech com análise prosódica librosa.
 
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from structlog import get_logger
 
-from src.api.routes.dependencies import get_temp_manager
+from src.api.routes.dependencies import (
+    get_temp_manager,
+    require_api_key,
+    validate_audio_upload,
+)
 from src.core.exceptions import (
     AzureAuthenticationError,
     AzureQuotaExceededError,
@@ -17,17 +21,19 @@ from src.core.exceptions import (
 )
 from src.core.rate_limit import check_and_increment_quota
 from src.core.temp_file_manager import TempFileManager
+from src.models.audit_log import AuditEventType
 from src.models.schemas import AnalysisMetadata, AudioAnalysisResponse
+from src.utils.audit_logger import get_audit_logger
 from src.services.audio_analysis import AudioAnalysisService
-from src.utils.file_validation import (
-    check_file_size,
-    check_upload_size,
-    validate_audio_file,
-)
+from src.utils.file_validation import check_file_size
 
 logger = get_logger()
 
-router = APIRouter(prefix="/analyze", tags=["Audio Analysis"])
+router = APIRouter(
+    prefix="/analyze",
+    tags=["Audio Analysis"],
+    dependencies=[Depends(require_api_key)],  # T018: Require auth for all routes
+)
 
 # Rate limits do Azure Free Tier
 AUDIO_DAILY_LIMIT = 10  # minutos por dia
@@ -91,10 +97,9 @@ async def analyze_audio(
         patient_id=patient_id,
     )
 
-    # Validação do arquivo
+    # Validação do arquivo (segurança: filename, magic bytes, tamanho)
     try:
-        await validate_audio_file(file)
-        await check_upload_size(file)  # Valida tamanho antes de salvar
+        await validate_audio_upload(file)
     except HTTPException as e:
         logger.warning(
             "audio_validation_failed",
@@ -240,6 +245,20 @@ async def analyze_audio(
             risco_saude_mental=response.risco_saude_mental,
             sentimento=response.sentimento,
             entonação=response.entonação,
+        )
+
+        # Log audit event
+        audit = get_audit_logger()
+        audit.log_analysis_created(
+            correlation_id=correlation_id,
+            resource="/analyze/audio",
+            patient_id=patient_id,
+            modalities=["audio"],
+            risk_detected=(
+                response.risco_violencia == "alto"
+                or response.risco_saude_mental == "alto"
+            ),
+            ip_address=None,  # Not available in this context
         )
 
         return response

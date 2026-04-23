@@ -1,20 +1,31 @@
-"""Rotas para análise de texto."""
+"""Rotas para análise de texto.
+
+Endpoints for text analysis with authentication and audit logging.
+"""
 
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from src.api.routes.dependencies import require_api_key, RoleRequired
+from src.core.security.models import SecurityContext
+from src.models.audit_log import AuditEventType
 from src.models.schemas import TextAnalysisRequest, TextAnalysisResponse
 from src.services.text_analysis import (
     TextAnalysisError,
     TextAnalysisService,
     get_text_analysis_service,
 )
+from src.utils.audit_logger import get_audit_logger
 
 # Dependency type reutilizável com Annotated (Python 3.9+)
 TextAnalysisServiceDep = Annotated[TextAnalysisService, Depends(get_text_analysis_service)]
 
-router = APIRouter(prefix="/analyze", tags=["Text Analysis"])
+router = APIRouter(
+    prefix="/analyze",
+    tags=["Text Analysis"],
+    dependencies=[Depends(require_api_key)],  # T018: Require auth for all routes
+)
 
 
 @router.post(
@@ -106,15 +117,45 @@ async def analyze_text(
     Raises:
         HTTPException: Em caso de erro na análise
     """
+    # Generate correlation ID
+    correlation_id = str(request.headers.get("X-Request-ID", id(request)))
+
     try:
         result = await service.analyze(
             text=analysis_request.texto,
             tipo=analysis_request.tipo or "geral",
             patient_id=analysis_request.patient_id,
         )
+
+        # Log audit event
+        audit_logger = get_audit_logger()
+        audit_logger.log_analysis_created(
+            correlation_id=correlation_id,
+            resource="/analyze/text",
+            patient_id=analysis_request.patient_id,
+            modalities=["text"],
+            risk_detected=(
+                result.get("risco_violencia") == "alto"
+                or result.get("risco_saude_mental") == "alto"
+            ),
+            ip_address=request.client.host if request.client else None,
+        )
+
         return result
 
     except TextAnalysisError as e:
+        # Log failed analysis
+        audit_logger = get_audit_logger()
+        audit_logger.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/text",
+            resource="/analyze/text",
+            result="failure",
+            patient_id=analysis_request.patient_id,
+            details={"error": e.message, "modalities": ["text"]},
+            ip_address=request.client.host if request.client else None,
+        )
         raise HTTPException(
             status_code=e.status_code,
             detail={
@@ -123,6 +164,18 @@ async def analyze_text(
             },
         ) from e
     except Exception as e:
+        # Log failed analysis
+        audit_logger = get_audit_logger()
+        audit_logger.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/text",
+            resource="/analyze/text",
+            result="error",
+            patient_id=analysis_request.patient_id,
+            details={"error": str(e), "modalities": ["text"]},
+            ip_address=request.client.host if request.client else None,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={

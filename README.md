@@ -247,6 +247,132 @@ A pasta `/scripts` contém utilitários para facilitar o desenvolvimento:
 
 ---
 
+## 🔒 Segurança
+
+Esta API implementa hardening de segurança completo seguindo OWASP API Top 10 2023/2026 e LGPD compliance.
+
+### Autenticação
+
+Todas as rotas protegidas requerem autenticação via API Key:
+
+```bash
+# Gerar uma API Key segura
+openssl rand -hex 32
+
+# Configurar no .env
+SECURITY_API_KEY=sua-key-aqui
+SECURITY_ENVIRONMENT=production
+```
+
+**Uso nas requisições:**
+```bash
+curl -H "X-API-Key: sua-key-aqui" http://localhost:8000/health
+```
+
+### Rate Limiting
+
+Proteção contra DDoS e brute force:
+
+| Endpoint | Limite | Janela |
+|----------|--------|--------|
+| Geral | 60 req/min | 1 minuto |
+| Auth | 5 req/min | 1 minuto |
+| Health/Docs | Ilimitado | - |
+
+**Headers de resposta:**
+- `X-RateLimit-Limit`: Limite total
+- `X-RateLimit-Remaining`: Requisições restantes
+- `X-RateLimit-Reset`: Tempo até reset (segundos)
+
+### Upload de Arquivos
+
+Validações de segurança implementadas:
+- ✅ **Magic Bytes**: Verificação real do tipo de arquivo (não apenas extensão)
+- ✅ **Sanitização**: Remoção de path traversal (`../`)
+- ✅ **Extensões**: Apenas formatos permitidos (WAV, MP3, OGG, MP4, AVI, MOV)
+- ✅ **Tamanho**: Máximo 50MB por arquivo
+- ✅ **Conteúdo**: Bloqueio de arquivos executáveis
+
+### Headers de Segurança
+
+Todos as respostas incluem headers OWASP:
+- `Strict-Transport-Security`: HSTS (produção)
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Content-Security-Policy`: CSP restritivo
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+### Auditoria LGPD
+
+Logs de auditoria estruturados para compliance:
+- 📁 Local: `logs/audit/`
+- 📄 Formato: JSON Lines (NDJSON)
+- 🔐 Integridade: SHA-256 checksums
+- ⏱️ Retenção: 365 dias (configurável)
+- 🛡️ Hash de PII: patient_id e IPs são hasheados
+
+**Endpoints de admin:**
+```bash
+# Estatísticas de auditoria
+GET /admin/audit/stats
+
+# Exportação ANPD (LGPD)
+GET /admin/audit/export?start_date=2026-01-01&end_date=2026-04-23
+
+# Verificação de integridade
+GET /admin/audit/verify
+```
+
+### CORS
+
+Configuração restritiva com whitelist explícita:
+
+```bash
+# .env
+SECURITY_CORS_ORIGINS="https://app-segura.com,https://app2.com"
+```
+
+- ❌ `*` nunca permitido em produção
+- ✅ Preflight requests validados
+- ✅ Warning em logs se CORS insecure
+
+### Sanitização de Logs
+
+Dados sensíveis são automaticamente mascarados:
+- 🔑 API Keys
+- 🔐 Azure credentials
+- 🪪 Tokens JWT
+- 📡 Connection strings
+- 🔒 Private keys
+
+### Dependências de Segurança
+
+Para instalar dependências de segurança:
+```bash
+poetry install --extras security
+```
+
+Inclui:
+- `slowapi`: Rate limiting
+- `redis`: Backend distribuído para rate limit
+- `python-magic`: Validação de magic bytes
+
+### Scanning de Segurança
+
+```bash
+# Bandit (SAST)
+poetry run bandit -r src/
+
+# Safety (SCA)
+poetry run safety check
+
+# Executar todos os testes de segurança
+poetry run pytest tests/security/ -v
+```
+
+---
+
 ## Testando a API
 
 ### Endpoint: POST /analyze/text

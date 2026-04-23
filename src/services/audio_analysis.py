@@ -17,6 +17,7 @@ import numpy as np
 from structlog import get_logger
 
 from src.core.config import get_settings
+from src.core.security.log_sanitizer import PatientIdHasher
 from src.infrastructure.azure_speech_client import AzureSpeechClient
 from src.services.risk_detector import calculate_risk
 
@@ -144,7 +145,7 @@ class AudioAnalysisService:
         logger.info(
             "audio_analysis_started",
             audio_file=str(audio_path),
-            patient_id=patient_id,
+            patient_id=PatientIdHasher.hash(patient_id),
         )
 
         try:

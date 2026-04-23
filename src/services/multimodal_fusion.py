@@ -17,6 +17,7 @@ from typing import Any
 from fastapi import HTTPException, UploadFile
 from structlog import get_logger
 
+from src.core.security.log_sanitizer import PatientIdHasher
 from src.models.schemas import (
     AnalysisMetadata,
     FusionResult,
@@ -210,7 +211,7 @@ class FusionService:
             has_text=texto is not None,
             has_audio=audio is not None,
             has_video=video is not None,
-            patient_id=patient_id,
+            patient_id=PatientIdHasher.hash(patient_id),
         )
 
         # Validar que pelo menos uma modalidade foi fornecida

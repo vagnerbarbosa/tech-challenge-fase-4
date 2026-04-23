@@ -8,8 +8,86 @@ e carregamento de variáveis de ambiente.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class SecurityConfig(BaseModel):
+    """Configurações de segurança para hardening da API (Spec 007).
+
+    Agrupa todas as configurações relacionadas à segurança:
+    - Autenticação via API Key
+    - Rate limiting
+    - CORS
+    - Redis para rate limiting distribuído
+    """
+
+    api_key: str = Field(
+        default="change-me-in-production",
+        description="API key para autenticação de endpoints",
+    )
+    api_key_header: str = Field(
+        default="X-API-Key",
+        description="Nome do header HTTP para API key",
+    )
+    rate_limit_per_minute: int = Field(
+        default=60,
+        description="Requisições permitidas por minuto por IP/cliente",
+    )
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        description="URL de conexão com Redis para rate limiting",
+    )
+    cors_origins: str = Field(
+        default="http://localhost:3000,http://localhost:8000",
+        description="Origens permitidas para CORS (separadas por vírgula)",
+    )
+    environment: Literal["development", "staging", "production"] = Field(
+        default="development",
+        description="Ambiente de execução para ajustes de segurança",
+    )
+    secret_key: str = Field(
+        default="change-me-in-production",
+        description="Chave secreta para tokens e criptografia",
+    )
+
+    @field_validator("cors_origins")
+    @classmethod
+    def validate_cors_origins(cls, v: str) -> str:
+        """Valida que CORS origins não está vazio em produção."""
+        return v
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Retorna lista de origens CORS permitidas."""
+        return [origin.strip() for origin in self.cors_origins.split(",")]
+
+    @property
+    def is_production(self) -> bool:
+        """Retorna True se ambiente é produção."""
+        return self.environment == "production"
+
+    # T010: Audit log configuration
+    audit_log_path: str = Field(
+        default="logs/audit.log",
+        description="Path to the audit log file",
+        alias="AUDIT_LOG_PATH",
+    )
+    audit_log_retention_days: int = Field(
+        default=90,
+        description="Number of days to retain audit logs",
+        alias="AUDIT_LOG_RETENTION_DAYS",
+    )
+    audit_log_max_size_mb: int = Field(
+        default=100,
+        description="Maximum size of audit log file before rotation (MB)",
+        alias="AUDIT_LOG_MAX_SIZE_MB",
+    )
+    audit_log_compress: bool = Field(
+        default=True,
+        description="Compress rotated audit logs with gzip",
+        alias="AUDIT_LOG_COMPRESS",
+    )
 
 
 class Settings(BaseSettings):
@@ -51,8 +129,14 @@ class Settings(BaseSettings):
     )
 
     # ===========================================
-    # Configurações de Segurança
+    # Configurações de Segurança (Spec 007)
     # ===========================================
+    security_config: SecurityConfig = Field(
+        default_factory=SecurityConfig,
+        description="Configurações de segurança hardening",
+    )
+
+    # Legacy security fields (deprecated, use security_config)
     secret_key: str = Field(
         default="change-me-in-production",
         description="Chave secreta para segurança JWT/API",

@@ -78,6 +78,7 @@ Requires: `export GITHUB_TOKEN=ghp_your_token`
 ## Conventions
 
 - **Code**: English (variables, functions, classes)
+- **Docstrings**: Portuguese (Brazilian context) - todas as docstrings de módulos, classes e funções devem estar em português
 - **Docs**: Portuguese (Brazilian context)
 - **Commits**: Conventional commits (`feat:`, `fix:`, `docs:`)
 - **Types**: Mandatory type hints on public APIs

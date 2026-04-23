@@ -105,6 +105,47 @@ class QuotaExceededException(AppException):
         self.service = service
 
 
+# T005: Security Exceptions
+
+class UnauthorizedException(SecurityException):
+    """Exceção para acesso não autorizado (401)."""
+
+    def __init__(
+        self,
+        message: str = "Acesso não autorizado",
+        details: dict[str, Any] | None = None,
+    ):
+        super().__init__(message, 401, details)
+
+
+class ForbiddenException(SecurityException):
+    """Exceção para acesso proibido (403)."""
+
+    def __init__(
+        self,
+        message: str = "Acesso proibido",
+        details: dict[str, Any] | None = None,
+    ):
+        super().__init__(message, 403, details)
+
+
+class RateLimitExceeded(AppException):
+    """Exceção para limite de requisições excedido (429)."""
+
+    def __init__(
+        self,
+        message: str = "Limite de requisições excedido",
+        retry_after: int | None = None,
+        details: dict[str, Any] | None = None,
+    ):
+        super().__init__(
+            message,
+            429,
+            {"retry_after": retry_after, **(details or {})},
+        )
+        self.retry_after = retry_after
+
+
 # Aliases para compatibilidade com azure_speech_client
 AzureServiceError = AzureServiceException
 AzureAuthenticationError = AuthenticationException

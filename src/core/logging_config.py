@@ -1,7 +1,8 @@
 """Configuração de logging estruturado usando structlog.
 
 Fornece logs formatados em JSON para produção e logs legíveis
-para desenvolvimento. Inclui context binding para rastreamento de requests.
+para desenvolvimento. Inclui context binding para rastreamento de requests
+e sanitização de dados sensíveis.
 """
 
 import logging
@@ -11,6 +12,62 @@ from typing import Any
 import structlog
 
 from src.core.config import settings
+from src.core.security.log_sanitizer import SecretMasker, PatientIdHasher
+
+
+def sanitize_processor(
+    logger: Any,
+    method_name: str,
+    event_dict: dict[str, Any],
+) -> dict[str, Any]:
+    """Structlog processor to sanitize sensitive data in logs.
+
+    Masks secrets and hashes patient IDs before logging.
+    Applied to all log events automatically.
+
+    Args:
+        logger: Logger instance
+        method_name: Name of the logging method
+        event_dict: Dictionary containing log event data
+
+    Returns:
+        Sanitized event dictionary
+    """
+    # List of keys that should always be sanitized
+    sensitive_keys = {
+        "api_key", "apikey", "secret", "password", "token",
+        "credential", "auth", "authorization", "azure_text_key",
+        "azure_speech_key", "azure_vision_key", "connection_string",
+        "patient_id", "paciente_id", "user_id", "cpf", "rg",
+    }
+
+    sanitized: dict[str, Any] = {}
+    for key, value in event_dict.items():
+        key_lower = key.lower()
+
+        # Sanitize based on key name
+        if any(sk in key_lower for sk in sensitive_keys):
+            if "patient_id" in key_lower or "paciente_id" in key_lower:
+                sanitized[key] = PatientIdHasher.hash(value)
+            else:
+                sanitized[key] = SecretMasker.MASK_VALUE
+        elif isinstance(value, str):
+            # Apply secret masking to string values
+            sanitized[key] = SecretMasker.mask(value)
+        elif isinstance(value, dict):
+            # Recursively sanitize nested dicts
+            sanitized[key] = SecretMasker.mask_dict(
+                PatientIdHasher.hash_dict_keys(value)
+            )
+        elif isinstance(value, list):
+            # Recursively sanitize lists
+            sanitized[key] = SecretMasker.mask_list(
+                PatientIdHasher.hash_list_items(value)
+            )
+        else:
+            sanitized[key] = value
+
+    return sanitized
 
 
 def configure_logging() -> None:
@@ -30,6 +87,8 @@ def configure_logging() -> None:
         structlog.stdlib.add_logger_name,
         # Substitui informação de exceção por traceback formatado
         structlog.processors.format_exc_info,
+        # T008: Sanitization processor - masks secrets and hashes patient IDs
+        sanitize_processor,
     ]
 
     if settings.environment == "production":

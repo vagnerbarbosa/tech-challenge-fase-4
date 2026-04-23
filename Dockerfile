@@ -45,7 +45,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     APP_HOME=/app \
     PORT=8000
 
-# Instalar dependências de runtime (OpenCV + FFmpeg + libs para audio)
+# Instalar dependências de runtime (OpenCV + FFmpeg + libs para audio + libmagic para python-magic)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libgl1 \
@@ -56,6 +56,7 @@ RUN apt-get update \
         libgomp1 \
         ffmpeg \
         libsndfile1 \
+        libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Diretório de trabalho

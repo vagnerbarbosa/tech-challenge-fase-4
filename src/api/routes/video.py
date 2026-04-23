@@ -8,22 +8,25 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from structlog import get_logger
 
+from src.api.routes.dependencies import require_api_key, validate_video_upload
 from src.core.cache import get_cache
 from src.core.rate_limit import RATE_LIMITS, check_and_increment_quota
+from src.models.audit_log import AuditEventType
 from src.models.schemas import VideoAnalysisMetadata, VideoAnalysisResponse
+from src.utils.audit_logger import get_audit_logger
 from src.services.video_analysis import VideoAnalysisService
-from src.utils.file_validation import (
-    check_upload_size,
-    check_video_duration,
-    validate_video_file,
-)
+from src.utils.file_validation import check_video_duration
 
 logger = get_logger()
 
-router = APIRouter(prefix="/analyze", tags=["Video Analysis"])
+router = APIRouter(
+    prefix="/analyze",
+    tags=["Video Analysis"],
+    dependencies=[Depends(require_api_key)],  # T018: Require auth for all routes
+)
 
 
 @router.post(
@@ -107,10 +110,9 @@ async def analyze_video(
             detail="Rate limit exceeded for video analysis",
         ) from None
 
-    # Validação do arquivo
+    # Validação do arquivo (segurança: filename, magic bytes, tamanho)
     try:
-        await validate_video_file(video)
-        await check_upload_size(video)
+        await validate_video_upload(video)
     except HTTPException as e:
         logger.warning(
             "video_validation_failed",
@@ -197,6 +199,20 @@ async def analyze_video(
             risco_saude_mental=result["risco_saude_mental"],
         )
 
+        # Log audit event
+        audit = get_audit_logger()
+        audit.log_analysis_created(
+            correlation_id=correlation_id,
+            resource="/analyze/video",
+            patient_id=patient_id,
+            modalities=["video"],
+            risk_detected=(
+                result["risco_violencia"] == "alto"
+                or result["risco_saude_mental"] == "alto"
+            ),
+            ip_address=None,  # Not available in this context
+        )
+
         # Montar resposta
         return VideoAnalysisResponse(
             risco_violencia=result["risco_violencia"],
@@ -215,8 +231,30 @@ async def analyze_video(
         )
 
     except HTTPException:
+        # Log failed analysis
+        audit = get_audit_logger()
+        audit.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/video",
+            resource="/analyze/video",
+            result="failure",
+            patient_id=patient_id,
+            details={"modalities": ["video"]},
+        )
         raise
     except Exception as e:
+        # Log failed analysis
+        audit = get_audit_logger()
+        audit.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/video",
+            resource="/analyze/video",
+            result="error",
+            patient_id=patient_id,
+            details={"error": str(e), "modalities": ["video"]},
+        )
         logger.error(
             "video_analysis_error",
             correlation_id=correlation_id,

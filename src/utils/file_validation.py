@@ -65,39 +65,100 @@ def _get_logger() -> "BoundLogger":
     return _logger
 
 
+async def check_upload_size_streaming(
+    file: UploadFile,
+    max_size: int = MAX_FILE_SIZE,
+    chunk_size: int = 8192,
+) -> int:
+    """Verifica tamanho do upload via streaming sem carregar tudo em memória.
+
+    Esta função implementa validação de tamanho eficiente para arquivos grandes,
+    lendo em chunks e interrompendo assim que o limite é excedido.
+
+    Args:
+        file: UploadFile do FastAPI
+        max_size: Tamanho máximo em bytes (padrão: 50MB)
+        chunk_size: Tamanho do chunk em bytes (padrão: 8KB)
+
+    Returns:
+        Tamanho total do arquivo em bytes
+
+    Raises:
+        HTTPException: 413 se arquivo muito grande, 400 se arquivo vazio
+    """
+    logger = _get_logger()
+
+    # Fast path: se file.size está disponível, valida diretamente
+    if file.size is not None:
+        if file.size > max_size:
+            logger.warning(
+                "file_size_validation_failed",
+                reason="file_too_large",
+                size_bytes=file.size,
+                max_size=max_size,
+            )
+            raise HTTPException(
+                status_code=413,
+                detail=f"Arquivo muito grande ({file.size / (1024*1024):.1f}MB). "
+                       f"Máximo: {max_size / (1024*1024):.0f}MB",
+            )
+        if file.size == 0:
+            raise HTTPException(status_code=400, detail="Arquivo vazio")
+        return file.size
+
+    # Streaming validation: lê em chunks
+    total_size = 0
+    has_content = False
+
+    while True:
+        chunk = await file.read(chunk_size)
+        if not chunk:
+            break
+
+        has_content = True
+        total_size += len(chunk)
+
+        # Verifica limite imediatamente
+        if total_size > max_size:
+            await file.seek(0)  # Tenta resetar para permiter outra leitura
+            logger.warning(
+                "file_size_validation_failed",
+                reason="file_too_large_streaming",
+                size_bytes=total_size,
+                max_size=max_size,
+            )
+            raise HTTPException(
+                status_code=413,
+                detail=f"Arquivo excede o limite de {max_size / (1024*1024):.0f}MB",
+            )
+
+    # Reseta posição para permitir leitura subsequente
+    await file.seek(0)
+
+    if not has_content:
+        raise HTTPException(status_code=400, detail="Arquivo vazio")
+
+    logger.debug(
+        "file_size_validated_streaming",
+        size_bytes=total_size,
+    )
+
+    return total_size
+
+
 async def check_upload_size(file: UploadFile, max_size: int = MAX_FILE_SIZE) -> None:
     """Verifica tamanho do upload antes de salvar em disco.
+
+    Wrapper compatível que usa streaming validation internamente.
 
     Args:
         file: UploadFile do FastAPI
         max_size: Tamanho máximo em bytes (padrão: 50MB)
 
     Raises:
-        HTTPException: 400 se arquivo muito grande
+        HTTPException: 400/413 se arquivo muito grande ou vazio
     """
-    logger = _get_logger()
-
-    # Verifica file.size (disponível em UploadFile se setado pelo client)
-    if file.size and file.size > max_size:
-        logger.warning(
-            "audio_validation_failed",
-            reason="file_too_large",
-            size_bytes=file.size,
-            max_size=max_size,
-        )
-        raise HTTPException(
-            status_code=400,
-            detail=f"Arquivo muito grande ({file.size / (1024*1024):.1f}MB). Máximo: {max_size / (1024*1024):.0f}MB",
-        )
-
-    # Fallback: ler conteúdo parcial para estimar tamanho se file.size não disponível
-    # Nota: Isso não é 100% preciso mas evita salvar arquivos muito grandes
-    if not file.size:
-        # Lê uma amostra para verificar se arquivo tem conteúdo
-        sample = await file.read(1)
-        await file.seek(0)
-        if len(sample) == 0:
-            raise HTTPException(status_code=400, detail="Arquivo vazio")
+    await check_upload_size_streaming(file, max_size)
 
 
 async def validate_audio_file(file: UploadFile) -> None:
