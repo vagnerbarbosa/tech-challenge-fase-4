@@ -4,7 +4,6 @@ Tests secret masking, patient ID hashing, and log sanitization
 to ensure LGPD compliance.
 """
 
-import pytest
 
 from src.core.security.log_sanitizer import (
     LogSanitizer,

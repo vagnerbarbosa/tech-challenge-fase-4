@@ -5,9 +5,7 @@ and maintains consistency under load.
 """
 
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 
-import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -107,8 +105,9 @@ class TestAsyncRateLimitConcurrency:
 
     async def test_async_parallel_requests(self):
         """Test rate limiting with async parallel requests."""
-        from src.api.main import app
         from httpx import ASGITransport, AsyncClient
+
+        from src.api.main import app
 
         async with AsyncClient(
             transport=ASGITransport(app=app),
@@ -130,8 +129,9 @@ class TestAsyncRateLimitConcurrency:
 
     async def test_async_auth_parallel(self):
         """Test auth rate limiting with async requests."""
-        from src.api.main import app
         from httpx import ASGITransport, AsyncClient
+
+        from src.api.main import app
 
         async with AsyncClient(
             transport=ASGITransport(app=app),

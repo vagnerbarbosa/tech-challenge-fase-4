@@ -16,8 +16,8 @@ from src.core.cache import get_cache
 from src.core.rate_limit import RATE_LIMITS, check_and_increment_quota
 from src.models.audit_log import AuditEventType
 from src.models.schemas import VideoAnalysisMetadata, VideoAnalysisResponse
-from src.utils.audit_logger import get_audit_logger
 from src.services.video_analysis import VideoAnalysisService
+from src.utils.audit_logger import get_audit_logger
 from src.utils.file_validation import check_video_duration
 
 logger = get_logger()

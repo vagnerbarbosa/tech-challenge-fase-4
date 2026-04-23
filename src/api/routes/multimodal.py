@@ -14,8 +14,8 @@ from src.api.routes.dependencies import require_api_key
 from src.core.rate_limit import RATE_LIMITS, check_and_increment_quota
 from src.models.audit_log import AuditEventType
 from src.models.schemas import MultimodalResponse
-from src.utils.audit_logger import get_audit_logger
 from src.services.multimodal_fusion import get_fusion_service
+from src.utils.audit_logger import get_audit_logger
 from src.utils.file_validation import validate_audio_file, validate_video_file
 
 logger = get_logger()

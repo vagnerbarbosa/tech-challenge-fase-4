@@ -4,7 +4,6 @@ Tests that rate limits are properly enforced on API endpoints
 and that appropriate headers are returned.
 """
 
-import asyncio
 
 import pytest
 from fastapi.testclient import TestClient
@@ -67,7 +66,7 @@ class TestRateLimitEnforcement:
         """Test that exceeding rate limit returns 429 status."""
         # Make many requests quickly
         responses = []
-        for i in range(70):  # More than default 60/min limit
+        for _i in range(70):  # More than default 60/min limit
             response = client.post(
                 "/analyze/text",
                 json={"text": "test"},
@@ -81,7 +80,7 @@ class TestRateLimitEnforcement:
     def test_429_has_retry_after_header(self, client: TestClient):
         """Test that 429 response has Retry-After header."""
         # Make many requests
-        for i in range(70):
+        for _i in range(70):
             response = client.post(
                 "/analyze/text",
                 json={"text": "test"},
@@ -97,7 +96,7 @@ class TestRateLimitEnforcement:
     def test_429_response_body(self, client: TestClient):
         """Test that 429 response has appropriate body."""
         # Make many requests
-        for i in range(70):
+        for _i in range(70):
             response = client.post(
                 "/analyze/text",
                 json={"text": "test"},
@@ -120,7 +119,7 @@ class TestAuthRateLimiting:
         """Test that auth endpoints have stricter rate limits."""
         # Make 6 auth requests (limit is 5/min)
         responses = []
-        for i in range(6):
+        for _i in range(6):
             response = client.post(
                 "/auth/validate",
                 headers={"X-API-Key": "invalid-key"},
@@ -163,7 +162,7 @@ class TestSkippedPaths:
     def test_health_endpoint_skips_rate_limit(self, client: TestClient):
         """Test that health endpoint is not rate limited."""
         # Make many requests to health endpoint
-        for i in range(100):
+        for _i in range(100):
             response = client.get("/health")
             assert response.status_code == 200
             # Should not have rate limit headers (skipped)
@@ -190,14 +189,12 @@ class TestRateLimitReset:
         """Test that rate limit resets after time window."""
         # This test may be flaky depending on timing
         # Make some requests
-        for i in range(5):
+        for _i in range(5):
             client.post("/analyze/text", json={"text": "test"})
 
         # Get remaining
         response = client.post("/analyze/text", json={"text": "test"})
         if response.status_code == 200:
-            remaining_before = int(response.headers["X-RateLimit-Remaining"])
-
             # Wait a bit (this might not be reliable in tests)
             import time
             time.sleep(1)

@@ -7,10 +7,6 @@ Reference: spec.md FR-009 - mascarar secrets em logs
 """
 
 import json
-import logging
-from io import StringIO
-
-import pytest
 
 from src.core.security.log_sanitizer import (
     LogSanitizer,

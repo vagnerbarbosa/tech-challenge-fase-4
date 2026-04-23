@@ -7,9 +7,9 @@ T068: Security test test_cors_production.py
 """
 
 from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
-from fastapi import FastAPI
 
 
 class TestCORSProductionSecurity:

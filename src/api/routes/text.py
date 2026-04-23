@@ -7,8 +7,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from src.api.routes.dependencies import require_api_key, RoleRequired
-from src.core.security.models import SecurityContext
+from src.api.routes.dependencies import require_api_key
 from src.models.audit_log import AuditEventType
 from src.models.schemas import TextAnalysisRequest, TextAnalysisResponse
 from src.services.text_analysis import (

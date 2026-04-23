@@ -21,10 +21,9 @@ from src.core.exceptions import (
 )
 from src.core.rate_limit import check_and_increment_quota
 from src.core.temp_file_manager import TempFileManager
-from src.models.audit_log import AuditEventType
 from src.models.schemas import AnalysisMetadata, AudioAnalysisResponse
-from src.utils.audit_logger import get_audit_logger
 from src.services.audio_analysis import AudioAnalysisService
+from src.utils.audit_logger import get_audit_logger
 from src.utils.file_validation import check_file_size
 
 logger = get_logger()

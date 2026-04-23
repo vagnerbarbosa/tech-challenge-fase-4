@@ -3,7 +3,6 @@
 T011: Unit test test_api_key_validator.py - validação de key válida/inválida/vazia
 """
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 

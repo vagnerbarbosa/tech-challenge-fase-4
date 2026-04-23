@@ -7,20 +7,16 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, Request, UploadFile, status
+from fastapi import Depends, HTTPException, Header, Request, UploadFile, status
 
-from src.core.config import settings
 from src.core.security.auth import (
-    APIKeyValidator,
-    BOLAProtector,
-    RBACValidator,
     get_api_key_validator,
     get_bola_protector,
     get_rbac_validator,
 )
 from src.core.security.file_validator import (
-    MAX_FILE_SIZE_BYTES,
     ALLOWED_EXTENSIONS,
+    MAX_FILE_SIZE_BYTES,
     validate_upload_file as _validate_upload_file,
 )
 from src.core.security.models import SecurityContext

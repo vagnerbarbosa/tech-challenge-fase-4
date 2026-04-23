@@ -115,8 +115,6 @@ class TestFilenameSanitizer:
         """Test blocking of .php extension."""
         result = sanitizer.sanitize("shell.php.mp3")  # Double extension trick
 
-        # Should extract and check the final extension
-        ext = result.sanitized_name.split(".")[-1] if result.sanitized_name else ""
         # The full extension is .mp3 in this case
         assert result.sanitized_name is not None
 

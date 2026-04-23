@@ -6,11 +6,10 @@ Fornece endpoints para verificar saúde e prontidão da API.
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 
 from src.api.routes.dependencies import require_api_key, require_api_key_optional
 from src.core.config import settings
-from src.core.exceptions import AuthenticationException
 from src.core.logging_config import get_logger
 from src.core.rate_limit import get_quota_status
 from src.core.security.models import SecurityContext

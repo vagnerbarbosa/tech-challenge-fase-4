@@ -5,13 +5,10 @@ Tests the AuditLogger class and related functions for LGPD compliance.
 
 from __future__ import annotations
 
-import gzip
 import json
-import os
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -72,7 +69,7 @@ class TestAuditLoggerInitialization:
         """Test that logger creates log directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             log_dir = Path(tmpdir) / "audit_logs"
-            logger = AuditLogger(log_dir=str(log_dir))
+            _ = AuditLogger(log_dir=str(log_dir))
             assert log_dir.exists()
 
     def test_uses_provided_settings(self) -> None:
@@ -180,7 +177,7 @@ class TestAuditLoggerLogEntry:
         log_files = list(temp_logger.log_dir.glob("audit-*.log"))
         assert len(log_files) > 0
 
-        with open(log_files[0], "r") as f:
+        with open(log_files[0]) as f:
             content = f.read()
             assert "test-123" in content
 
@@ -196,7 +193,7 @@ class TestAuditLoggerLogEntry:
 
         # Read the log file
         log_files = list(temp_logger.log_dir.glob("audit-*.log"))
-        with open(log_files[0], "r") as f:
+        with open(log_files[0]) as f:
             line = f.readline()
             entry = json.loads(line)
             assert "_checksum" in entry
@@ -309,7 +306,7 @@ class TestAuditLogIntegrity:
 
         # Read and verify
         log_files = list(temp_logger.log_dir.glob("audit-*.log"))
-        with open(log_files[0], "r") as f:
+        with open(log_files[0]) as f:
             line = f.readline()
             is_valid = temp_logger._verify_entry_integrity(line)
             assert is_valid is True

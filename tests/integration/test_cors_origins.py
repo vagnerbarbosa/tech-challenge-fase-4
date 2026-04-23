@@ -72,12 +72,6 @@ class TestCORSOrigins:
         )
         assert response.status_code == 200
 
-        cors_headers = [
-            "access-control-allow-origin",
-            "access-control-allow-credentials",
-            "access-control-allow-methods",
-        ]
-
         # Verifica que pelo menos o header de origem está presente
         assert "access-control-allow-origin" in response.headers
 

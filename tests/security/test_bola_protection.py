@@ -5,16 +5,14 @@ T013: Security test test_bola_protection.py - acesso a recurso de outro usuário
 Tests verify that users cannot access resources they don't own (OWASP API1).
 """
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from src.api.main import app
 from src.core.exceptions import AuthenticationException, ForbiddenException
-from src.core.security.auth import BOLAProtector, APIKeyValidator
+from src.core.security.auth import BOLAProtector
 from src.core.security.models import SecurityContext
-from src.core.config import SecurityConfig
 from tests.conftest import TEST_API_KEY
 
 

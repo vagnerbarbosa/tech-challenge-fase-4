@@ -4,19 +4,18 @@ Configura a aplicação FastAPI com todos os middlewares, rotas
 e handlers de exceção.
 """
 
+import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import admin, audio, auth, health, multimodal, text, video
 from src.api.middleware.rate_limit import (
     AuthRateLimitMiddleware,
     RateLimitMiddleware,
 )
-import uuid
-
+from src.api.routes import admin, audio, auth, health, multimodal, text, video
 from src.core.config import settings
 from src.core.exceptions import (
     AppException,

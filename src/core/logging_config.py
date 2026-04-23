@@ -12,7 +12,7 @@ from typing import Any
 import structlog
 
 from src.core.config import settings
-from src.core.security.log_sanitizer import SecretMasker, PatientIdHasher
+from src.core.security.log_sanitizer import PatientIdHasher, SecretMasker
 
 
 def sanitize_processor(

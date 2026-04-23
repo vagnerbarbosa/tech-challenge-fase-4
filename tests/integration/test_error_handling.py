@@ -6,7 +6,6 @@ and that proper generic messages are returned.
 Reference: spec.md FR-034 - ocultar detalhes de erro em produção
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 from src.api.main import app

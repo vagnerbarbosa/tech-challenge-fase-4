@@ -8,15 +8,13 @@ from __future__ import annotations
 import json
 import tempfile
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from httpx import Response
 
 from src.api.main import app
 from src.models.audit_log import AuditEventType, AuditLogEntry
-from src.utils.audit_logger import AuditLogger, get_audit_logger
+from src.utils.audit_logger import AuditLogger
 from tests.conftest import TEST_API_KEY
 
 
@@ -314,7 +312,7 @@ class TestAuditEntryImmutability:
         log_files = list(temp_audit_logger.log_dir.glob("audit-*.log"))
         assert len(log_files) > 0
 
-        with open(log_files[0], "r") as f:
+        with open(log_files[0]) as f:
             line = f.readline()
             entry = json.loads(line)
             assert "_checksum" in entry

@@ -118,7 +118,7 @@ class TestTokenBucketRateLimiter:
     async def test_is_allowed_multiple_requests(self, limiter):
         """Test multiple requests consume tokens."""
         # Make 5 requests
-        for i in range(5):
+        for _i in range(5):
             is_allowed, info = await limiter.is_allowed("client_2")
             assert is_allowed is True
 
@@ -367,7 +367,7 @@ class TestEdgeCases:
 
         allowed_count = 0
         # Make 150 rapid requests
-        for i in range(150):
+        for _i in range(150):
             is_allowed, _ = await limiter.is_allowed("rapid_client")
             if is_allowed:
                 allowed_count += 1

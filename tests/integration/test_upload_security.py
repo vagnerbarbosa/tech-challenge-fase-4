@@ -9,10 +9,8 @@ Tests end-to-end upload security including:
 """
 
 import io
-from pathlib import Path
 
 import pytest
-from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
 from src.api.main import app

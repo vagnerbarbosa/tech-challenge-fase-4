@@ -4,11 +4,11 @@ Provides endpoints for API key validation with brute force protection
 via strict rate limiting (5 requests per minute).
 """
 
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, Header, Request, status
 from structlog import get_logger
 
 from src.core.config import settings
-from src.core.exceptions import AuthenticationException, ForbiddenException
+from src.core.exceptions import AuthenticationException
 from src.core.security.rate_limiter import check_rate_limit
 
 logger = get_logger(__name__)

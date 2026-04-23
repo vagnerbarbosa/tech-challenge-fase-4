@@ -9,12 +9,11 @@ from __future__ import annotations
 import json
 import tempfile
 from datetime import datetime, timedelta
-from typing import Any
 
 import pytest
 
-from src.models.audit_log import AuditEventType, AuditLogEntry
-from src.utils.audit_logger import AuditLogger, get_audit_logger
+from src.models.audit_log import AuditEventType
+from src.utils.audit_logger import AuditLogger
 
 
 class TestLGPDCompliance:
@@ -365,7 +364,7 @@ class TestLGPDCompliance:
         log_files = list(temp_audit_logger.log_dir.glob("audit-*.log"))
         assert len(log_files) > 0
 
-        with open(log_files[0], "r") as f:
+        with open(log_files[0]) as f:
             line = f.readline()
             data = json.loads(line)
             assert "_checksum" in data
