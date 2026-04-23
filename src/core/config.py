@@ -29,7 +29,7 @@ def _get_package_version() -> str:
         return "0.6.0"
 
 
-class SecurityConfig(BaseModel):
+class SecurityConfig(BaseSettings):
     """Configurações de segurança para hardening da API (Spec 007).
 
     Agrupa todas as configurações relacionadas à segurança:
@@ -37,7 +37,17 @@ class SecurityConfig(BaseModel):
     - Rate limiting
     - CORS
     - Redis para rate limiting distribuído
+
+    Variáveis de ambiente são carregadas com prefixo SECURITY_.
+    Exemplo: SECURITY_API_KEY, SECURITY_CORS_ORIGINS
     """
+
+    model_config = SettingsConfigDict(
+        env_prefix="SECURITY_",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
     api_key: str = Field(
         default="change-me-in-production",
