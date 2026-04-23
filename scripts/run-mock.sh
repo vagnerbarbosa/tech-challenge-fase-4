@@ -2,8 +2,23 @@
 # ===========================================
 # Script para rodar API com Mocks Azure
 # ===========================================
+# Uso: ./scripts/run-mock.sh [flags]
+#   --rebuild    Força rebuild das imagens sem cache
+#
 
 set -e
+
+REBUILD=false
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --rebuild)
+            REBUILD=true
+            shift
+            ;;
+    esac
+done
 
 echo "🚀 Iniciando ambiente com mocks Azure..."
 echo ""
@@ -22,6 +37,16 @@ elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
 else
     echo "❌ Docker Compose não encontrado!"
     exit 1
+fi
+
+# Se --rebuild, remover imagens antigas e rebuildar
+if [ "$REBUILD" = true ]; then
+    echo "🧹 Rebuild forçado - removendo imagens antigas..."
+    $COMPOSE -f docker-compose.mock.yml down 2>/dev/null || true
+    docker rmi tech-challenge-fase-4-api tech-challenge-fase-4-mock-azure 2>/dev/null || true
+    echo "🔨 Rebuildando imagens..."
+    $COMPOSE -f docker-compose.mock.yml build --no-cache
+    echo ""
 fi
 
 # Subir serviços
