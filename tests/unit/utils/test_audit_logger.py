@@ -68,13 +68,19 @@ class TestAuditLoggerInitialization:
     def test_creates_log_directory(self) -> None:
         """Test that logger creates log directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
+            # Reset singleton for test
+            AuditLogger._instance = None
             log_dir = Path(tmpdir) / "audit_logs"
             _ = AuditLogger(log_dir=str(log_dir))
             assert log_dir.exists()
+            # Cleanup
+            AuditLogger._instance = None
 
     def test_uses_provided_settings(self) -> None:
         """Test that logger uses provided settings."""
         with tempfile.TemporaryDirectory() as tmpdir:
+            # Reset singleton for test
+            AuditLogger._instance = None
             logger = AuditLogger(
                 log_dir=str(tmpdir),
                 max_size_bytes=1024,
@@ -82,6 +88,8 @@ class TestAuditLoggerInitialization:
             )
             assert logger.max_size_bytes == 1024
             assert logger.max_age_days == 30
+            # Cleanup
+            AuditLogger._instance = None
 
 
 class TestAuditLoggerLogEntry:
@@ -532,6 +540,8 @@ class TestAuditLogImmutability:
 
     def test_audit_log_entry_is_frozen(self) -> None:
         """Test that AuditLogEntry is immutable."""
+        from pydantic import ValidationError
+
         entry = AuditLogEntry(
             event_type=AuditEventType.ANALYSIS_CREATED,
             correlation_id="test-123",
@@ -540,8 +550,8 @@ class TestAuditLogImmutability:
             result="success",
         )
 
-        # Attempting to modify should raise error (frozen model)
-        with pytest.raises(TypeError):
+        # Attempting to modify should raise ValidationError (frozen model in Pydantic v2)
+        with pytest.raises(ValidationError):
             entry.action = "modified"
 
     def test_model_config_frozen(self) -> None:

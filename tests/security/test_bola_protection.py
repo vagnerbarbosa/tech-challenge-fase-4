@@ -1,8 +1,8 @@
-"""Security tests for BOLA (Broken Object Level Authorization) protection.
+"""Testes de segurança para proteção BOLA (Broken Object Level Authorization).
 
 T013: Security test test_bola_protection.py - acesso a recurso de outro usuário retorna 403
 
-Tests verify that users cannot access resources they don't own (OWASP API1).
+Testes verificam que usuários não podem acessar recursos que não são deles (OWASP API1).
 """
 
 
@@ -17,10 +17,10 @@ from tests.conftest import TEST_API_KEY
 
 
 class TestBOLAProtection:
-    """Test cases for BOLA (Broken Object Level Authorization) protection."""
+    """Casos de teste para proteção BOLA (Broken Object Level Authorization)."""
 
     def test_user_cannot_access_other_user_resource(self) -> None:
-        """Test that user1 cannot access user2's resource."""
+        """Testa que user1 não pode acessar recurso de user2."""
         protector = BOLAProtector()
 
         # Simulate User 1's security context
@@ -43,7 +43,7 @@ class TestBOLAProtection:
         assert "patient-data-123" in str(exc_info.value.message)
 
     def test_user_can_access_own_resource(self) -> None:
-        """Test that user can access their own resource."""
+        """Testa que usuário pode acessar seu próprio recurso."""
         protector = BOLAProtector()
 
         user_ctx = SecurityContext(
@@ -61,7 +61,7 @@ class TestBOLAProtection:
         )
 
     def test_bypass_via_admin_role(self) -> None:
-        """Test that admin users can bypass ownership checks."""
+        """Testa que usuários admin podem ignorar verificações de ownership."""
         protector = BOLAProtector()
 
         admin_ctx = SecurityContext(
@@ -79,7 +79,7 @@ class TestBOLAProtection:
         )
 
     def test_unauthenticated_user_access_denied(self) -> None:
-        """Test that unauthenticated users cannot access any resources."""
+        """Testa que usuários não autenticados não podem acessar recursos."""
         protector = BOLAProtector()
 
         anon_ctx = SecurityContext.anonymous(request_id="req-anon")
@@ -94,7 +94,7 @@ class TestBOLAProtection:
         assert exc_info.value.status_code == 401
 
     def test_bola_with_none_resource_owner(self) -> None:
-        """Test handling of None resource owner (public resource)."""
+        """Testa tratamento de owner None (recurso público)."""
         protector = BOLAProtector()
 
         user_ctx = SecurityContext(
@@ -113,15 +113,15 @@ class TestBOLAProtection:
 
 
 class TestBOLAWithAPIEndpoints:
-    """BOLA protection tests in context of API endpoints."""
+    """Testes de proteção BOLA no contexto de endpoints de API."""
 
     @pytest.fixture
     def client(self) -> TestClient:
-        """Create test client for FastAPI app."""
+        """Cria cliente de teste para app FastAPI."""
         return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def test_endpoint_with_patient_id_in_path(self, client: TestClient) -> None:
-        """Test that patient-specific endpoints enforce ownership."""
+        """Testa que endpoints específicos de paciente aplicam ownership."""
         # This test validates that endpoints with patient_id in path
         # properly check ownership
 
@@ -136,10 +136,10 @@ class TestBOLAWithAPIEndpoints:
 
 
 class TestResourceEnumeration:
-    """Tests to prevent resource enumeration attacks."""
+    """Testes para prevenir ataques de enumeração de recursos."""
 
     def test_error_messages_do_not_leak_existence(self) -> None:
-        """Test that error messages don't reveal if resource exists."""
+        """Testa que mensagens de erro não revelam se recurso existe."""
         protector = BOLAProtector()
 
         # Different errors for "resource doesn't exist" vs "no permission"
@@ -170,10 +170,10 @@ class TestResourceEnumeration:
 
 
 class TestBOLAEdgeCases:
-    """Edge case tests for BOLA protection."""
+    """Testes de casos de borda para proteção BOLA."""
 
     def test_empty_resource_owner(self) -> None:
-        """Test BOLA with empty string resource owner."""
+        """Testa BOLA com resource owner sendo string vazia."""
         protector = BOLAProtector()
 
         user_ctx = SecurityContext(
@@ -192,7 +192,7 @@ class TestBOLAEdgeCases:
             )
 
     def test_bola_with_write_role_only(self) -> None:
-        """Test that write role alone doesn't grant ownership bypass."""
+        """Testa que role de escrita sozinha não concede bypass de ownership."""
         protector = BOLAProtector()
 
         user_ctx = SecurityContext(
@@ -211,7 +211,7 @@ class TestBOLAEdgeCases:
             )
 
     def test_bola_multiple_roles(self) -> None:
-        """Test BOLA with multiple roles including read+write."""
+        """Testa BOLA com múltiplas roles incluindo read+write."""
         protector = BOLAProtector()
 
         user_ctx = SecurityContext(
@@ -230,10 +230,10 @@ class TestBOLAEdgeCases:
 
 
 class TestSecurityContextOwnership:
-    """Tests for security context ownership verification."""
+    """Testes para verificação de ownership do contexto de segurança."""
 
     def test_context_with_no_api_key_hash(self) -> None:
-        """Test BOLA with security context missing api_key_hash."""
+        """Testa BOLA com contexto de segurança sem api_key_hash."""
         protector = BOLAProtector()
 
         # Context without api_key_hash
@@ -253,7 +253,7 @@ class TestSecurityContextOwnership:
             )
 
     def test_context_is_frozen(self) -> None:
-        """Test that security context is immutable (frozen)."""
+        """Testa que contexto de segurança é imutável (frozen)."""
         ctx = SecurityContext(
             request_id="req-123",
             api_key_hash="hash123",

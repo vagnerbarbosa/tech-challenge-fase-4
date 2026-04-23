@@ -1,4 +1,4 @@
-"""Unit tests for API Key validator.
+"""Testes unitários para validador de API Key.
 
 T011: Unit test test_api_key_validator.py - validação de key válida/inválida/vazia
 """
@@ -13,10 +13,10 @@ from src.core.security.models import SecurityContext
 
 
 class TestAPIKeyValidator:
-    """Test cases for APIKeyValidator."""
+    """Casos de teste para APIKeyValidator."""
 
     def test_validate_valid_key(self) -> None:
-        """Test validation with valid API key."""
+        """Testa validação com API key válida."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -28,7 +28,7 @@ class TestAPIKeyValidator:
         assert result is True
 
     def test_validate_invalid_key(self) -> None:
-        """Test validation with invalid API key."""
+        """Testa validação com API key inválida."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -40,7 +40,7 @@ class TestAPIKeyValidator:
         assert result is False
 
     def test_validate_empty_key(self) -> None:
-        """Test validation with empty API key."""
+        """Testa validação com API key vazia."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -52,7 +52,7 @@ class TestAPIKeyValidator:
         assert result is False
 
     def test_validate_none_key(self) -> None:
-        """Test validation with None API key."""
+        """Testa validação com API key None."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -64,7 +64,7 @@ class TestAPIKeyValidator:
         assert result is False
 
     def test_validate_whitespace_key(self) -> None:
-        """Test validation with whitespace-only API key."""
+        """Testa validação com API key contendo apenas espaços em branco."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -76,7 +76,7 @@ class TestAPIKeyValidator:
         assert result is False
 
     def test_get_security_context_valid(self) -> None:
-        """Test getting security context with valid key."""
+        """Testa obter contexto de segurança com key válida."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -97,7 +97,7 @@ class TestAPIKeyValidator:
         assert ctx.ip_address == "192.168.1.1"
 
     def test_get_security_context_invalid(self) -> None:
-        """Test getting security context with invalid key raises exception."""
+        """Testa que obter contexto de segurança com key inválida lança exceção."""
         config = SecurityConfig(
             api_key="test-api-key-123",
             api_key_header="X-API-Key",
@@ -114,7 +114,7 @@ class TestAPIKeyValidator:
         assert exc_info.value.status_code == 401
 
     def test_get_security_context_dev_mode(self) -> None:
-        """Test that development mode allows default key."""
+        """Testa que modo de desenvolvimento permite key padrão."""
         config = SecurityConfig(
             api_key="dev-key",
             api_key_header="X-API-Key",
@@ -132,7 +132,7 @@ class TestAPIKeyValidator:
         assert "admin" in ctx.roles
 
     def test_api_key_hash_not_stored_plain(self) -> None:
-        """Verify that plain API key is not stored in security context."""
+        """Verifica que API key em plaintext não é armazenada no contexto de segurança."""
         config = SecurityConfig(
             api_key="secret-key-123",
             api_key_header="X-API-Key",
@@ -153,10 +153,10 @@ class TestAPIKeyValidator:
 
 
 class TestRBACValidator:
-    """Test cases for RBACValidator."""
+    """Casos de teste para RBACValidator."""
 
     def test_has_role_true(self) -> None:
-        """Test role check when role is present."""
+        """Testa verificação de role quando role está presente."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -169,7 +169,7 @@ class TestRBACValidator:
         assert result is True
 
     def test_has_role_false(self) -> None:
-        """Test role check when role is not present."""
+        """Testa verificação de role quando role não está presente."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -182,7 +182,7 @@ class TestRBACValidator:
         assert result is False
 
     def test_require_role_success(self) -> None:
-        """Test require_role when user has the role."""
+        """Testa require_role quando usuário tem a role."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -194,7 +194,7 @@ class TestRBACValidator:
         validator.require_role(ctx, "write")
 
     def test_require_role_failure(self) -> None:
-        """Test require_role when user doesn't have the role."""
+        """Testa require_role quando usuário não tem a role."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -208,7 +208,7 @@ class TestRBACValidator:
         assert exc_info.value.status_code == 403
 
     def test_has_any_role_true(self) -> None:
-        """Test has_any_role when user has at least one role."""
+        """Testa has_any_role quando usuário tem pelo menos uma role."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -221,7 +221,7 @@ class TestRBACValidator:
         assert result is True
 
     def test_has_any_role_false(self) -> None:
-        """Test has_any_role when user has none of the roles."""
+        """Testa has_any_role quando usuário não tem nenhuma das roles."""
         validator = RBACValidator()
         ctx = SecurityContext(
             request_id="req-123",
@@ -234,7 +234,7 @@ class TestRBACValidator:
         assert result is False
 
     def test_roles_from_api_key(self) -> None:
-        """Test that different API keys get appropriate roles."""
+        """Testa que diferentes API keys recebem roles apropriadas."""
         config = SecurityConfig(
             api_key="admin-key",
             api_key_header="X-API-Key",
@@ -253,10 +253,10 @@ class TestRBACValidator:
 
 
 class TestBOLAProtector:
-    """Test cases for BOLAProtector."""
+    """Casos de teste para BOLAProtector."""
 
     def test_verify_ownership_match(self) -> None:
-        """Test ownership verification when user owns the resource."""
+        """Testa verificação de ownership quando usuário é dono do recurso."""
         protector = BOLAProtector()
         ctx = SecurityContext(
             request_id="req-123",
@@ -272,7 +272,7 @@ class TestBOLAProtector:
         )
 
     def test_verify_ownership_mismatch(self) -> None:
-        """Test ownership verification when user doesn't own the resource."""
+        """Testa verificação de ownership quando usuário não é dono do recurso."""
         protector = BOLAProtector()
         ctx = SecurityContext(
             request_id="req-123",
@@ -291,7 +291,7 @@ class TestBOLAProtector:
         assert "resource-1" in str(exc_info.value.message)
 
     def test_verify_ownership_unauthenticated(self) -> None:
-        """Test ownership verification for unauthenticated user."""
+        """Testa verificação de ownership para usuário não autenticado."""
         protector = BOLAProtector()
         ctx = SecurityContext.anonymous(request_id="req-123")
 
@@ -305,7 +305,7 @@ class TestBOLAProtector:
         assert exc_info.value.status_code == 401
 
     def test_verify_ownership_admin_bypass(self) -> None:
-        """Test that admin can access any resource."""
+        """Testa que admin pode acessar qualquer recurso."""
         protector = BOLAProtector()
         ctx = SecurityContext(
             request_id="req-123",
@@ -322,7 +322,7 @@ class TestBOLAProtector:
         )
 
     def test_verify_ownership_with_none_owner(self) -> None:
-        """Test ownership verification with None owner (public resource)."""
+        """Testa verificação de ownership com owner None (recurso público)."""
         protector = BOLAProtector()
         ctx = SecurityContext(
             request_id="req-123",
@@ -339,10 +339,10 @@ class TestBOLAProtector:
 
 
 class TestSecurityIntegration:
-    """Integration tests for security components working together."""
+    """Testes de integração para componentes de segurança trabalhando juntos."""
 
     def test_full_auth_flow_success(self) -> None:
-        """Test complete authentication flow with valid credentials."""
+        """Testa fluxo completo de autenticação com credenciais válidas."""
         config = SecurityConfig(
             api_key="valid-key",
             api_key_header="X-API-Key",
@@ -370,7 +370,7 @@ class TestSecurityIntegration:
         )
 
     def test_full_auth_flow_bola_violation(self) -> None:
-        """Test complete flow detecting BOLA violation."""
+        """Testa fluxo completo detectando violação BOLA."""
         # Use production environment to ensure no admin bypass
         config = SecurityConfig(
             api_key="user1-key",

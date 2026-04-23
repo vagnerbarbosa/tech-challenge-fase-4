@@ -1,7 +1,7 @@
-"""Unit tests for TokenBucketRateLimiter.
+"""Testes unitários para TokenBucketRateLimiter.
 
-Tests the token bucket algorithm, backend implementations,
-and rate limiting behavior.
+Testa o algoritmo de token bucket, implementações de backends
+e comportamento de rate limiting.
 """
 
 import asyncio
@@ -21,22 +21,22 @@ from src.core.security.rate_limiter import (
 
 
 class TestMemoryRateLimiterBackend:
-    """Tests for MemoryRateLimiterBackend."""
+    """Testes para MemoryRateLimiterBackend."""
 
     @pytest.fixture
     def backend(self):
-        """Create a fresh memory backend."""
+        """Cria um backend em memória limpo."""
         return MemoryRateLimiterBackend()
 
     @pytest.mark.asyncio
     async def test_get_token_bucket_new_key(self, backend):
-        """Test getting bucket for new key returns None."""
+        """Testa que obter bucket para nova chave retorna None."""
         result = await backend.get_token_bucket("test_key")
         assert result is None
 
     @pytest.mark.asyncio
     async def test_set_and_get_token_bucket(self, backend):
-        """Test setting and getting token bucket."""
+        """Testa definir e obter bucket de tokens."""
         bucket = {"tokens": 50.0, "last_update": time.time()}
         await backend.set_token_bucket("test_key", bucket, ttl=60)
 
@@ -47,24 +47,24 @@ class TestMemoryRateLimiterBackend:
 
     @pytest.mark.asyncio
     async def test_token_bucket_expiry(self, backend):
-        """Test that expired buckets are cleaned up."""
+        """Testa que buckets expirados são limpos."""
         bucket = {"tokens": 50.0, "last_update": time.time()}
         await backend.set_token_bucket("test_key", bucket, ttl=1)
 
-        # Should exist immediately
+        # Deve existir imediatamente
         result = await backend.get_token_bucket("test_key")
         assert result is not None
 
-        # Wait for expiry
+        # Aguarda expiração
         await asyncio.sleep(1.1)
 
-        # Should be expired
+        # Deve estar expirado
         result = await backend.get_token_bucket("test_key")
         assert result is None
 
     @pytest.mark.asyncio
     async def test_increment_counter(self, backend):
-        """Test counter increment."""
+        """Testa incremento de contador."""
         count = await backend.increment_counter("counter_key", ttl=60)
         assert count == 1
 
@@ -73,7 +73,7 @@ class TestMemoryRateLimiterBackend:
 
     @pytest.mark.asyncio
     async def test_counter_expiry(self, backend):
-        """Test counter expiry."""
+        """Testa expiração de contador."""
         await backend.increment_counter("counter_key", ttl=1)
         await asyncio.sleep(1.1)
 
@@ -82,24 +82,24 @@ class TestMemoryRateLimiterBackend:
 
     @pytest.mark.asyncio
     async def test_get_counter_nonexistent(self, backend):
-        """Test getting counter for non-existent key."""
+        """Testa obter contador para chave inexistente."""
         count = await backend.get_counter("nonexistent")
         assert count == 0
 
 
 class TestTokenBucketRateLimiter:
-    """Tests for TokenBucketRateLimiter."""
+    """Testes para TokenBucketRateLimiter."""
 
     @pytest.fixture
     def backend(self):
-        """Create a fresh memory backend."""
+        """Cria um backend em memória limpo."""
         return MemoryRateLimiterBackend()
 
     @pytest.fixture
     def limiter(self, backend):
-        """Create a rate limiter with 60/min rate."""
+        """Cria um rate limiter com taxa de 60/min."""
         return TokenBucketRateLimiter(
-            rate=1.0,  # 1 token per second
+            rate=1.0,  # 1 token por segundo
             capacity=60,  # 60 burst
             backend=backend,
             key_prefix="test",
@@ -107,7 +107,7 @@ class TestTokenBucketRateLimiter:
 
     @pytest.mark.asyncio
     async def test_is_allowed_new_client(self, limiter):
-        """Test first request from new client is allowed."""
+        """Testa que primeira requisição de novo cliente é permitida."""
         is_allowed, info = await limiter.is_allowed("client_1")
         assert is_allowed is True
         assert info["limit"] == 60
@@ -116,34 +116,34 @@ class TestTokenBucketRateLimiter:
 
     @pytest.mark.asyncio
     async def test_is_allowed_multiple_requests(self, limiter):
-        """Test multiple requests consume tokens."""
-        # Make 5 requests
+        """Testa que múltiplas requisições consomem tokens."""
+        # Faz 5 requisições
         for _i in range(5):
             is_allowed, info = await limiter.is_allowed("client_2")
             assert is_allowed is True
 
-        # Should have 55 remaining
+        # Deve ter 55 restantes
         is_allowed, info = await limiter.is_allowed("client_2")
         assert is_allowed is True
         assert info["remaining"] == 54
 
     @pytest.mark.asyncio
     async def test_rate_limit_exceeded(self, limiter):
-        """Test rate limit is enforced."""
-        # Create a limiter with small capacity for testing
+        """Testa que o rate limit é aplicado."""
+        # Cria um limiter com capacidade pequena para teste
         backend = MemoryRateLimiterBackend()
         small_limiter = TokenBucketRateLimiter(
-            rate=0.1,  # Slow refill
-            capacity=2,  # Small capacity
+            rate=0.1,  # Recarga lenta
+            capacity=2,  # Capacidade pequena
             backend=backend,
             key_prefix="small",
         )
 
-        # Consume all tokens
-        await small_limiter.is_allowed("client_3")  # 1 remaining
-        await small_limiter.is_allowed("client_3")  # 0 remaining
+        # Consome todos os tokens
+        await small_limiter.is_allowed("client_3")  # 1 restante
+        await small_limiter.is_allowed("client_3")  # 0 restantes
 
-        # Next request should be denied
+        # Próxima requisição deve ser negada
         is_allowed, info = await small_limiter.is_allowed("client_3")
         assert is_allowed is False
         assert info["remaining"] == 0
@@ -151,109 +151,109 @@ class TestTokenBucketRateLimiter:
 
     @pytest.mark.asyncio
     async def test_token_refill(self):
-        """Test tokens refill over time."""
+        """Testa que tokens recarregam ao longo do tempo."""
         backend = MemoryRateLimiterBackend()
         limiter = TokenBucketRateLimiter(
-            rate=10.0,  # 10 tokens per second
+            rate=10.0,  # 10 tokens por segundo
             capacity=10,
             backend=backend,
             key_prefix="refill",
         )
 
-        # Consume all tokens
+        # Consome todos os tokens
         await limiter.is_allowed("client_4")
         is_allowed, info = await limiter.is_allowed("client_4")
         if is_allowed:
-            await limiter.is_allowed("client_4")  # Ensure we consume all
+            await limiter.is_allowed("client_4")  # Garante que consumiu tudo
 
-        # Wait for refill
-        await asyncio.sleep(0.5)  # Should add ~5 tokens
+        # Aguarda recarga
+        await asyncio.sleep(0.5)  # Deve adicionar ~5 tokens
 
-        # Should be allowed now
+        # Deve ser permitido agora
         is_allowed, info = await limiter.is_allowed("client_4")
         assert is_allowed is True
 
     @pytest.mark.asyncio
     async def test_different_clients_isolated(self, limiter):
-        """Test that different clients have separate buckets."""
-        # Client A uses tokens
+        """Testa que clientes diferentes têm buckets separados."""
+        # Cliente A usa tokens
         await limiter.is_allowed("client_a")
         await limiter.is_allowed("client_a")
 
-        # Client B should have full bucket
+        # Cliente B deve ter bucket cheio
         is_allowed, info = await limiter.is_allowed("client_b")
         assert is_allowed is True
         assert info["remaining"] == 59
 
     @pytest.mark.asyncio
     async def test_get_rate_limit_info(self, limiter):
-        """Test getting rate limit info without consuming."""
-        # Consume some tokens
+        """Testa obter informações de rate limit sem consumir."""
+        # Consome alguns tokens
         await limiter.is_allowed("client_5")
         await limiter.is_allowed("client_5")
 
-        # Get info without consuming
+        # Obtém info sem consumir
         info = await limiter.get_rate_limit_info("client_5")
         assert info["limit"] == 60
         assert info["remaining"] == 58
 
     @pytest.mark.asyncio
     async def test_get_rate_limit_info_new_client(self, limiter):
-        """Test getting info for new client."""
+        """Testa obter info para novo cliente."""
         info = await limiter.get_rate_limit_info("new_client")
         assert info["limit"] == 60
         assert info["remaining"] == 60
 
     @pytest.mark.asyncio
     async def test_reset(self, limiter):
-        """Test resetting rate limit."""
-        # Consume tokens
+        """Testa resetar rate limit."""
+        # Consome tokens
         await limiter.is_allowed("client_6")
 
-        # Reset
+        # Reseta
         await limiter.reset("client_6")
 
-        # Should be back to full
+        # Deve voltar ao total
         info = await limiter.get_rate_limit_info("client_6")
         assert info["remaining"] == 60
 
     @pytest.mark.asyncio
     async def test_custom_tokens_consumption(self, limiter):
-        """Test consuming multiple tokens at once."""
+        """Testa consumir múltiplos tokens de uma vez."""
         is_allowed, info = await limiter.is_allowed("client_7", tokens=5)
         assert is_allowed is True
         assert info["remaining"] == 55  # 60 - 5
 
 
 class TestRateLimiterCreation:
-    """Tests for rate limiter creation functions."""
+    """Testes para funções de criação de rate limiter."""
 
     def test_create_rate_limiter_default(self):
-        """Test creating rate limiter with defaults."""
+        """Testa criar rate limiter com padrões."""
         limiter = create_rate_limiter(requests_per_minute=60)
         assert limiter.rate == 1.0  # 60/60
         assert limiter.capacity == 60
 
     def test_create_rate_limiter_custom_burst(self):
-        """Test creating rate limiter with custom burst."""
+        """Testa criar rate limiter com burst customizado."""
         limiter = create_rate_limiter(requests_per_minute=30, burst=10)
         assert limiter.rate == 0.5  # 30/60
         assert limiter.capacity == 10
 
     def test_get_rate_limiters_singleton(self):
-        """Test that get_rate_limiters returns singleton."""
+        """Testa que get_rate_limiters retorna singleton."""
         limiters1 = get_rate_limiters()
         limiters2 = get_rate_limiters()
         assert limiters1 is limiters2
 
 
 class TestCheckRateLimit:
-    """Tests for check_rate_limit function."""
+    """Testes para função check_rate_limit."""
 
     @pytest.mark.asyncio
     async def test_check_rate_limit_allowed(self):
-        """Test check_rate_limit when allowed."""
-        # Use general limiter which should allow first request
+        """Testa check_rate_limit quando permitido."""
+        # Usa limiter geral que deve permitir primeira requisição
         is_allowed, info = await check_rate_limit("test_check_allowed", "general")
         assert is_allowed is True
         assert "limit" in info
@@ -261,53 +261,54 @@ class TestCheckRateLimit:
 
     @pytest.mark.asyncio
     async def test_check_rate_limit_raises_exception(self):
-        """Test check_rate_limit raises RateLimitExceeded."""
-        # Create a limiter that will definitely reject
+        """Testa check_rate_limit retorna tuple em vez de lançar exceção."""
+        # Cria um limiter que definitivamente rejeitará
         backend = MemoryRateLimiterBackend()
         limiter = TokenBucketRateLimiter(
-            rate=0.001,  # Very slow refill
+            rate=0.001,  # Recarga muito lenta
             capacity=1,
             backend=backend,
             key_prefix="exception_test",
         )
 
-        # Consume the only token
+        # Consome o único token
         await limiter.is_allowed("exceeded_client")
 
-        # Reset singleton to use our test limiter
+        # Reseta singleton para usar nosso limiter de teste
         from src.core.security import rate_limiter
         old_limiters = rate_limiter._rate_limiters
         rate_limiter._rate_limiters = None
 
-        # Create new limiters with our backend
+        # Cria novos limiters com nosso backend
         limiters = get_rate_limiters()
         limiters.general = limiter
 
         try:
-            with pytest.raises(RateLimitExceeded) as exc_info:
-                await check_rate_limit("exceeded_client", "general")
+            # check_rate_limit agora retorna (is_allowed, info) em vez de lançar
+            is_allowed, info = await check_rate_limit("exceeded_client", "general")
 
-            assert exc_info.value.status_code == 429
-            assert "retry_after" in exc_info.value.details
+            assert is_allowed is False
+            assert info["remaining"] == 0
+            assert "reset_after" in info
         finally:
-            # Restore
+            # Restaura
             rate_limiter._rate_limiters = old_limiters
 
 
 class TestRedisRateLimiterBackend:
-    """Tests for RedisRateLimiterBackend."""
+    """Testes para RedisRateLimiterBackend."""
 
-    @pytest.mark.skip(reason="Requires Redis server")
+    @pytest.mark.skip(reason="Requer servidor Redis")
     def test_redis_backend_initialization(self):
-        """Test Redis backend initialization (skipped without Redis)."""
-        # This test is skipped unless Redis is available
+        """Testa inicialização do backend Redis (pulado sem Redis)."""
+        # Este teste é pulado a menos que Redis esteja disponível
         backend = RedisRateLimiterBackend(redis_url="redis://localhost:6379/0")
         assert backend._redis_url == "redis://localhost:6379/0"
         assert backend._initialized is False
 
     def test_redis_backend_without_redis_package(self, monkeypatch):
-        """Test Redis backend when redis package is not available."""
-        # Mock the import to fail
+        """Testa backend Redis quando pacote redis não está disponível."""
+        # Mock para falhar o import
         import builtins
         original_import = builtins.__import__
 
@@ -319,31 +320,31 @@ class TestRedisRateLimiterBackend:
         monkeypatch.setattr(builtins, "__import__", mock_import)
 
         backend = RedisRateLimiterBackend()
-        # Should not raise during init
+        # Não deve lançar erro durante init
         assert backend._initialized is False
 
 
 class TestEdgeCases:
-    """Edge case tests."""
+    """Testes de casos de borda."""
 
     @pytest.mark.asyncio
     async def test_zero_rate_limit(self):
-        """Test rate limiter with zero rate."""
+        """Testa rate limiter com taxa zero."""
         backend = MemoryRateLimiterBackend()
         limiter = TokenBucketRateLimiter(
-            rate=0.0,  # No refill
+            rate=0.0,  # Sem recarga
             capacity=1,
             backend=backend,
         )
 
-        # Should handle without error
+        # Deve lidar sem erro
         is_allowed, info = await limiter.is_allowed("zero_rate_client")
-        # With zero rate, first request should still be allowed (full bucket)
+        # Com taxa zero, primeira requisição ainda deve ser permitida (bucket cheio)
         assert is_allowed is True
 
     @pytest.mark.asyncio
     async def test_negative_tokens_consumption(self):
-        """Test rate limiter with negative tokens (should not happen)."""
+        """Testa rate limiter com tokens negativos (não deveria acontecer)."""
         backend = MemoryRateLimiterBackend()
         limiter = TokenBucketRateLimiter(
             rate=1.0,
@@ -351,26 +352,26 @@ class TestEdgeCases:
             backend=backend,
         )
 
-        # Consuming negative tokens would add tokens, but should be handled
+        # Consumir tokens negativos adicionaria tokens, mas deve ser tratado
         is_allowed, info = await limiter.is_allowed("client_neg", tokens=1)
         assert is_allowed is True
 
     @pytest.mark.asyncio
     async def test_rapid_requests(self):
-        """Test rate limiter with many rapid requests."""
+        """Testa rate limiter com muitas requisições rápidas."""
         backend = MemoryRateLimiterBackend()
         limiter = TokenBucketRateLimiter(
-            rate=100.0,  # Fast refill
+            rate=100.0,  # Recarga rápida
             capacity=100,
             backend=backend,
         )
 
         allowed_count = 0
-        # Make 150 rapid requests
+        # Faz 150 requisições rápidas
         for _i in range(150):
             is_allowed, _ = await limiter.is_allowed("rapid_client")
             if is_allowed:
                 allowed_count += 1
 
-        # Should allow at least capacity requests
+        # Deve permitir pelo menos capacity requisições
         assert allowed_count >= 100

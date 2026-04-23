@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 class TestRateLimitConcurrency:
     """Tests for concurrent rate limiting behavior."""
 
-    def test_parallel_requests_respect_limit(self, client: TestClient):
+    def test_parallel_requests_respect_limit(self, auth_client: TestClient):
         """Test that parallel requests properly count against rate limit.
 
         Makes multiple parallel requests and verifies that the rate limit
@@ -24,7 +24,7 @@ class TestRateLimitConcurrency:
         # Make parallel requests
         responses = []
         for i in range(num_requests):
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"test {i}"},
             )
@@ -40,14 +40,14 @@ class TestRateLimitConcurrency:
         # Should have at least some successful requests
         assert len(successful) > 0
 
-    def test_parallel_requests_consistent_headers(self, client: TestClient):
+    def test_parallel_requests_consistent_headers(self, auth_client: TestClient):
         """Test that parallel requests return consistent rate limit headers."""
         num_requests = 10
 
         # Make parallel requests
         remaining_values = []
         for i in range(num_requests):
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"test {i}"},
             )
@@ -58,7 +58,7 @@ class TestRateLimitConcurrency:
         for remaining in remaining_values:
             assert 0 <= remaining <= 60
 
-    def test_burst_requests(self, client: TestClient):
+    def test_burst_requests(self, auth_client: TestClient):
         """Test handling of burst requests at rate limit boundary.
 
         Makes exactly the burst capacity number of requests as fast
@@ -66,13 +66,13 @@ class TestRateLimitConcurrency:
         """
         # Make burst capacity requests
         for i in range(60):  # Burst capacity
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"burst {i}"},
             )
 
         # Next request should be rate limited
-        response = client.post(
+        response = auth_client.post(
             "/analyze/text",
             json={"text": "should be rate limited"},
         )
@@ -80,13 +80,13 @@ class TestRateLimitConcurrency:
         # May or may not be rate limited depending on refill timing
         assert response.status_code in [200, 429]
 
-    def test_auth_parallel_burst(self, client: TestClient):
+    def test_auth_parallel_burst(self, auth_client: TestClient):
         """Test auth endpoint with parallel burst (stricter limit)."""
         num_requests = 10  # More than auth limit of 5
 
         responses = []
         for i in range(num_requests):
-            response = client.post(
+            response = auth_client.post(
                 "/auth/validate",
                 headers={"X-API-Key": f"key-{i}"},
             )
@@ -108,10 +108,12 @@ class TestAsyncRateLimitConcurrency:
         from httpx import ASGITransport, AsyncClient
 
         from src.api.main import app
+        from tests.conftest import TEST_API_KEY
 
         async with AsyncClient(
             transport=ASGITransport(app=app),
             base_url="http://test",
+            headers={"X-API-Key": TEST_API_KEY},
         ) as client:
             # Create multiple concurrent requests
             tasks = [
@@ -132,10 +134,12 @@ class TestAsyncRateLimitConcurrency:
         from httpx import ASGITransport, AsyncClient
 
         from src.api.main import app
+        from tests.conftest import TEST_API_KEY
 
         async with AsyncClient(
             transport=ASGITransport(app=app),
             base_url="http://test",
+            headers={"X-API-Key": TEST_API_KEY},
         ) as client:
             # Create concurrent auth requests
             tasks = [
@@ -156,7 +160,7 @@ class TestAsyncRateLimitConcurrency:
 class TestRateLimitRaceConditions:
     """Tests for race conditions in rate limiting."""
 
-    def test_simultaneous_requests_no_overcount(self, client: TestClient):
+    def test_simultaneous_requests_no_overcount(self, auth_client: TestClient):
         """Test that simultaneous requests don't overcount.
 
         This test verifies the atomicity of token consumption.
@@ -167,7 +171,7 @@ class TestRateLimitRaceConditions:
         lock = threading.Lock()
 
         def make_request():
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": "threaded test"},
             )
@@ -191,13 +195,13 @@ class TestRateLimitRaceConditions:
 
         assert successful + rate_limited == 10
 
-    def test_high_concurrency_stress(self, client: TestClient):
+    def test_high_concurrency_stress(self, auth_client: TestClient):
         """Stress test with high concurrency."""
         num_requests = 50
 
         responses = []
         for i in range(num_requests):
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"stress {i}"},
             )
@@ -215,7 +219,7 @@ class TestRateLimitRaceConditions:
 class TestRateLimitDistributed:
     """Tests simulating distributed rate limiting scenarios."""
 
-    def test_different_clients_concurrent(self, client: TestClient):
+    def test_different_clients_concurrent(self, auth_client: TestClient):
         """Test that different clients are rate limited independently."""
         import threading
 
@@ -225,7 +229,7 @@ class TestRateLimitDistributed:
         def make_request(client_id: str):
             # Use different headers to simulate different clients
             headers = {"X-Forwarded-For": f"192.168.1.{client_id}"}
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": "distributed test"},
                 headers=headers,
@@ -250,19 +254,19 @@ class TestRateLimitDistributed:
         assert results["client_a"].count(200) > 0
         assert results["client_b"].count(200) > 0
 
-    def test_rate_limit_recovery(self, client: TestClient):
+    def test_rate_limit_recovery(self, auth_client: TestClient):
         """Test that rate limits recover after window."""
         import time
 
         # Exhaust rate limit
         for i in range(65):
-            client.post("/analyze/text", json={"text": f"exhaust {i}"})
+            auth_client.post("/analyze/text", json={"text": f"exhaust {i}"})
 
         # Wait for some recovery (tokens refill at 1/sec)
         time.sleep(2)
 
         # Should be able to make some requests again
-        response = client.post(
+        response = auth_client.post(
             "/analyze/text",
             json={"text": "after wait"},
         )
@@ -274,12 +278,12 @@ class TestRateLimitDistributed:
 class TestRateLimitHeadersUnderLoad:
     """Tests for rate limit header accuracy under load."""
 
-    def test_remaining_count_accuracy(self, client: TestClient):
+    def test_remaining_count_accuracy(self, auth_client: TestClient):
         """Test that remaining count is accurate under load."""
         remaining_values = []
 
         for i in range(10):
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"accuracy {i}"},
             )
@@ -292,12 +296,12 @@ class TestRateLimitHeadersUnderLoad:
             # Allow for some refill between requests
             assert remaining_values[i] <= remaining_values[i-1] + 1
 
-    def test_reset_after_consistency(self, client: TestClient):
+    def test_reset_after_consistency(self, auth_client: TestClient):
         """Test that reset_after is consistent."""
         reset_values = []
 
         for i in range(5):
-            response = client.post(
+            response = auth_client.post(
                 "/analyze/text",
                 json={"text": f"reset test {i}"},
             )

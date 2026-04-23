@@ -40,9 +40,9 @@ class SecretMasker:
             r"(authorization|auth)[\s]*[:=][\s]*([\w\s-]+)",
             re.IGNORECASE,
         ),
-        # Connection strings with passwords
+        # Connection strings with passwords or account keys
         "connection_string": re.compile(
-            r"(password|pwd|passwd)[\s]*[:=][\s]*([^;\s]+)",
+            r"(password|pwd|passwd|accountkey)[\s]*[:=][\s]*([^;\s]+)",
             re.IGNORECASE,
         ),
         # Private keys
@@ -297,6 +297,11 @@ class LogSanitizer:
             "content", "texto", "transcricao", "text", "raw_content",
             "media", "audio_data", "video_data", "frame", "image",
         }
+        sensitive_key_patterns = {
+            "api_key", "apikey", "key", "secret", "password", "token",
+            "credential", "auth", "authorization", "private_key",
+            "access_key", "secret_key", "client_secret", "connection_string",
+        }
 
         for key, value in data.items():
             key_lower = key.lower()
@@ -306,6 +311,9 @@ class LogSanitizer:
                 sanitized[key] = "[REDACTED_MEDIA_CONTENT]"
             elif key == "patient_id" and isinstance(value, str):
                 sanitized[key] = PatientIdHasher.hash(value)
+            elif any(sk in key_lower for sk in sensitive_key_patterns):
+                # Mask sensitive keys by name
+                sanitized[key] = SecretMasker.MASK_VALUE
             elif isinstance(value, str):
                 sanitized[key] = SecretMasker.mask(value)
             elif isinstance(value, dict):

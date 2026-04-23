@@ -507,7 +507,7 @@ class AuditLogger:
             correlation_id=correlation_id,
             action=alert_type,
             resource="security",
-            result="alert",
+            result="error",
             ip_address=ip_address,
             details=merged_details,
         )

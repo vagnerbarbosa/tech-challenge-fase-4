@@ -1,6 +1,6 @@
-"""Security tests for Content Security Policy configuration.
+"""Testes de segurança para configuração de Content Security Policy.
 
-Tests T049: Verify CSP policy is correctly configured and effective.
+Testes T049: Verifica se a política CSP está configurada corretamente e é efetiva.
 """
 
 import pytest
@@ -12,29 +12,29 @@ from tests.conftest import TEST_API_KEY
 
 @pytest.fixture
 def client():
-    """Test client for FastAPI application."""
+    """Cliente de teste para aplicação FastAPI."""
     return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
 
 class TestCSPPolicy:
-    """Security tests for Content Security Policy headers."""
+    """Testes de segurança para headers de Content Security Policy."""
 
     def test_csp_uses_default_self(self, client):
-        """CSP default-src should use 'self' directive."""
+        """CSP default-src deve usar diretiva 'self'."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
         assert "default-src 'self'" in csp
 
     def test_csp_blocks_inline_scripts(self, client):
-        """CSP should restrict inline scripts."""
+        """CSP deve restringir scripts inline."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
-        # Should have script-src with 'self' and possibly nonce/hash
+        # Deve ter script-src com 'self' e possivelmente nonce/hash
         assert "script-src" in csp
 
-        # Extract script-src directive specifically (not style-src)
+        # Extrai diretiva script-src especificamente (não style-src)
         script_src_part = ""
         for directive in csp.split(";"):
             directive = directive.strip()
@@ -42,35 +42,35 @@ class TestCSPPolicy:
                 script_src_part = directive
                 break
 
-        # Inline scripts should not be allowed in script-src
-        # (style-src may have 'unsafe-inline' which is acceptable)
+        # Scripts inline não devem ser permitidos em script-src
+        # (style-src pode ter 'unsafe-inline' que é aceitável)
         assert "'unsafe-inline'" not in script_src_part or "'nonce-" in script_src_part
 
     def test_csp_blocks_eval(self, client):
-        """CSP should block eval() and similar."""
+        """CSP deve bloquear eval() e similares."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
         assert "'unsafe-eval'" not in csp
 
     def test_csp_restricts_object_sources(self, client):
-        """CSP should restrict object/embed sources."""
+        """CSP deve restringir fontes de objeto/embed."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
-        # object-src should be 'none' or restricted
+        # object-src deve ser 'none' ou restrito
         assert "object-src" in csp
         assert "'none'" in csp or "'self'" in csp
 
     def test_csp_has_base_uri_restriction(self, client):
-        """CSP should restrict base URI."""
+        """CSP deve restringir URI base."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
         assert "base-uri" in csp
 
     def test_csp_has_frame_ancestors(self, client):
-        """CSP should have frame-ancestors directive."""
+        """CSP deve ter diretiva frame-ancestors."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
@@ -78,20 +78,20 @@ class TestCSPPolicy:
         assert "'none'" in csp or "'self'" in csp
 
     def test_csp_has_form_action(self, client):
-        """CSP should restrict form actions."""
+        """CSP deve restringir ações de formulário."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
         assert "form-action" in csp
 
     def test_csp_upgrade_insecure_requests_in_production(self, monkeypatch):
-        """CSP should upgrade insecure requests in production."""
-        # Import here to get fresh instance with new env
+        """CSP deve atualizar requisições inseguras em produção."""
+        # Importa aqui para obter instância fresca com novo env
         import os
         monkeypatch.setenv("ENVIRONMENT", "production")
         os.environ["ENVIRONMENT"] = "production"
 
-        # Create a test app with production environment
+        # Cria app de teste com ambiente de produção
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
         from src.api.middleware.cors_security import SecurityHeadersMiddleware
@@ -110,29 +110,29 @@ class TestCSPPolicy:
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
-        # In production, should upgrade insecure requests
+        # Em produção, deve atualizar requisições inseguras
         assert "upgrade-insecure-requests" in csp
 
     def test_csp_no_wildcard_sources(self, client):
-        """CSP should not use wildcard sources without restrictions."""
+        """CSP não deve usar fontes wildcard sem restrições."""
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
-        # Should not have wildcards without restrictions
+        # Não deve ter wildcards sem restrições
         directives = csp.split(";")
         for directive in directives:
             directive = directive.strip()
             if directive and " " in directive:
                 name, values = directive.split(" ", 1)
-                # Wildcards should be avoided in sensitive directives
+                # Wildcards devem ser evitados em diretivas sensíveis
                 if name in ["script-src", "style-src", "object-src"]:
-                    assert "*" not in values, f"Wildcard not allowed in {name}"
+                    assert "*" not in values, f"Wildcard não permitido em {name}"
 
     def test_csp_report_only_not_enabled_by_default(self, client):
-        """CSP-Report-Only should not be present by default."""
+        """CSP-Report-Only não deve estar presente por padrão."""
         response = client.get("/health")
 
-        # Should enforce CSP, not just report
+        # Deve aplicar CSP, não apenas reportar
         assert "content-security-policy" in response.headers
-        # Report-only header should not be present in production-like settings
-        # (This test may be adjusted based on requirements)
+        # Header report-only não deve estar presente em configurações tipo produção
+        # (Este teste pode ser ajustado baseado nos requisitos)

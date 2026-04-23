@@ -1,9 +1,9 @@
-"""Security tests for secrets in logs (T030).
+"""Testes de segurança para secrets em logs (T030).
 
-Tests that verify secrets are never logged in plaintext.
-This test uses grep-like verification to ensure no sensitive data leaks.
+Testes que verificam que secrets nunca são logados em plaintext.
+Este teste usa verificação tipo grep para garantir que não há vazamento de dados sensíveis.
 
-Reference: spec.md FR-009 - mascarar secrets em logs
+Referência: spec.md FR-009 - mascarar secrets em logs
 """
 
 import json
@@ -16,7 +16,7 @@ from src.core.security.log_sanitizer import (
 
 
 class TestSecretsNotInLogs:
-    """Tests to verify secrets are never logged in plaintext."""
+    """Testes para verificar que secrets nunca são logados em plaintext."""
 
     SECRETS_TO_TEST = [
         "supersecrettoken123",
@@ -27,14 +27,14 @@ class TestSecretsNotInLogs:
     ]
 
     def test_api_keys_masked_in_strings(self):
-        """API keys should be masked in log strings."""
+        """API keys devem ser mascarados em strings de log."""
         for secret in self.SECRETS_TO_TEST:
             log_message = f"Processing with api_key={secret}"
             masked = SecretMasker.mask(log_message)
-            assert secret not in masked, f"Secret was not masked: {secret[:10]}..."
+            assert secret not in masked, f"Secret não foi mascarado: {secret[:10]}..."
 
     def test_connection_strings_masked(self):
-        """Connection string passwords should be masked."""
+        """Senhas de connection string devem ser mascaradas."""
         secret_password = "MySecretP@ssw0rd"
         connection_string = (
             f"Server=myserver;Database=mydb;Password={secret_password};"
@@ -43,21 +43,21 @@ class TestSecretsNotInLogs:
         assert secret_password not in masked
 
     def test_azure_keys_masked(self):
-        """Azure keys should be masked."""
+        """Azure keys devem ser mascaradas."""
         azure_key = "1234567890abcdef1234567890abcdef"
         log_message = f"Azure request with key: {azure_key}"
         masked = SecretMasker.mask(log_message)
         assert azure_key not in masked
 
     def test_bearer_tokens_masked(self):
-        """Bearer tokens should be masked."""
+        """Bearer tokens devem ser mascarados."""
         token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0"
         log_message = f"Authorization: {token}"
         masked = SecretMasker.mask(log_message)
         assert "eyJhbGci" not in masked
 
     def test_private_keys_masked(self):
-        """Private keys should be masked."""
+        """Private keys devem ser mascaradas."""
         private_key = """-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA...
 -----END RSA PRIVATE KEY-----"""
@@ -67,7 +67,7 @@ MIIEpAIBAAKCAQEA...
 
 
 class TestPatientIdNotInPlaintext:
-    """Tests to verify patient IDs are never logged in plaintext (FR-010)."""
+    """Testes para verificar que patient IDs nunca são logados em plaintext (FR-010)."""
 
     PATIENT_IDS = [
         "patient-123-456",
@@ -77,36 +77,36 @@ class TestPatientIdNotInPlaintext:
     ]
 
     def test_patient_id_hashed_in_logs(self):
-        """Patient IDs should be hashed, not logged in plaintext."""
+        """Patient IDs devem ser hasheados, não logados em plaintext."""
         for patient_id in self.PATIENT_IDS:
             log_data = {"patient_id": patient_id, "action": "analysis"}
             sanitized = LogSanitizer.sanitize(log_data)
             assert patient_id not in str(sanitized)
-            # Should have a hash instead
+            # Deve ter um hash no lugar
             assert sanitized["patient_id"] is not None
             assert len(sanitized["patient_id"]) == 16
 
     def test_patient_id_consistency(self):
-        """Same patient ID should produce same hash for correlation."""
+        """Mesmo patient ID deve produzir mesmo hash para correlação."""
         patient_id = "patient-abc-123"
         hash1 = PatientIdHasher.hash(patient_id)
         hash2 = PatientIdHasher.hash(patient_id)
-        assert hash1 == hash2, "Patient ID hashing should be consistent"
+        assert hash1 == hash2, "Hashing de patient ID deve ser consistente"
 
     def test_different_patients_different_hashes(self):
-        """Different patient IDs should produce different hashes."""
+        """Different patient IDs devem produzir hashes diferentes."""
         id1 = "patient-001"
         id2 = "patient-002"
         hash1 = PatientIdHasher.hash(id1)
         hash2 = PatientIdHasher.hash(id2)
-        assert hash1 != hash2, "Different patients should have different hashes"
+        assert hash1 != hash2, "Pacientes diferentes devem ter hashes diferentes"
 
 
 class TestAuditLogSanitization:
-    """Tests for audit log sanitization (T037)."""
+    """Testes para sanitização de logs de auditoria (T037)."""
 
     def test_media_content_redacted(self):
-        """Media content should be completely redacted from audit logs."""
+        """Conteúdo de mídia deve ser completamente removido dos logs de auditoria."""
         data = {
             "patient_id": "patient-123",
             "transcricao": "sensitive medical transcript",
@@ -117,7 +117,7 @@ class TestAuditLogSanitization:
         assert sanitized["texto"] == "[REDACTED_MEDIA_CONTENT]"
 
     def test_patient_id_hashed_in_audit(self):
-        """Patient ID should be hashed in audit logs."""
+        """Patient ID deve ser hasheado em logs de auditoria."""
         patient_id = "patient-456"
         data = {"patient_id": patient_id}
         sanitized = LogSanitizer.sanitize_for_audit(data)
@@ -126,10 +126,10 @@ class TestAuditLogSanitization:
 
 
 class TestGrepLikeVerification:
-    """Grep-like tests to simulate log scanning for secrets."""
+    """Testes tipo grep para simular scan de logs por secrets."""
 
     def test_grep_no_api_keys_in_masked_logs(self):
-        """Simulate grep for API keys - should find nothing."""
+        """Simula grep por API keys - não deve encontrar nada."""
         log_entries = [
             "api_key=secret123",
             "API_KEY: another_secret",
@@ -137,11 +137,11 @@ class TestGrepLikeVerification:
         ]
         for entry in log_entries:
             masked = SecretMasker.mask(entry)
-            # Simulate grep for common secret patterns
+            # Simula grep por padrões comuns de secrets
             assert "secret" not in masked.lower()
 
     def test_grep_no_passwords_in_masked_logs(self):
-        """Simulate grep for passwords - should find nothing."""
+        """Simula grep por senhas - não deve encontrar nada."""
         log_entries = [
             "password=my_password",
             "pwd=secretpwd",
@@ -154,7 +154,7 @@ class TestGrepLikeVerification:
             assert "SuperSecret123" not in masked
 
     def test_grep_no_patient_ids_in_hashed_logs(self):
-        """Simulate grep for patient IDs - should find only hashes."""
+        """Simula grep por patient IDs - deve encontrar apenas hashes."""
         patient_id = "PATIENT_12345"
         log_data = {
             "event": "analysis_complete",
@@ -163,24 +163,24 @@ class TestGrepLikeVerification:
         }
         sanitized = LogSanitizer.sanitize(log_data)
         log_string = json.dumps(sanitized)
-        # Original patient ID should not be found
+        # Patient ID original não deve ser encontrado
         assert patient_id not in log_string
-        # But there should be a hash
+        # Mas deve haver um hash
         assert sanitized["patient_id"] is not None
 
 
 class TestErrorMessagesSanitized:
-    """Tests for sanitized error messages (FR-034)."""
+    """Testes para mensagens de erro sanitizadas (FR-034)."""
 
     def test_error_messages_dont_contain_secrets(self):
-        """Error messages should not contain secrets."""
+        """Mensagens de erro não devem conter secrets."""
         error_message = "Connection failed with key: secret_api_key_123"
         sanitized = SecretMasker.mask_exception_message(error_message)
         assert "secret_api_key_123" not in sanitized
         assert SecretMasker.MASK_VALUE in sanitized
 
     def test_azure_errors_masked(self):
-        """Azure connection errors should not expose keys."""
+        """Erros de conexão Azure não devem expor keys."""
         error_message = (
             "Azure error: Authentication failed for key "
             "1234567890abcdef1234567890abcdef"
@@ -190,7 +190,7 @@ class TestErrorMessagesSanitized:
 
 
 class TestSensitiveKeysDetection:
-    """Tests for detection of sensitive keys in dictionaries."""
+    """Testes para detecção de chaves sensíveis em dicionários."""
 
     SENSITIVE_KEYS = [
         "api_key",
@@ -212,14 +212,14 @@ class TestSensitiveKeysDetection:
     ]
 
     def test_all_sensitive_keys_masked(self):
-        """All sensitive key variants should be masked."""
+        """Todas as variantes de chaves sensíveis devem ser mascaradas."""
         for key in self.SENSITIVE_KEYS:
             data = {key: "sensitive_value_123"}
             masked = SecretMasker.mask_dict(data)
-            assert masked[key] == SecretMasker.MASK_VALUE, f"Key '{key}' was not masked"
+            assert masked[key] == SecretMasker.MASK_VALUE, f"Chave '{key}' não foi mascarada"
 
     def test_case_insensitive_key_matching(self):
-        """Sensitive key detection should be case-insensitive."""
+        """Detecção de chaves sensíveis deve ser case-insensitive."""
         data = {
             "API_KEY": "value1",
             "Password": "value2",
