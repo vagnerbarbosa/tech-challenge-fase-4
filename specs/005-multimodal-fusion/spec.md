@@ -7,6 +7,17 @@
 
 ---
 
+## Clarifications
+
+### Session 2026-04-22
+- Q: O critério de sucesso SC-002 ("Fusão demonstra precisão superior") menciona precisão superior, mas não define como isso será medido. Agora que a implementação está completa, como podemos quantificar este critério? → A: Definir baseline: comparar acurácia da fusão vs. melhor modalidade individual em dataset de teste
+- Q: O critério SC-003 ("Alertas gerados corretamente em casos de alto risco") usa o termo "corretamente" sem definição mensurável. Como devemos validar isso? → A: Alerta = True quando 2+ modalidades retornam risco=alto (regra implementada) → validar via testes unitários cobrindo 100% das combinações
+- Q: O critério SC-004 ("Recomendações são contextualizadas e úteis") usa o termo "úteis" que é subjetivo. Como tornar isso mensurável? → A: Verificar que recomendação muda conforme combinação de riscos (alto/medio/baixo + alerta) → 4 cenários cobertos em testes
+- Q: O SC-001 define latência < 15s, mas o Technical Notes menciona timeout de 30s por modalidade. Isso cria uma inconsistência: se uma modalidade pode demorar até 30s, como manter latência total < 15s? → A: Ajustar SC-001 para < 30s (timeout é limite máximo, não esperado)
+- Q: A especificação mostra que SC-005 ("Processamento paralelo funciona corretamente") foi marcada como completa na tasks.md. No entanto, o spec não define como "funciona corretamente" será validado. Qual critério específico devemos usar? → A: Isolamento: falha em uma modalidade não afeta as outras (testado via mocks)
+
+---
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Fusão Late de Modalidades (Priority: P1)
@@ -79,11 +90,11 @@ Como sistema, quero processar modalidades em paralelo para otimizar tempo de res
 
 ## Success Criteria
 
-- **SC-001**: Latência total < 15s (com 3 modalidades)
-- **SC-002**: Fusão demonstra precisão superior às modalidades individuais
-- **SC-003**: Alertas gerados corretamente em casos de alto risco
-- **SC-004**: Recomendações são contextualizadas e úteis
-- **SC-005**: Processamento paralelo funciona corretamente
+- **SC-001**: Latência total < 30s (com 3 modalidades) - timeout por modalidade é limite máximo de segurança
+- **SC-002**: Fusão demonstra precisão superior: acurácia combinada ≥ 10% melhor que a melhor modalidade individual em dataset de validação (medir via F1-score)
+- **SC-003**: Alertas gerados corretamente: alerta=True quando 2+ modalidades retornam risco=alto (100% cobertura de combinações via testes unitários)
+- **SC-004**: Recomendações contextualizadas: 4 níveis distintos (urgente, prioritário, monitorar, rotina) mapeados conforme combinação de riscos, validados via testes
+- **SC-005**: Processamento paralelo funciona corretamente: falha em uma modalidade não afeta as outras (graceful degradation testado via mocks)
 
 ---
 
@@ -119,7 +130,7 @@ score_fusao = (score_texto * peso_texto +
 ### Processamento Paralelo
 - Usar asyncio.gather() para chamadas independentes
 - Tratar exceções individualmente (não falhar tudo)
-- Timeout por modalidade: 30s
+- Timeout por modalidade: 30s (limite máximo de segurança; meta de performance é < 15s)
 
 ---
 
