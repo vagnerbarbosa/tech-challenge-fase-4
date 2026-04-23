@@ -1,7 +1,7 @@
-"""Admin routes for audit log export and LGPD compliance.
+"""Rotas administrativas para exportação de logs de auditoria e compliance LGPD.
 
-This module provides administrative endpoints for managing audit logs
-and exporting data in ANPD-compliant format as required by LGPD.
+Este módulo fornece endpoints administrativos para gerenciamento de logs de auditoria
+e exportação de dados em formato compatível com ANPD conforme exigido pela LGPD.
 """
 
 from __future__ import annotations
@@ -20,35 +20,35 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 def verify_admin_access(request: Request) -> bool:
-    """Verify admin access for protected endpoints.
+    """Verifica acesso administrativo para endpoints protegidos.
 
-    In production, this should validate a proper admin token/API key.
-    For now, it checks for a header-based admin key.
+    Em produção, deve validar um token/API key de administrador adequado.
+    Por enquanto, verifica um header-based admin key.
 
     Args:
-        request: FastAPI request object
+        request: Objeto de requisição FastAPI
 
     Returns:
-        True if admin access is granted
+        True se acesso de administrador for concedido
 
     Raises:
-        HTTPException: If admin access is denied
+        HTTPException: Se acesso de administrador for negado
     """
-    # Check for admin API key header
+    # Verifica header de admin API key
     admin_key = request.headers.get("X-Admin-Key")
 
-    # In production, this should check against a secure admin key
-    # For development, we allow a simple check
+    # Em produção, deve verificar contra uma chave segura
+    # Para desenvolvimento, permite check simples
     expected_key = getattr(settings, "admin_api_key", None)
 
     if not expected_key:
-        # If no admin key is configured, deny access in production
+        # Se não há chave configurada, nega acesso em produção
         if settings.environment == "production":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin access not configured",
             )
-        # In development, allow without key for testing
+        # Em desenvolvimento, permite sem chave para testes
         return True
 
     if admin_key != expected_key:
@@ -62,11 +62,11 @@ def verify_admin_access(request: Request) -> bool:
 
 @router.get(
     "/audit/stats",
-    summary="Get audit log statistics",
-    description="Returns statistics about the audit log system including file counts and sizes.",
+    summary="Obtém estatísticas de logs de auditoria",
+    description="Retorna estatísticas sobre o sistema de logs de auditoria incluindo contagens e tamanhos de arquivos.",
     responses={
         200: {
-            "description": "Audit log statistics",
+            "description": "Estatísticas de logs de auditoria",
             "content": {
                 "application/json": {
                     "example": {
@@ -80,7 +80,7 @@ def verify_admin_access(request: Request) -> bool:
                 }
             },
         },
-        403: {"description": "Admin access required"},
+        403: {"description": "Acesso de administrador necessário"},
     },
 )
 async def get_audit_stats(
@@ -88,19 +88,19 @@ async def get_audit_stats(
     _: Annotated[bool, Depends(verify_admin_access)],
     audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
 ) -> dict[str, Any]:
-    """Get statistics about the audit log system.
+    """Obtém estatísticas sobre o sistema de logs de auditoria.
 
     Args:
-        request: FastAPI request object
-        _: Admin access verification
-        audit_logger: Audit logger instance
+        request: Objeto de requisição FastAPI
+        _: Verificação de acesso administrativo
+        audit_logger: Instância do audit logger
 
     Returns:
-        Dictionary with audit log statistics.
+        Dicionário com estatísticas de logs de auditoria.
     """
     stats = audit_logger.get_stats()
 
-    # Log this admin access
+    # Loga este acesso administrativo
     audit_logger.log(
         event_type=AuditEventType.DATA_ACCESS,
         correlation_id=str(id(request)),
@@ -116,15 +116,15 @@ async def get_audit_stats(
 @router.get(
     "/audit/export",
     response_class=PlainTextResponse,
-    summary="Export audit logs in ANPD format",
-    description="Exports audit logs in NDJSON format compliant with ANPD requirements for LGPD audits.",
+    summary="Exporta logs de auditoria em formato ANPD",
+    description="Exporta logs de auditoria em formato NDJSON compatível com requisitos da ANPD para auditorias LGPD.",
     responses={
         200: {
-            "description": "Audit logs in NDJSON format",
+            "description": "Logs de auditoria em formato NDJSON",
             "content": {"text/plain": {}},
         },
-        403: {"description": "Admin access required"},
-        400: {"description": "Invalid date range"},
+        403: {"description": "Acesso de administrador necessário"},
+        400: {"description": "Intervalo de datas inválido"},
     },
 )
 async def export_audit_logs(
@@ -133,58 +133,58 @@ async def export_audit_logs(
     audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
     start_date: datetime | None = Query(
         None,
-        description="Start date for export (ISO 8601 format)",
-        example="2026-01-01T00:00:00Z",
+        description="Data de início para exportação (formato ISO 8601)",
+        examples=["2026-01-01T00:00:00Z"],
     ),
     end_date: datetime | None = Query(
         None,
-        description="End date for export (ISO 8601 format)",
-        example="2026-04-23T23:59:59Z",
+        description="Data de fim para exportação (formato ISO 8601)",
+        examples=["2026-04-23T23:59:59Z"],
     ),
     event_type: AuditEventType | None = Query(
         None,
-        description="Filter by event type",
+        description="Filtrar por tipo de evento",
     ),
     format: str = Query(
         "ndjson",
         pattern="^(ndjson|json)$",
-        description="Export format (ndjson or json array)",
+        description="Formato de exportação (ndjson ou array json)",
     ),
 ) -> str:
-    """Export audit logs in ANPD-compliant format.
+    """Exporta logs de auditoria em formato compatível com ANPD.
 
-    This endpoint exports audit logs in a format suitable for submission
-to the Brazilian National Data Protection Authority (ANPD) as required
-    by LGPD Article 46.
+    Este endpoint exporta logs de auditoria em formato adequado para submissão
+    à Autoridade Nacional de Proteção de Dados (ANPD) conforme exigido
+    pelo Artigo 46 da LGPD.
 
     Args:
-        request: FastAPI request object
-        _: Admin access verification
-        audit_logger: Audit logger instance
-        start_date: Start date filter (inclusive)
-        end_date: End date filter (inclusive)
-        event_type: Filter by specific event type
-        format: Export format (ndjson or json)
+        request: Objeto de requisição FastAPI
+        _: Verificação de acesso administrativo
+        audit_logger: Instância do audit logger
+        start_date: Filtro de data de início (inclusivo)
+        end_date: Filtro de data de fim (inclusivo)
+        event_type: Filtrar por tipo específico de evento
+        format: Formato de exportação (ndjson ou json)
 
     Returns:
-        NDJSON or JSON string containing audit log entries.
+        String NDJSON ou JSON contendo entradas de log de auditoria.
 
     Raises:
-        HTTPException: If date range is invalid or export fails.
+        HTTPException: Se intervalo de datas for inválido ou exportação falhar.
     """
-    # Validate date range
+    # Valida intervalo de datas
     if start_date and end_date and start_date > end_date:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="start_date must be before end_date",
+            detail="start_date deve ser anterior a end_date",
         )
 
     try:
-        # Generate correlation ID for this export
+        # Gera ID de correlação para esta exportação
         correlation_id = f"export-{id(request)}-{datetime.utcnow().isoformat()}"
 
         if event_type:
-            # Get entries filtered by event type
+            # Obtém entradas filtradas por tipo de evento
             entries = audit_logger.get_entries(
                 start_date=start_date,
                 end_date=end_date,
@@ -204,14 +204,14 @@ to the Brazilian National Data Protection Authority (ANPD) as required
                     indent=2,
                 )
         else:
-            # Use the built-in export function
+            # Usa a função de exportação interna
             result = audit_logger.export_for_anpd(
                 start_date=start_date,
                 end_date=end_date,
                 format=format,
             )
 
-        # Log this export operation
+        # Loga esta operação de exportação
         audit_logger.log(
             event_type=AuditEventType.ADMIN_EXPORT,
             correlation_id=correlation_id,
@@ -241,17 +241,17 @@ to the Brazilian National Data Protection Authority (ANPD) as required
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to export audit logs: {str(e)}",
+            detail=f"Falha ao exportar logs de auditoria: {str(e)}",
         ) from e
 
 
 @router.get(
     "/audit/verify",
-    summary="Verify audit log integrity",
-    description="Verifies the integrity of audit log entries by checking checksums.",
+    summary="Verifica integridade de logs de auditoria",
+    description="Verifica a integridade de entradas de log de auditoria verificando checksums.",
     responses={
         200: {
-            "description": "Integrity check results",
+            "description": "Resultados de verificação de integridade",
             "content": {
                 "application/json": {
                     "example": {
@@ -264,31 +264,31 @@ to the Brazilian National Data Protection Authority (ANPD) as required
                 }
             },
         },
-        403: {"description": "Admin access required"},
+        403: {"description": "Acesso de administrador necessário"},
     },
 )
 async def verify_audit_integrity(
     request: Request,
     _: Annotated[bool, Depends(verify_admin_access)],
     audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
-    limit: int = Query(10000, ge=1, le=100000, description="Maximum entries to verify"),
+    limit: int = Query(10000, ge=1, le=100000, description="Máximo de entradas para verificar"),
 ) -> dict[str, Any]:
-    """Verify integrity of audit log entries.
+    """Verifica integridade de entradas de log de auditoria.
 
-    Checks checksums for audit log entries to detect tampering.
+    Verifica checksums para detectar adulteração.
 
     Args:
-        request: FastAPI request object
-        _: Admin access verification
-        audit_logger: Audit logger instance
-        limit: Maximum number of entries to verify
+        request: Objeto de requisição FastAPI
+        _: Verificação de acesso administrativo
+        audit_logger: Instância do audit logger
+        limit: Número máximo de entradas para verificar
 
     Returns:
-        Dictionary with integrity verification results.
+        Dicionário com resultados de verificação de integridade.
     """
     entries = audit_logger.get_entries(limit=limit, verify_integrity=True)
 
-    # Get total entries including corrupted ones
+    # Obtém total de entradas incluindo corrompidas
     all_entries = audit_logger.get_entries(limit=limit, verify_integrity=False)
 
     total = len(all_entries)
@@ -308,12 +308,12 @@ async def verify_audit_integrity(
         "integrity_percentage": round(integrity_pct, 2),
         "status": status_label,
         "message": (
-            "All entries verified" if corrupted == 0
-            else f"{corrupted} corrupted entries detected"
+            "Todas as entradas verificadas" if corrupted == 0
+            else f"{corrupted} entradas corrompidas detectadas"
         ),
     }
 
-    # Log the verification
+    # Loga a verificação
     audit_logger.log(
         event_type=AuditEventType.DATA_ACCESS,
         correlation_id=str(id(request)),
