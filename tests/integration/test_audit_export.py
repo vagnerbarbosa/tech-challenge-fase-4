@@ -356,8 +356,8 @@ class TestLGPDCompliance:
             result="success",
         )
 
-        # Verify entry is immutable
-        with pytest.raises(Exception):
+        # Verify entry is immutable (frozen dataclass raises TypeError)
+        with pytest.raises(TypeError):
             entry.action = "modified"
 
         # Verify checksum is written to log file

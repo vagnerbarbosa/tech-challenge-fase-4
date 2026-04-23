@@ -202,6 +202,7 @@ class TestUploadSecurity:
 
         # Should be rejected based on final extension or content
         # (the .mp3 extension is valid but content might not match)
+        assert response.status_code in [200, 400, 422]
 
     def test_upload_control_characters_in_filename(self, client: TestClient) -> None:
         """Test handling of control characters in filename."""

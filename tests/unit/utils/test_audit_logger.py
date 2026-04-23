@@ -540,8 +540,8 @@ class TestAuditLogImmutability:
             result="success",
         )
 
-        # Attempting to modify should raise error
-        with pytest.raises(Exception):  # pydantic ValidationError or similar
+        # Attempting to modify should raise error (frozen model)
+        with pytest.raises(TypeError):
             entry.action = "modified"
 
     def test_model_config_frozen(self) -> None:

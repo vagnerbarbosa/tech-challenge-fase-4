@@ -253,6 +253,6 @@ class TestSecurityContextOwnership:
             is_authenticated=True,
         )
 
-        # Should not be able to modify
-        with pytest.raises(Exception):
+        # Should not be able to modify (frozen model)
+        with pytest.raises((TypeError, AttributeError)):
             ctx.roles.append("admin")  # type: ignore
