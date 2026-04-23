@@ -143,7 +143,6 @@ class AuditLogEntry(BaseModel):
             return datetime.utcnow()
         if isinstance(v, str):
             # Parse ISO format string to datetime
-            from datetime import timezone
             v = datetime.fromisoformat(v.replace("Z", "+00:00"))
             return v.replace(tzinfo=None)
         if v.tzinfo is not None:
