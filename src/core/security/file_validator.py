@@ -433,7 +433,7 @@ class FilenameSanitizer:
         decoded = filename.replace("%2e%2e%2f", "../").replace("%2e%2e/", "../")
         return ".." in decoded
 
-    def validate_extension(self, filename: str, allowed_extensions: set[str] | None = None) -> bool:
+    def validate_extension(self, filename: str, allowed_extensions: set[str] | frozenset[str] | None = None) -> bool:
         """Valida extensão de arquivo contra lista permitida.
 
         Args:
@@ -457,7 +457,7 @@ class FilenameSanitizer:
 async def validate_upload_file(
     file: UploadFile,
     max_size: int = MAX_FILE_SIZE_BYTES,
-    allowed_extensions: set[str] | None = None,
+    allowed_extensions: set[str] | frozenset[str] | None = None,
 ) -> UploadFile:
     """FastAPI dependency para validar arquivos enviados.
 

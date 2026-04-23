@@ -19,7 +19,7 @@ class SecretMasker:
     """
 
     # Patterns for secret detection
-    PATTERNS: dict[str, re.Pattern] = {
+    PATTERNS: dict[str, re.Pattern[str]] = {
         # Azure keys (32-64 hex chars or base64-like)
         "azure_key": re.compile(
             r"([a-f0-9]{32,64})|([A-Za-z0-9+/]{40,88}=?)",
@@ -278,8 +278,8 @@ class LogSanitizer:
             hashed = PatientIdHasher.hash_patient_id_field(data)
             return SecretMasker.mask_dict(hashed)
         elif isinstance(data, list):
-            hashed = PatientIdHasher.hash_list_items(data)
-            return SecretMasker.mask_list(hashed)
+            hashed_list = PatientIdHasher.hash_list_items(data)
+            return SecretMasker.mask_list(hashed_list)
         return data
 
     @staticmethod

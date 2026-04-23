@@ -95,10 +95,12 @@ class APIKeyValidator:
             request_id = str(uuid.uuid4())
 
         # Hash the API key for storage (not the plain key)
-        api_key_hash = self._hash_api_key(api_key)
+        # api_key is guaranteed to be str here because validate() passed
+        api_key_str = api_key  # type: ignore[assignment]
+        api_key_hash = self._hash_api_key(api_key_str)
 
         # Determine roles based on environment and key
-        roles = self._determine_roles(api_key)
+        roles = self._determine_roles(api_key_str)
 
         return SecurityContext(
             request_id=request_id,
