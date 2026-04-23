@@ -57,7 +57,7 @@ def sanitize_processor(
         elif isinstance(value, dict):
             # Recursively sanitize nested dicts
             sanitized[key] = SecretMasker.mask_dict(
-                PatientIdHasher.hash_dict_keys(value)
+                PatientIdHasher.hash_patient_id_field(value)
             )
         elif isinstance(value, list):
             # Recursively sanitize lists

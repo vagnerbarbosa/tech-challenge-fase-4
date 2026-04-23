@@ -261,7 +261,7 @@ class AuditLogger:
             True se a integridade da entrada for válida, False caso contrário.
         """
         try:
-            entry_dict = json.loads(entry_line)
+            entry_dict: dict[str, Any] = json.loads(entry_line)
             stored_checksum = entry_dict.pop("_checksum", None)
 
             if not stored_checksum:

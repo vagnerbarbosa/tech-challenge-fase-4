@@ -96,11 +96,11 @@ class APIKeyValidator:
 
         # Hash the API key for storage (not the plain key)
         # api_key is guaranteed to be str here because validate() passed
-        api_key_str = api_key  # type: ignore[assignment]
-        api_key_hash = self._hash_api_key(api_key_str)
+        assert api_key is not None, "api_key must be str after validation"
+        api_key_hash = self._hash_api_key(api_key)
 
         # Determine roles based on environment and key
-        roles = self._determine_roles(api_key_str)
+        roles = self._determine_roles(api_key)
 
         return SecurityContext(
             request_id=request_id,
