@@ -42,9 +42,9 @@
 
 ## Notes
 
-- Specification rewritten from scratch with 2026 security best practices
-- Clarifications resolved in session 2026-04-22
-- All 35 functional requirements defined with clear testability
+- Specification created following Spec Kit process
+- All 3 clarifications resolved in session 2026-04-22
+- 35 functional requirements defined with clear testability
 - OWASP API Top 10 mapping included
 - LGPD articles cross-referenced
 
@@ -52,12 +52,4 @@
 
 **Status**: ✅ **APROVADO para planning**
 
-Especificação completa, cobrindo:
-- 7 User Stories (P1 e P2) com acceptance scenarios
-- 35 Functional Requirements
-- 8 Success Criteria mensuráveis
-- OWASP API Top 10 2023/2026 mapping
-- LGPD compliance mapping
-- Fontes atualizadas de 2026
-
-Próximo passo: `/speckit.plan` para criar o plano técnico.
+Próximo passo: `/speckit.plan`

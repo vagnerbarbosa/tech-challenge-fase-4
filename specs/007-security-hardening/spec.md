@@ -1,16 +1,16 @@
 # Feature Specification: Security Hardening 2026
 
-**Feature Branch**: `007-security-hardening`
-**Created**: 2026-04-22
-**Status**: Draft
-**Input**: User description: "Reescrever spec de segurança com melhores práticas 2026, OWASP API Top 10, LGPD compliance técnico e proteção de dados de saúde"
+**Feature Branch**: `007-security-hardening`  
+**Created**: 2026-04-22  
+**Status**: Draft  
+**Input**: User description: "Implementar hardening de segurança completo para API FastAPI de saúde, incluindo: autenticação API Key, rate limiting contra DDoS, validação de uploads com magic bytes, sanitização de logs LGPD-compliant, headers de segurança OWASP, proteção BOLA, e auditoria LGPD. Seguir OWASP API Top 10 2023/2026 e compliance LGPD para dados de saúde."
 
 ---
 
 ## Clarifications
 
 ### Session 2026-04-22
-- **Q**: Qual o nível de autenticação necessário para o MVP? OAuth2 completo, JWT básico, ou API Key?  
+- **Q**: Qual o nível de autenticação necessário para o MVP?  
   **A**: API Key mínima para MVP, com estrutura para evoluir para OAuth2/JWT
 - **Q**: Devemos implementar criptografia em repouso para dados sensíveis ou apenas em trânsito?  
   **A**: Criptografia em trânsito (TLS 1.3) obrigatória; em repouso para dados sensíveis (AES-256) quando possível
