@@ -183,35 +183,25 @@ async def export_audit_logs(
         # Gera ID de correlação para esta exportação
         correlation_id = f"export-{id(request)}-{datetime.utcnow().isoformat()}"
 
-        if event_type:
-            # Obtém entradas filtradas por tipo de evento
-            entries = audit_logger.get_entries(
-                start_date=start_date,
-                end_date=end_date,
-                event_type=event_type,
-                limit=100000,
-                verify_integrity=True,
-            )
+        # Obtém entradas filtradas (com ou sem tipo de evento)
+        entries = audit_logger.get_entries(
+            start_date=start_date,
+            end_date=end_date,
+            event_type=event_type,
+            limit=100000,
+            verify_integrity=True,
+        )
 
-            if format == "ndjson":
-                result = "".join(entry.to_ndjson_line() for entry in entries)
-            else:
-                import json
-
-                result = json.dumps(
-                    [entry.to_anpd_format() for entry in entries],
-                    ensure_ascii=False,
-                    indent=2,
-                )
+        if format == "ndjson":
+            result = "".join(entry.to_ndjson_line() for entry in entries)
         else:
-            # Usa a função de exportação interna
-            export_result = audit_logger.export_for_anpd(
-                start_date=start_date,
-                end_date=end_date,
-                format=format,
+            import json
+
+            result = json.dumps(
+                [entry.to_anpd_format() for entry in entries],
+                ensure_ascii=False,
+                indent=2,
             )
-            # Ensure result is always a string
-            result = export_result if isinstance(export_result, str) else json.dumps(export_result)
 
         # Loga esta operação de exportação
         audit_logger.log(
@@ -225,11 +215,11 @@ async def export_audit_logs(
                 "end_date": end_date.isoformat() if end_date else None,
                 "event_type": event_type.value if event_type else None,
                 "format": format,
-                "entries_exported": len(entries) if isinstance(result, str) and event_type else None,
+                "entries_exported": len(entries),
             },
         )
 
-        return result if isinstance(result, str) else str(result)
+        return result
 
     except Exception as e:
         logger = get_audit_logger()

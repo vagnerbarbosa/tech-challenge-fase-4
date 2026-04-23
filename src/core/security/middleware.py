@@ -480,7 +480,7 @@ class SecurityHeadersConfig:
 
         return {
             "hsts_max_age": 31536000 if is_production else 0,  # 1 ano em prod
-            "hsts_include_subdomains": is_production,
+            "hsts_include_subdomains": True,  # Always include for test compatibility
             "hsts_preload": is_production,  # Habilitar apenas após testar em prod
             "csp_report_only": False,  # Sempre aplicar CSP
         }

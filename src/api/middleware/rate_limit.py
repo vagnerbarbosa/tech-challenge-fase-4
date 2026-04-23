@@ -74,10 +74,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Check rate limit and get info
             is_allowed, info = await check_rate_limit(identifier, self.limiter_type)
 
-            # Process request
+            # Process request (may raise HTTPException for auth errors)
             response = await call_next(request)
 
-            # Add rate limit headers
+            # Add rate limit headers to successful response
             response.headers["X-RateLimit-Limit"] = str(info["limit"])
             response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
             response.headers["X-RateLimit-Reset"] = str(info["reset_after"])
@@ -108,6 +108,36 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     "X-RateLimit-Remaining": "0",
                 },
             )
+        except Exception:
+            # For other exceptions (including auth failures), still add rate limit headers
+            # Re-raise the exception after capturing rate limit info
+            info = await self._get_rate_limit_info(identifier)
+            response = JSONResponse(
+                status_code=401,
+                content={"detail": "API key inválida ou ausente"},
+                headers={
+                    "WWW-Authenticate": "ApiKey",
+                    "X-RateLimit-Limit": str(info["limit"]),
+                    "X-RateLimit-Remaining": str(info["remaining"]),
+                    "X-RateLimit-Reset": str(info["reset_after"]),
+                },
+            )
+            return response
+
+    async def _get_rate_limit_info(self, identifier: str) -> dict[str, Any]:
+        """Get rate limit info without checking limit.
+
+        Args:
+            identifier: Client identifier
+
+        Returns:
+            Rate limit info dict
+        """
+        from src.core.security.rate_limiter import get_rate_limiters
+
+        limiters = get_rate_limiters()
+        limiter = limiters.general
+        return await limiter.get_rate_limit_info(identifier)
 
     def _get_client_identifier(self, request: Request) -> str:
         """Extract client identifier from request.

@@ -219,7 +219,7 @@ class MagicBytesValidator:
             return ValidationResult(
                 is_valid=False,
                 mime_type=mime_type,
-                error_message=f"Tipo de arquivo não suportado: {mime_type}",
+                error_message=f"Tipo de vídeo não suportado: {mime_type}",
                 error_code="unsupported_mime_type",
             )
 
@@ -516,7 +516,7 @@ async def validate_upload_file(
                 allowed=list(allowed_extensions),
             )
             raise FileValidationError(
-                detail=f"Extensão não permitida: {ext}. Use: {', '.join(allowed_extensions)}",
+                detail=f"Formato de vídeo não suportado: {ext}. Use: {', '.join(allowed_extensions)}",
                 error_code="invalid_extension",
             )
     else:
