@@ -1,8 +1,8 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis, Multimodal Fusion",
-    "version": "1.1.0",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis, Multimodal Fusion\n\n⚠️ Autenticação: Todas as requisições (exceto Health) precisam do header X-API-Key",
+    "version": "1.2.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -19,7 +19,7 @@
               "host": ["{{base_url}}"],
               "path": ["health"]
             },
-            "description": "Verifica status da API e quotas Azure"
+            "description": "Verifica status da API e quotas Azure (público, sem auth)"
           },
           "response": []
         },
@@ -33,7 +33,7 @@
               "host": ["{{base_url}}"],
               "path": ["ready"]
             },
-            "description": "Verifica se a API está pronta para receber requisições (Kubernetes/Docker health check)"
+            "description": "Verifica se a API está pronta para receber requisições (Kubernetes/Docker health check) - público"
           },
           "response": []
         },
@@ -47,7 +47,52 @@
               "host": ["{{base_url}}"],
               "path": [""]
             },
-            "description": "Informações da API"
+            "description": "Informações da API (público)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Validate API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/validate",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "validate"]
+            },
+            "description": "Valida se a API Key está funcionando"
+          },
+          "response": []
+        },
+        {
+          "name": "Rate Limit Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/rate-limit-status",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "rate-limit-status"]
+            },
+            "description": "Verifica o status do rate limit do client"
           },
           "response": []
         }
@@ -64,6 +109,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
               }
             ],
             "body": {
@@ -75,7 +125,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "text"]
             },
-            "description": "Analisa texto para sentimento e riscos"
+            "description": "Analisa texto para sentimento e riscos. Requer X-API-Key header."
           },
           "response": []
         },
@@ -83,7 +133,13 @@
           "name": "Cache Stats",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/text/cache/stats",
               "host": ["{{base_url}}"],
@@ -97,7 +153,13 @@
           "name": "Clear Cache",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/text/cache/clear",
               "host": ["{{base_url}}"],
@@ -116,7 +178,13 @@
           "name": "Analyze Audio",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -137,7 +205,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "audio"]
             },
-            "description": "Analisa arquivo de áudio (WAV, MP3, OGG) para transcrição, prosódia e riscos"
+            "description": "Analisa arquivo de áudio (WAV, MP3, OGG) para transcrição, prosódia e riscos. Requer X-API-Key header."
           },
           "response": []
         },
@@ -145,7 +213,13 @@
           "name": "Get Audio Formats",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/audio/formats",
               "host": ["{{base_url}}"],
@@ -159,7 +233,13 @@
           "name": "Audio Cache Stats",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/audio/cache/stats",
               "host": ["{{base_url}}"],
@@ -173,7 +253,13 @@
           "name": "Clear Audio Cache",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/audio/cache/clear",
               "host": ["{{base_url}}"],
@@ -192,7 +278,13 @@
           "name": "Analyze Video",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -218,7 +310,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "video"]
             },
-            "description": "Analisa vídeo (MP4, AVI, MOV) usando YOLOv8 local para detecção de objetos, instrumentos médicos e comportamento"
+            "description": "Analisa vídeo (MP4, AVI, MOV) usando YOLOv8 local para detecção de objetos, instrumentos médicos e comportamento. Requer X-API-Key header."
           },
           "response": []
         },
@@ -226,7 +318,13 @@
           "name": "Get Video Formats",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/video/formats",
               "host": ["{{base_url}}"],
@@ -240,7 +338,13 @@
           "name": "Video Cache Stats",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/video/cache/stats",
               "host": ["{{base_url}}"],
@@ -254,7 +358,13 @@
           "name": "Clear Video Cache",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/analyze/video/cache/clear",
               "host": ["{{base_url}}"],
@@ -273,7 +383,13 @@
           "name": "Analyze Multimodal (1 modalidade - texto)",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -294,14 +410,19 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "Fusão multimodal com apenas texto"
+            "description": "Fusão multimodal com apenas texto. Requer X-API-Key header."
           },
           "response": [
             {
               "name": "Sucesso - 1 modalidade",
               "originalRequest": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -334,7 +455,13 @@
           "name": "Analyze Multimodal (2 modalidades - texto + áudio)",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -360,7 +487,7 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "Fusão multimodal com texto e áudio"
+            "description": "Fusão multimodal com texto e áudio. Requer X-API-Key header."
           },
           "response": []
         },
@@ -368,7 +495,13 @@
           "name": "Analyze Multimodal (3 modalidades)",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}",
+                "type": "text"
+              }
+            ],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -399,14 +532,19 @@
               "host": ["{{base_url}}"],
               "path": ["analyze", "multimodal"]
             },
-            "description": "Fusão multimodal completa com texto, áudio e vídeo"
+            "description": "Fusão multimodal completa com texto, áudio e vídeo. Requer X-API-Key header."
           },
           "response": [
             {
               "name": "Sucesso - 3 modalidades",
               "originalRequest": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "X-API-Key",
+                    "value": "{{api_key}}"
+                  }
+                ],
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -441,7 +579,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"fusao\": {\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\",\n    \"confiança\": 0.72,\n    \"alerta\": false,\n    \"recomendacao\": \"Acompanhamento prioritário recomendado\",\n    \"scores_por_modalidade\": {\n      \"texto\": 0.5,\n      \"audio\": 0.5,\n      \"video\": 0.0\n    }\n  },\n  \"texto\": {\n    \"sentimento\": \"negativo\",\n    \"score\": -0.85,\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\"\n  },\n  \"audio\": {\n    \"transcricao\": \"Estou muito ansiosa\",\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"medio\"\n  },\n  \"video\": {\n    \"risco_violencia\": \"baixo\",\n    \"risco_saude_mental\": \"baixo\"\n  },\n  \"metadata\": {\n    \"correlation_id\": \"abc-123\",\n    \"timestamp\": \"2026-04-21T14:30:00Z\",\n    \"tempo_processamento_ms\": 12500,\n    \"cache_hit\": false,\n    \"azure_calls\": 2,\n    \"modalidades_processadas\": [\"texto\", \"audio\", \"video\"]\n  }\n}"
+              "body": "{\n  \"fusao\": {\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\",\n    \"confiança\": 0.72,\n    \"alerta\": false,\n    \"recomendacao\": \"Acompanhamento prioritário recomendado\",\n    \"scores_por_modalidade\": {\n      \"texto\": 0.5,\n      \"audio\": 0.5,\n      \"video\": 0.0\n    }\n  },\n  \"texto\": {\n    \"sentimento\": \"negativo\",\n    \"score\": -0.85,\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"alto\"\n  },\n  \"audio\": {\n    \"transcricao\": \"Estou muito ansiosa\",\n    \"risco_violencia\": \"medio\",\n    \"risco_saude_mental\": \"medio\"\n  },\n  \"video\": {\n    \"risco_violamento\": \"baixo\",\n    \"risco_saude_mental\": \"baixo\"\n  },\n  \"metadata\": {\n    \"correlation_id\": \"abc-123\",\n    \"timestamp\": \"2026-04-21T14:30:00Z\",\n    \"tempo_processamento_ms\": 12500,\n    \"cache_hit\": false,\n    \"azure_calls\": 2,\n    \"modalidades_processadas\": [\"texto\", \"audio\", \"video\"]\n  }\n}"
             }
           ]
         }
@@ -457,7 +595,8 @@
     {
       "key": "api_key",
       "value": "test-api-key",
-      "type": "string"
+      "type": "string",
+      "description": "API Key para autenticação (header X-API-Key). Valor padrão: test-api-key (modo mock)"
     }
   ]
 }
