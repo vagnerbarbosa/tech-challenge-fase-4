@@ -111,26 +111,28 @@ class APIKeyValidator:
         )
 
     def _hash_api_key(self, api_key: str) -> str:
-        """Hash da chave de API usando SHA256.
+        """Hash da chave de API usando PBKDF2.
 
-        Nota: SHA256 é adequado para hash de API keys pois:
-        1. API keys são geradas com alta entropia (aleatórias)
-        2. API keys têm comprimento fixo e suficiente (>32 chars)
-        3. Diferente de senhas de usuário, não são vulneráveis a rainbow tables
-           quando combinadas com salt único por instância
-
-        Para password hashing de usuários, usar bcrypt ou Argon2.
+        Usa PBKDF2-HMAC-SHA256 que é computacionalmente mais custoso
+        que SHA256 simples, adequado para proteção de API keys.
 
         Args:
             api_key: A chave de API para fazer hash
 
         Returns:
-            Hash SHA256 como string hexadecimal (64 caracteres)
+            Hash PBKDF2 como string hexadecimal
         """
-        # Use SHA256 with instance-specific salt for API key hashing
-        # This provides sufficient security for high-entropy API keys
-        salted_key = f"{api_key}:{self.config.environment}"
-        return hashlib.sha256(salted_key.encode("utf-8")).hexdigest()
+        # Use PBKDF2 with 100k iterations for API key hashing
+        # Provides better protection than simple SHA256
+        import secrets
+
+        salt = self.config.environment.encode("utf-8")
+        return hashlib.pbkdf2_hmac(
+            "sha256",
+            api_key.encode("utf-8"),
+            salt,
+            100000,  # 100k iterations
+        ).hex()
 
     def _determine_roles(self, api_key: str) -> list[str]:
         """Determina as roles baseadas na chave de API e ambiente.
