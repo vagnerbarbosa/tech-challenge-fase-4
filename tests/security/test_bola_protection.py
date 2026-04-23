@@ -15,6 +15,7 @@ from src.core.exceptions import AuthenticationException, ForbiddenException
 from src.core.security.auth import BOLAProtector, APIKeyValidator
 from src.core.security.models import SecurityContext
 from src.core.config import SecurityConfig
+from tests.conftest import TEST_API_KEY
 
 
 class TestBOLAProtection:
@@ -119,7 +120,7 @@ class TestBOLAWithAPIEndpoints:
     @pytest.fixture
     def client(self) -> TestClient:
         """Create test client for FastAPI app."""
-        return TestClient(app)
+        return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def test_endpoint_with_patient_id_in_path(self, client: TestClient) -> None:
         """Test that patient-specific endpoints enforce ownership."""

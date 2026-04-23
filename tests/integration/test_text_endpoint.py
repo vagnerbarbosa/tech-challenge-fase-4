@@ -5,12 +5,13 @@ from fastapi.testclient import TestClient
 
 from src.api.main import app
 from src.core.cache import get_cache
+from tests.conftest import TEST_API_KEY
 
 
 @pytest.fixture
 def client():
     """Cliente de teste para a aplicação FastAPI."""
-    return TestClient(app)
+    return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
 
 @pytest.fixture(autouse=True)

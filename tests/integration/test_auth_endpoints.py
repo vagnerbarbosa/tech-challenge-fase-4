@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from src.api.main import app
 from src.core.config import SecurityConfig
+from tests.conftest import TEST_API_KEY
 
 
 class TestAuthenticationEndpoints:
@@ -16,7 +17,7 @@ class TestAuthenticationEndpoints:
     @pytest.fixture
     def client(self) -> TestClient:
         """Create test client for FastAPI app."""
-        return TestClient(app)
+        return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def test_health_without_api_key(self, client: TestClient) -> None:
         """Test that health endpoint returns 401 without API key in production.
@@ -35,7 +36,7 @@ class TestAuthenticationEndpoints:
         """Test health endpoint with valid API key."""
         response = client.get(
             "/health",
-            headers={"X-API-Key": "change-me-in-production"},
+            headers={"X-API-Key": TEST_API_KEY},
         )
 
         assert response.status_code == 200
@@ -76,7 +77,7 @@ class TestAuthenticationEndpoints:
         """
         response = client.post(
             "/analyze/text",
-            headers={"X-API-Key": "change-me-in-production"},
+            headers={"X-API-Key": TEST_API_KEY},
             json={"texto": "Test text for analysis", "tipo": "geral"},
         )
 
@@ -120,7 +121,7 @@ class TestAuthenticationHeaders:
     @pytest.fixture
     def client(self) -> TestClient:
         """Create test client for FastAPI app."""
-        return TestClient(app)
+        return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def test_www_authenticate_header_on_401(self, client: TestClient) -> None:
         """Test that 401 responses include WWW-Authenticate header."""
@@ -153,14 +154,14 @@ class TestRoleBasedAccess:
     @pytest.fixture
     def client(self) -> TestClient:
         """Create test client for FastAPI app."""
-        return TestClient(app)
+        return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def test_admin_endpoint_without_admin_role(self, client: TestClient) -> None:
         """Test that admin endpoints require admin role."""
         # Regular API key shouldn't access admin endpoints
         response = client.get(
             "/admin/cache/clear",  # Hypothetical admin endpoint
-            headers={"X-API-Key": "change-me-in-production"},
+            headers={"X-API-Key": TEST_API_KEY},
         )
 
         # Should return 404 (not found) or 403 (forbidden) if protected

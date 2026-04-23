@@ -16,6 +16,7 @@ from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
 from src.api.main import app
+from tests.conftest import TEST_API_KEY
 
 
 class TestUploadSecurity:
@@ -24,7 +25,7 @@ class TestUploadSecurity:
     @pytest.fixture
     def client(self) -> TestClient:
         """Create test client."""
-        return TestClient(app)
+        return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
     def create_test_file(self, content: bytes, filename: str) -> tuple[io.BytesIO, str]:
         """Create a test file for upload.

@@ -17,12 +17,13 @@ from httpx import Response
 from src.api.main import app
 from src.models.audit_log import AuditEventType, AuditLogEntry
 from src.utils.audit_logger import AuditLogger, get_audit_logger
+from tests.conftest import TEST_API_KEY
 
 
 @pytest.fixture
 def client() -> TestClient:
     """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
 
 @pytest.fixture

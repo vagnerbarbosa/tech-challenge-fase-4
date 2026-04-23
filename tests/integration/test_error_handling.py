@@ -11,8 +11,9 @@ from fastapi.testclient import TestClient
 
 from src.api.main import app
 from src.core.config import settings
+from tests.conftest import TEST_API_KEY
 
-client = TestClient(app)
+client = TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
 
 class TestErrorHandlingProduction:

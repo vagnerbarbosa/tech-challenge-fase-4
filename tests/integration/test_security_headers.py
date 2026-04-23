@@ -7,12 +7,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.api.main import app
+from tests.conftest import TEST_API_KEY
 
 
 @pytest.fixture
 def client():
     """Test client for FastAPI application."""
-    return TestClient(app)
+    return TestClient(app, headers={"X-API-Key": TEST_API_KEY})
 
 
 class TestSecurityHeaders:
