@@ -62,7 +62,7 @@ async def health_check(
         "vision": get_quota_status("vision"),
     }
 
-    response = {
+    response: dict[str, Any] = {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "version": settings.app_version,
@@ -101,7 +101,7 @@ async def readiness_check(
     """
     # TODO: Verificar conexão com banco de dados
     # TODO: Verificar disponibilidade dos serviços Azure
-    response = {
+    response: dict[str, Any] = {
         "status": "ready",
         "timestamp": datetime.utcnow().isoformat(),
     }

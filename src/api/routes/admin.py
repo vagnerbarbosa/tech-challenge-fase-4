@@ -6,6 +6,7 @@ e exportação de dados em formato compatível com ANPD conforme exigido pela LG
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Annotated, Any
 
@@ -205,11 +206,13 @@ async def export_audit_logs(
                 )
         else:
             # Usa a função de exportação interna
-            result = audit_logger.export_for_anpd(
+            export_result = audit_logger.export_for_anpd(
                 start_date=start_date,
                 end_date=end_date,
                 format=format,
             )
+            # Ensure result is always a string
+            result = export_result if isinstance(export_result, str) else json.dumps(export_result)
 
         # Loga esta operação de exportação
         audit_logger.log(

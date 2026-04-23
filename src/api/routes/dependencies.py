@@ -41,7 +41,7 @@ def get_temp_manager() -> TempFileManager:
 async def validate_upload_file(
     file: UploadFile,
     max_size: int = MAX_FILE_SIZE_BYTES,
-    allowed_extensions: set[str] | None = None,
+    allowed_extensions: set[str] | frozenset[str] | None = None,
 ) -> UploadFile:
     """Valida arquivo enviado via upload.
 
