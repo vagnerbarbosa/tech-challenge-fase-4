@@ -177,7 +177,7 @@ async def analyze_video(
 
         # Processar vídeo
         analysis_service = VideoAnalysisService()
-        result = analysis_service.analyze(
+        result = await analysis_service.analyze(
             video_path=video_path,
             duration_seconds=duration,
             temp_dir=temp_dir,
