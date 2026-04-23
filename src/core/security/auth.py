@@ -124,8 +124,6 @@ class APIKeyValidator:
         """
         # Use PBKDF2 with 100k iterations for API key hashing
         # Provides better protection than simple SHA256
-        import secrets
-
         salt = self.config.environment.encode("utf-8")
         return hashlib.pbkdf2_hmac(
             "sha256",
