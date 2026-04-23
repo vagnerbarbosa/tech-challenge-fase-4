@@ -94,7 +94,7 @@ class TestCSPPolicy:
         # Create a test app with production environment
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
-        from src.core.security.middleware import SecurityHeadersMiddleware
+        from src.api.middleware.cors_security import SecurityHeadersMiddleware
 
         test_app = FastAPI()
         test_app.add_middleware(
