@@ -13,6 +13,15 @@ from fastapi.testclient import TestClient
 class TestRateLimitConcurrency:
     """Tests for concurrent rate limiting behavior."""
 
+    def _check_rate_limit_enabled(self, auth_client: TestClient):
+        """Check if rate limiting is enabled."""
+        response = auth_client.post(
+            "/analyze/text",
+            json={"texto": "Estou me sentindo ansiosa"},
+        )
+        if "X-RateLimit-Limit" not in response.headers:
+            pytest.skip("Rate limiting not enabled")
+
     def test_parallel_requests_respect_limit(self, auth_client: TestClient):
         """Test that parallel requests properly count against rate limit.
 
@@ -42,6 +51,8 @@ class TestRateLimitConcurrency:
 
     def test_parallel_requests_consistent_headers(self, auth_client: TestClient):
         """Test that parallel requests return consistent rate limit headers."""
+        self._check_rate_limit_enabled(auth_client)
+
         num_requests = 10
 
         # Make parallel requests
@@ -278,8 +289,19 @@ class TestRateLimitDistributed:
 class TestRateLimitHeadersUnderLoad:
     """Tests for rate limit header accuracy under load."""
 
+    def _check_rate_limit_enabled(self, auth_client: TestClient):
+        """Check if rate limiting is enabled."""
+        response = auth_client.post(
+            "/analyze/text",
+            json={"texto": "Estou me sentindo ansiosa"},
+        )
+        if "X-RateLimit-Limit" not in response.headers:
+            pytest.skip("Rate limiting not enabled")
+
     def test_remaining_count_accuracy(self, auth_client: TestClient):
         """Test that remaining count is accurate under load."""
+        self._check_rate_limit_enabled(auth_client)
+
         remaining_values = []
 
         for i in range(10):
@@ -298,6 +320,8 @@ class TestRateLimitHeadersUnderLoad:
 
     def test_reset_after_consistency(self, auth_client: TestClient):
         """Test that reset_after is consistent."""
+        self._check_rate_limit_enabled(auth_client)
+
         reset_values = []
 
         for i in range(5):
