@@ -161,6 +161,7 @@ app.add_middleware(
     hsts_include_subdomains=security_headers_config["hsts_include_subdomains"],
     hsts_preload=security_headers_config["hsts_preload"],
     csp_report_only=security_headers_config["csp_report_only"],
+    environment=security_headers_config["environment"],
 )
 logger.info(
     "SecurityHeadersMiddleware configurado",

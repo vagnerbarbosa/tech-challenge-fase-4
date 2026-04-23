@@ -1,6 +1,6 @@
-"""Rate limiting middleware for FastAPI.
+"""Middleware de rate limiting para FastAPI.
 
-Adds X-RateLimit-* headers to all responses and handles rate limit exceptions.
+Adiciona headers X-RateLimit-* a todas as respostas e trata exceções de rate limit.
 """
 
 from collections.abc import Awaitable, Callable
@@ -22,12 +22,12 @@ logger = get_logger(__name__)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Middleware to add rate limiting headers to responses.
+    """Middleware para adicionar headers de rate limiting às respostas.
 
-    Adds the following headers to all responses:
-    - X-RateLimit-Limit: Maximum requests allowed
-    - X-RateLimit-Remaining: Remaining requests in window
-    - X-RateLimit-Reset: Seconds until rate limit resets
+    Adiciona os seguintes headers a todas as respostas:
+    - X-RateLimit-Limit: Máximo de requisições permitidas
+    - X-RateLimit-Remaining: Requisições restantes na janela
+    - X-RateLimit-Reset: Segundos até o reset do rate limit
     """
 
     def __init__(
@@ -36,12 +36,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         limiter_type: str = "general",
         skip_paths: list[str] | None = None,
     ) -> None:
-        """Initialize rate limit middleware.
+        """Inicializa o middleware de rate limiting.
 
         Args:
-            app: FastAPI application
-            limiter_type: Type of rate limiter (general, auth, analyze, health)
-            skip_paths: List of paths to skip rate limiting
+            app: Aplicação FastAPI
+            limiter_type: Tipo de rate limiter (general, auth, analyze, health)
+            skip_paths: Lista de caminhos para ignorar rate limiting
         """
         super().__init__(app)
         self.limiter_type = limiter_type
@@ -53,45 +53,39 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        """Process request and add rate limit headers.
+        """Processa a requisição e adiciona headers de rate limit.
+
+        CRÍTICO: A verificação de rate limit acontece ANTES do call_next
+        para garantir que 429 seja retornado antes de 401 (falha de auth).
+        Isso evita que ataques de autenticação sejam mascarados por violações
+        de rate limit.
 
         Args:
-            request: FastAPI request
-            call_next: Next middleware/handler
+            request: Requisição FastAPI
+            call_next: Próximo middleware/handler
 
         Returns:
-            Response with rate limit headers
+            Resposta com headers de rate limit
         """
-        # Skip rate limiting for certain paths
+        # Ignora rate limiting para certos caminhos
         path = request.url.path
         if any(path.startswith(skip) for skip in self.skip_paths):
             return await call_next(request)
 
-        # Get client identifier
+        # Obtém identificador do cliente
         identifier = self._get_client_identifier(request)
 
-        try:
-            # Check rate limit and get info
-            is_allowed, info = await check_rate_limit(identifier, self.limiter_type)
+        # Verifica rate limit ANTES de processar a requisição (garante 429 antes de 401)
+        is_allowed, info = await check_rate_limit(identifier, self.limiter_type)
 
-            # Process request (may raise HTTPException for auth errors)
-            response = await call_next(request)
-
-            # Add rate limit headers to successful response
-            response.headers["X-RateLimit-Limit"] = str(info["limit"])
-            response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
-            response.headers["X-RateLimit-Reset"] = str(info["reset_after"])
-
-            return response
-
-        except RateLimitExceeded as exc:
-            # Return 429 with retry-after header
-            retry_after = exc.retry_after or 60
+        if not is_allowed:
+            # Rate limit excedido - retorna 429 imediatamente (antes da verificação de auth)
+            retry_after = info.get("reset_after", 60)
 
             logger.warning(
                 "rate_limit_exceeded",
                 path=path,
-                identifier=identifier[:8] + "...",  # Partial identifier for privacy
+                identifier=identifier[:8] + "...",  # Identificador parcial para privacidade
                 retry_after=retry_after,
             )
 
@@ -99,39 +93,35 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=429,
                 content={
                     "error": "RateLimitExceeded",
-                    "message": exc.message,
+                    "message": f"Rate limit excedido. Tente novamente após {retry_after} segundos.",
                     "retry_after": retry_after,
                 },
                 headers={
                     "Retry-After": str(retry_after),
-                    "X-RateLimit-Limit": str(exc.details.get("limit", 60)),
-                    "X-RateLimit-Remaining": "0",
-                },
-            )
-        except Exception:
-            # For other exceptions (including auth failures), still add rate limit headers
-            # Re-raise the exception after capturing rate limit info
-            info = await self._get_rate_limit_info(identifier)
-            response = JSONResponse(
-                status_code=401,
-                content={"detail": "API key inválida ou ausente"},
-                headers={
-                    "WWW-Authenticate": "ApiKey",
                     "X-RateLimit-Limit": str(info["limit"]),
-                    "X-RateLimit-Remaining": str(info["remaining"]),
-                    "X-RateLimit-Reset": str(info["reset_after"]),
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": str(retry_after),
                 },
             )
-            return response
+
+        # Rate limit OK - processa requisição (pode retornar 401, 403, etc.)
+        response = await call_next(request)
+
+        # Adiciona headers de rate limit à resposta (sobrescreve existentes)
+        response.headers["X-RateLimit-Limit"] = str(info["limit"])
+        response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
+        response.headers["X-RateLimit-Reset"] = str(info["reset_after"])
+
+        return response
 
     async def _get_rate_limit_info(self, identifier: str) -> dict[str, Any]:
-        """Get rate limit info without checking limit.
+        """Obtém informações de rate limit sem verificar o limite.
 
         Args:
-            identifier: Client identifier
+            identifier: Identificador do cliente
 
         Returns:
-            Rate limit info dict
+            Dicionário com informações de rate limit
         """
         from src.core.security.rate_limiter import get_rate_limiters
 
@@ -140,36 +130,36 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await limiter.get_rate_limit_info(identifier)
 
     def _get_client_identifier(self, request: Request) -> str:
-        """Extract client identifier from request.
+        """Extrai identificador do cliente da requisição.
 
-        Priority:
-        1. X-API-Key header (hashed)
-        2. X-Forwarded-For header (first IP)
-        3. X-Real-IP header
-        4. Remote address
+        Prioridade:
+        1. Header X-API-Key (hasheada)
+        2. Header X-Forwarded-For (primeiro IP)
+        3. Header X-Real-IP
+        4. Endereço remoto
 
         Args:
-            request: FastAPI request
+            request: Requisição FastAPI
 
         Returns:
-            Client identifier string
+            String com identificador do cliente
         """
-        # Check for API key first
+        # Verifica API key primeiro
         api_key = request.headers.get("X-API-Key")
         if api_key:
             return f"api:{api_key}"
 
-        # Get IP address
+        # Obtém endereço IP
         forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
-            # First IP in X-Forwarded-For is the client
+            # Primeiro IP no X-Forwarded-For é o cliente
             return forwarded_for.split(",")[0].strip()
 
         real_ip = request.headers.get("X-Real-IP")
         if real_ip:
             return real_ip
 
-        # Fall back to remote address
+        # Fallback para endereço remoto
         if request.client:
             return str(request.client.host)
 
@@ -177,10 +167,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 class AuthRateLimitMiddleware(BaseHTTPMiddleware):
-    """Stricter rate limiting for authentication endpoints.
+    """Rate limiting mais restritivo para endpoints de autenticação.
 
-    Applies stricter rate limits (5/min) to auth-related endpoints
-    to protect against brute force attacks.
+    Aplica limites mais rigorosos (5/min) a endpoints relacionados a auth
+    para proteger contra ataques de força bruta.
     """
 
     def __init__(
@@ -188,11 +178,11 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         app: Any,
         protected_paths: list[str] | None = None,
     ) -> None:
-        """Initialize auth rate limit middleware.
+        """Inicializa o middleware de rate limiting para auth.
 
         Args:
-            app: FastAPI application
-            protected_paths: Paths that require stricter rate limiting
+            app: Aplicação FastAPI
+            protected_paths: Caminhos que requerem rate limiting mais restritivo
         """
         super().__init__(app)
         self.protected_paths = protected_paths or [
@@ -207,38 +197,32 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        """Process request with auth-specific rate limiting.
+        """Processa requisição com rate limiting específico para auth.
+
+        CRÍTICO: A verificação de rate limit acontece ANTES do call_next
+        para garantir que 429 seja retornado antes de 401 (falha de auth).
 
         Args:
-            request: FastAPI request
-            call_next: Next middleware/handler
+            request: Requisição FastAPI
+            call_next: Próximo middleware/handler
 
         Returns:
-            Response with rate limit headers
+            Resposta com headers de rate limit
         """
         path = request.url.path
 
-        # Only apply to auth paths
+        # Aplica apenas a caminhos de auth
         if not any(path.startswith(p) for p in self.protected_paths):
             return await call_next(request)
 
         identifier = self._get_client_identifier(request)
 
-        try:
-            # Use auth rate limiter (5/min)
-            is_allowed, info = await check_rate_limit(identifier, "auth")
+        # Verifica rate limit ANTES de processar a requisição (garante 429 antes de 401)
+        is_allowed, info = await check_rate_limit(identifier, "auth")
 
-            response = await call_next(request)
-
-            # Add rate limit headers
-            response.headers["X-RateLimit-Limit"] = str(info["limit"])
-            response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
-            response.headers["X-RateLimit-Reset"] = str(info["reset_after"])
-
-            return response
-
-        except RateLimitExceeded as exc:
-            retry_after = exc.retry_after or 60
+        if not is_allowed:
+            # Rate limit excedido - retorna 429 imediatamente (antes da verificação de auth)
+            retry_after = info.get("reset_after", 60)
 
             logger.warning(
                 "auth_rate_limit_exceeded",
@@ -251,23 +235,34 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=429,
                 content={
                     "error": "RateLimitExceeded",
-                    "message": "Too many authentication attempts. Please try again later.",
+                    "message": "Muitas tentativas de autenticação. Tente novamente mais tarde.",
                     "retry_after": retry_after,
                 },
                 headers={
                     "Retry-After": str(retry_after),
-                    "X-RateLimit-Limit": str(exc.details.get("limit", 5)),
+                    "X-RateLimit-Limit": str(info["limit"]),
                     "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": str(retry_after),
                 },
             )
 
-    def _get_client_identifier(self, request: Request) -> str:
-        """Extract client identifier from request.
+        # Rate limit OK - processa requisição (pode retornar 401, 403, etc.)
+        response = await call_next(request)
 
-        For auth endpoints, use IP + path combination to prevent
-        distributed attacks on the same endpoint.
+        # Adiciona headers de rate limit
+        response.headers["X-RateLimit-Limit"] = str(info["limit"])
+        response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
+        response.headers["X-RateLimit-Reset"] = str(info["reset_after"])
+
+        return response
+
+    def _get_client_identifier(self, request: Request) -> str:
+        """Extrai identificador do cliente da requisição.
+
+        Para endpoints de auth, usa combinação de IP + caminho para prevenir
+        ataques distribuídos no mesmo endpoint.
         """
-        # Get IP address
+        # Obtém endereço IP
         forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
             ip = forwarded_for.split(",")[0].strip()
@@ -275,26 +270,26 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
             real_ip = request.headers.get("X-Real-IP")
             ip = real_ip or (request.client.host if request.client else "unknown")
 
-        # Include path in identifier to rate limit per endpoint
+        # Inclui caminho no identificador para rate limit por endpoint
         return f"{ip}:{request.url.path}"
 
 
-# Helper functions for manual rate limit checks
+# Funções auxiliares para verificações manuais de rate limit
 
 async def add_rate_limit_headers(
     response: Response,
     identifier: str,
     limiter_type: str = "general",
 ) -> Response:
-    """Add rate limit headers to a response.
+    """Adiciona headers de rate limit a uma resposta.
 
     Args:
-        response: FastAPI response
-        identifier: Client identifier
-        limiter_type: Type of rate limiter
+        response: Resposta FastAPI
+        identifier: Identificador do cliente
+        limiter_type: Tipo de rate limiter
 
     Returns:
-        Response with headers added
+        Resposta com headers adicionados
     """
     limiters = get_rate_limiters()
 

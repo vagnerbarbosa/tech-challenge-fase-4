@@ -33,8 +33,18 @@ class TestCSPPolicy:
 
         # Should have script-src with 'self' and possibly nonce/hash
         assert "script-src" in csp
-        # Inline scripts should not be allowed by default
-        assert "'unsafe-inline'" not in csp or "'nonce-" in csp
+
+        # Extract script-src directive specifically (not style-src)
+        script_src_part = ""
+        for directive in csp.split(";"):
+            directive = directive.strip()
+            if directive.startswith("script-src "):
+                script_src_part = directive
+                break
+
+        # Inline scripts should not be allowed in script-src
+        # (style-src may have 'unsafe-inline' which is acceptable)
+        assert "'unsafe-inline'" not in script_src_part or "'nonce-" in script_src_part
 
     def test_csp_blocks_eval(self, client):
         """CSP should block eval() and similar."""
@@ -74,11 +84,29 @@ class TestCSPPolicy:
 
         assert "form-action" in csp
 
-    def test_csp_upgrade_insecure_requests_in_production(self, client, monkeypatch):
+    def test_csp_upgrade_insecure_requests_in_production(self, monkeypatch):
         """CSP should upgrade insecure requests in production."""
-        # Temporarily set production environment
+        # Import here to get fresh instance with new env
+        import os
         monkeypatch.setenv("ENVIRONMENT", "production")
+        os.environ["ENVIRONMENT"] = "production"
 
+        # Create a test app with production environment
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from src.core.security.middleware import SecurityHeadersMiddleware
+
+        test_app = FastAPI()
+        test_app.add_middleware(
+            SecurityHeadersMiddleware,
+            environment="production",
+        )
+
+        @test_app.get("/health")
+        def health():
+            return {"status": "ok"}
+
+        client = TestClient(test_app)
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 

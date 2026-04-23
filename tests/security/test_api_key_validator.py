@@ -371,9 +371,11 @@ class TestSecurityIntegration:
 
     def test_full_auth_flow_bola_violation(self) -> None:
         """Test complete flow detecting BOLA violation."""
+        # Use production environment to ensure no admin bypass
         config = SecurityConfig(
             api_key="user1-key",
             api_key_header="X-API-Key",
+            environment="production",
         )
         auth_validator = APIKeyValidator(config)
         bola_protector = BOLAProtector()
@@ -384,6 +386,9 @@ class TestSecurityIntegration:
             request_id="req-123",
             ip_address="192.168.1.1",
         )
+
+        # Verify user1-key doesn't have admin role in production
+        assert "admin" not in ctx.roles
 
         # But tries to access User 2's resource
         with pytest.raises(ForbiddenException):

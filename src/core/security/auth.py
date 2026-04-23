@@ -132,30 +132,31 @@ class APIKeyValidator:
             100000,  # 100k iterations
         ).hex()
 
-    def _determine_roles(self, api_key: str) -> list[str]:
+    def _determine_roles(self, api_key: str) -> tuple[str, ...]:
         """Determina as roles baseadas na chave de API e ambiente.
 
-        Em desenvolvimento, todas as chaves recebem a role admin.
-        Em produção, apenas chaves específicas recebem privilégios elevados.
+        Chaves contendo "admin" no nome recebem role admin em qualquer ambiente.
+        Em desenvolvimento, todas as chaves recebem role admin para conveniência.
 
         Args:
             api_key: A chave de API validada
 
         Returns:
-            Lista de strings de roles
+            Tuple de strings de roles (imutável)
         """
-        roles = ["read"]  # Default role
+        roles: list[str] = ["read"]  # Default role
 
-        # In development, grant additional permissions
-        if self.config.environment == "development":
-            roles.append("write")
+        # All valid keys get write access
+        roles.append("write")
+
+        # Keys with "admin" in name get admin role (in any environment)
+        if "admin" in api_key.lower():
             roles.append("admin")
-        else:
-            # In production, check for specific patterns or keys
-            # For now, all valid keys get write access in this implementation
-            roles.append("write")
+        elif self.config.environment == "development":
+            # In development, grant admin to all keys for convenience
+            roles.append("admin")
 
-        return roles
+        return tuple(roles)
 
 
 class RBACValidator:

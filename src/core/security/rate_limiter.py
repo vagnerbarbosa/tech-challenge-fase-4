@@ -475,10 +475,9 @@ async def check_rate_limit(
         limiter_type: Tipo de limiter a usar (general, auth, analyze, health)
 
     Returns:
-        Tupla de (is_allowed, rate_limit_info)
-
-    Raises:
-        RateLimitExceeded: Se o rate limit for excedido
+        Tupla de (is_allowed, rate_limit_info) onde:
+        - is_allowed: True se a requisição pode prosseguir, False se rate limit excedido
+        - rate_limit_info: Dict com limit, remaining, reset_after, retry_after
     """
     limiters = get_rate_limiters()
 
@@ -490,16 +489,4 @@ async def check_rate_limit(
     }
 
     limiter = limiter_map.get(limiter_type, limiters.general)
-    is_allowed, info = await limiter.is_allowed(identifier)
-
-    if not is_allowed:
-        raise RateLimitExceeded(
-            message="Rate limit exceeded. Please try again later.",
-            retry_after=info.get("retry_after", 60),
-            details={
-                "limit": info["limit"],
-                "retry_after": info["retry_after"],
-            },
-        )
-
-    return is_allowed, info
+    return await limiter.is_allowed(identifier)

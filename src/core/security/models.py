@@ -23,9 +23,9 @@ class SecurityContext(BaseModel):
         default=None,
         description="Hash SHA256 da chave de API (nunca armazenar chave em texto puro)",
     )
-    roles: list[str] = Field(
-        default_factory=list,
-        description="Lista de roles atribuídas à requisição",
+    roles: tuple[str, ...] = Field(
+        default_factory=tuple,
+        description="Tuple de roles atribuídas à requisição (imutável)",
     )
     ip_address: str | None = Field(
         default=None,

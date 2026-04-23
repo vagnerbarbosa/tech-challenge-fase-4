@@ -25,9 +25,9 @@ class SecretMasker:
             r"([a-f0-9]{32,64})|([A-Za-z0-9+/]{40,88}=?)",
             re.IGNORECASE,
         ),
-        # API keys with common prefixes
+        # API keys with common prefixes and standalone "key"
         "api_key": re.compile(
-            r"(api[_-]?key|apikey|x-api-key)[\s]*[:=][\s]*([\w-]+)",
+            r"(api[_-]?key|apikey|x-api-key|[\s:]key)[\s]*[:=][\s]*([\w-]+)",
             re.IGNORECASE,
         ),
         # Bearer tokens

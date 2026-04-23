@@ -31,10 +31,10 @@ class TestCORSOrigins:
 
         Verifica que diferentes origens configuradas são aceitas.
         """
+        # These origins must match the configured CORS_ORIGINS
         allowed_origins = [
             "http://localhost:3000",
             "http://localhost:8000",
-            "http://127.0.0.1:3000",
         ]
 
         for origin in allowed_origins:
@@ -44,6 +44,20 @@ class TestCORSOrigins:
             )
             assert response.status_code == 200
             assert response.headers.get("access-control-allow-origin") == origin
+
+    def test_cors_rejects_disallowed_origin(self, client: TestClient) -> None:
+        """T073: Testa que origens não permitidas são rejeitadas."""
+        # This origin is not in the configured CORS_ORIGINS
+        disallowed_origin = "http://127.0.0.1:3000"
+
+        response = client.get(
+            "/health",
+            headers={"Origin": disallowed_origin},
+        )
+        # Should return 200 but without CORS headers (or with warning logged)
+        assert response.status_code == 200
+        # CORS header should not be set for disallowed origins
+        assert response.headers.get("access-control-allow-origin") != disallowed_origin
 
     def test_cors_simple_request_with_origin(self, client: TestClient) -> None:
         """Testa requisição simples com header Origin."""

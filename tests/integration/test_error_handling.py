@@ -30,8 +30,8 @@ class TestErrorHandlingProduction:
         # Response should not contain sensitive details
         assert response.status_code == 404
         content = response.json()
-        # Should have a generic error message
-        assert "error" in content
+        # Should have a generic error message (FastAPI uses 'detail' for 404)
+        assert "detail" in content or "error" in content
 
     def test_validation_error_sanitized(self):
         """Validation errors should not expose internal details."""

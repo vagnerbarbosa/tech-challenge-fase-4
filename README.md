@@ -74,112 +74,37 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 
 ## Como Executar
 
+> 📖 **[Guia Completo de Execução](docs/RUNNING.md)** - Instruções detalhadas para:
+> - Rodar localmente com Docker ou Poetry
+> - Usar a API já hospedada no Azure
+> - Exemplos de chamadas com autenticação
+
 ### Pré-requisitos
 
-- **Python 3.11+** (se rodando localmente)
-- **Poetry** (gerenciamento de dependências, se rodando localmente)
-- **Docker e Docker Compose** (⚠️ **Recomendado** para desenvolvimento e **Obrigatório** para testes - veja [Executando Testes](#executando-testes))
+- **Docker e Docker Compose** (recomendado) ou **Python 3.11+ + Poetry**
 - **Git**
 
-> 💡 **Dica**: Mesmo que você escolha rodar a API localmente, **recomendamos fortemente** usar Docker para executar os testes devido a dependências nativas complexas (librosa, python-magic).
+> 💡 **Dica**: Use Docker para evitar problemas com dependências nativas (librosa, python-magic).
 
 ---
 
-## Opção 1: Usando Docker com Mocks (Recomendado para Desenvolvimento)
-
-Esta opção usa containers Docker que simulam os serviços Azure, permitindo desenvolver sem precisar de uma conta Azure.
-
-> **Nota:** Com Docker não é necessário rodar `setup.sh` nem instalar Poetry/Python localmente. O Docker cuida de todas as dependências.
-
-### Passo 1: Iniciar os Containers
+## Executar Localmente
 
 ```bash
-# Usando o script (recomendado)
-./scripts/run-mock.sh
-
-# Ou comando Docker direto
-docker-compose -f docker-compose.mock.yml up -d
-```
-
-### Passo 2: Verificar se está funcionando
-
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Deve retornar: {"status": "healthy", "version": "0.6.0"}
-```
-
-### Passo 3: Testar o Endpoint de Análise de Texto
-
-```bash
-# Via curl
-curl -X POST http://localhost:8000/analyze/text \
-  -H "Content-Type: application/json" \
-  -d '{"texto": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa", "tipo": "diario"}'
-
-# Ou use a interface Swagger
-# Abra no navegador: http://localhost:8000/docs
-
-# Ou importe as collections do Postman
-# Arquivos: docs/collection.json e docs/environment.json
-```
-
-> **⚠️ Nota sobre o Mock:** O modo mock retorna valores **fixos** para testes, independente do texto enviado:
-> ```json
-> {
->   "sentimento": "neutro",
->   "score": 0.0,
->   "risco_violencia": "medio",
->   "risco_saude_mental": "baixo"
-> }
-> ```
-> Para análise real com Azure, configure as credenciais no arquivo `.env` (veja seção de Configuração Azure abaixo).
-
-**Serviços disponíveis:**
-- API: http://localhost:8000
-- Swagger UI: http://localhost:8000/docs
-- Mock Azure Text: http://localhost:3001
-- Mock Azure Speech: http://localhost:3002
-- Redis: http://localhost:6379
-
-### Passo 4: Parar os Containers
-
-```bash
-docker-compose -f docker-compose.mock.yml down
-```
-
----
-
-## Opção 2: Executar Localmente (com Poetry)
-
-Esta opção requer configurar variáveis de ambiente com credenciais Azure reais ou usar o modo mock local.
-
-> **Nota:** Na primeira vez, é necessário rodar `setup.sh` para instalar Poetry e as dependências Python.
-
-### Passo 1: Configurar o Ambiente
-
-```bash
-# Clone o repositório
+# Clone e execute com Docker
 git clone https://github.com/vagnerbarbosa/tech-challenge-fase-4.git
 cd tech-challenge-fase-4
+./scripts/run-mock.sh
 
-# Execute o script de setup (instala Poetry e dependências na primeira vez)
-./scripts/setup.sh
-
-# Ou faça manualmente:
-# poetry install
-# cp .env.example .env
+# Teste
+curl http://localhost:8000/health
 ```
 
-### Passo 2: Configurar Variáveis de Ambiente
+Veja o [guia completo](docs/RUNNING.md) para outras opções (Docker manual, Poetry, Azure).
 
-```bash
-# Criar arquivo .env
-cp .env.example .env
+---
 
-# Edite o arquivo .env com suas credenciais Azure (opcional para testes locais)
-```
+## Configurar Azure (Opcional)
 
 **Principais variáveis:**
 
@@ -250,6 +175,8 @@ A pasta `/scripts` contém utilitários para facilitar o desenvolvimento:
 ## 🔒 Segurança
 
 Esta API implementa hardening de segurança completo seguindo OWASP API Top 10 2023/2026 e LGPD compliance.
+
+> 📖 **[Guia de Segurança](docs/technical/security-guide.md)** - Arquitetura de segurança, testes e deploy seguro
 
 ### Autenticação
 
@@ -358,77 +285,29 @@ Inclui:
 - `redis`: Backend distribuído para rate limit
 - `python-magic`: Validação de magic bytes
 
-### Scanning de Segurança
-
-```bash
-# Bandit (SAST)
-poetry run bandit -r src/
-
-# Safety (SCA)
-poetry run safety check
-
-# Executar todos os testes de segurança
-poetry run pytest tests/security/ -v
-```
-
 ---
 
 ## Testando a API
 
-### Endpoint: POST /analyze/text
+### Exemplo: Análise de Texto
 
-Analisa texto em português e retorna sentimento, níveis de risco e palavras-chave.
-
-**Exemplo de Request:**
 ```bash
 curl -X POST http://localhost:8000/analyze/text \
   -H "Content-Type: application/json" \
-  -d '{
-    "texto": "Estou me sentindo muito ansiosa e com medo quando ele chega em casa",
-    "tipo": "diario",
-    "patient_id": "uuid-anonimo-123"
-  }'
+  -d '{"texto": "Estou me sentindo ansiosa", "tipo": "diario"}'
 ```
 
-**Exemplo de Response:**
+**Resposta:**
 ```json
 {
   "sentimento": "negativo",
-  "score": -0.85,
   "risco_violencia": "alto",
   "risco_saude_mental": "alto",
-  "palavras_chave": ["ansiosa", "medo", "casa"],
-  "indicadores": ["ansiedade", "medo"],
-  "metadata": {
-    "correlation_id": "abc-123-xyz",
-    "timestamp": "2026-04-11T14:30:00Z",
-    "tempo_processamento_ms": 450,
-    "cache_hit": false,
-    "azure_calls": 1
-  }
+  "palavras_chave": ["ansiosa"]
 }
 ```
 
-### Parâmetros do Request
-
-| Campo | Tipo | Obrigatório | Descrição |
-|-------|------|-------------|-----------|
-| `texto` | string | Sim | Texto para análise (10-5000 caracteres) |
-| `tipo` | string | Não | Origem do texto: `diario`, `prontuario`, `relato` ou `geral` (padrão) |
-| `patient_id` | string | Não | ID anônimo do paciente (UUID recomendado) |
-
-#### Tipos de Texto (`tipo`)
-
-O campo `tipo` indica a origem/contexto do texto para classificação:
-
-| Tipo | Quando Usar |
-|------|-------------|
-| `diario` | Entradas pessoais, diários da paciente |
-| `prontuario` | Registros médicos formais |
-| `relato` | Narrações de consultas ou entrevistas |
-| `geral` | Textos genéricos (padrão se não informado) |
-
-### Outros Endpoints
+### Endpoints
 
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
@@ -929,6 +808,14 @@ poetry run locust -f locustfile.py
 
 ## Documentação
 
+### Guias de Uso
+
+| Documento | Descrição | Público |
+|-----------|-----------|---------|
+| [Como Executar](docs/RUNNING.md) | Passo a passo para rodar localmente ou usar Azure | Todos |
+| [Segurança](docs/technical/security-guide.md) | Arquitetura de segurança e deploy seguro | DevOps/SRE |
+| [Compliance](docs/technical/compliance-analysis.md) | Análise LGPD e OWASP | Arquitetos |
+
 ### Specs Kit (Status)
 
 | ID | Feature | Status | Link |
@@ -947,7 +834,6 @@ poetry run locust -f locustfile.py
 ### Outros Documentos
 - [📋 Índice de Especificações](specs/README.md)
 - [📊 Context7 - Melhores Práticas](docs/technical/context7-best-practices.md)
-- [🔒 Compliance Analysis](docs/technical/compliance-analysis.md)
 
 ---
 

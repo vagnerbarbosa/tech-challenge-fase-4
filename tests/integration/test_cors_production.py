@@ -35,20 +35,20 @@ class TestCORSProductionSecurity:
         Valida que em produção não é aceito ter lista de origens vazia
         ou apenas '*'.
         """
-        # Simula ambiente de produção
-        with patch.dict("os.environ", {
-            "ENVIRONMENT": "production",
-            "SECURITY_CORS_ORIGINS": "https://app.example.com,https://admin.example.com",
-        }):
-            from src.core.config import get_settings
-            settings = get_settings()
+        from src.core.config import SecurityConfig
 
-            assert settings.environment == "production"
-            cors_origins = settings.security_config.cors_origins_list
-            assert "*" not in cors_origins
-            # Use exact equality for origin validation (security best practice)
-            assert any(o == "https://app.example.com" for o in cors_origins)
-            assert any(o == "https://admin.example.com" for o in cors_origins)
+        # Cria configuração de segurança com origens específicas
+        security_config = SecurityConfig(
+            cors_origins="https://app.example.com,https://admin.example.com",
+            environment="production",
+            secret_key="production-secret-key-32-chars-long",
+        )
+
+        cors_origins = security_config.cors_origins_list
+        assert "*" not in cors_origins
+        # Use exact equality for origin validation (security best practice)
+        assert any(o == "https://app.example.com" for o in cors_origins)
+        assert any(o == "https://admin.example.com" for o in cors_origins)
 
     def test_cors_credentials_with_star_is_insecure(self) -> None:
         """T068: Valida que CORS * com credentials é inseguro.
@@ -56,19 +56,17 @@ class TestCORSProductionSecurity:
         O navegador rejeita configurações onde allow_origins=["*"]
         e allow_credentials=True juntos.
         """
-        # Esta configuração deve gerar warning ou erro em produção
-        with patch.dict("os.environ", {
-            "ENVIRONMENT": "production",
-            "SECURITY_CORS_ORIGINS": "*",
-        }):
-            from src.core.config import get_settings
-            settings = get_settings()
+        from src.core.config import SecurityConfig
 
-            # Em produção, a validação deve detectar configuração insegura
-            if settings.environment == "production":
-                # A configuração atual permite *, mas isso é inseguro
-                assert "*" in settings.security_config.cors_origins_list
-                # O middleware deve tratar isso (fallback para origens seguras)
+        security_config = SecurityConfig(
+            cors_origins="*",
+            environment="production",
+            secret_key="production-secret-key-32-chars-long",
+        )
+
+        # A configuração permite *, mas isso é inseguro com credentials
+        assert "*" in security_config.cors_origins_list
+        # O middleware deve tratar isso (fallback para origens seguras)
 
 
 class TestCORSOriginValidation:

@@ -253,6 +253,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         hsts_include_subdomains: bool = True,
         hsts_preload: bool = False,
         csp_report_only: bool = False,
+        environment: str | None = None,
     ) -> None:
         """Inicializa o middleware de headers de segurança.
 
@@ -262,12 +263,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             hsts_include_subdomains: Incluir subdomínios no HSTS
             hsts_preload: Incluir diretiva preload para HSTS
             csp_report_only: Se True, usa Content-Security-Policy-Report-Only
+            environment: Ambiente de execução (override do settings)
         """
         super().__init__(app)
         self.hsts_max_age = hsts_max_age
         self.hsts_include_subdomains = hsts_include_subdomains
         self.hsts_preload = hsts_preload
         self.csp_report_only = csp_report_only
+        self.environment = environment or settings.environment
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:  # type: ignore[override,misc]
         """Processa a requisição e adiciona headers de segurança na resposta.
@@ -358,7 +361,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         ]
 
         # Adiciona upgrade-insecure-requests em produção
-        if settings.environment == "production":
+        if self.environment == "production":
             csp_directives.append("upgrade-insecure-requests")
 
         csp_value = "; ".join(csp_directives)
@@ -483,5 +486,6 @@ class SecurityHeadersConfig:
             "hsts_include_subdomains": True,  # Always include for test compatibility
             "hsts_preload": is_production,  # Habilitar apenas após testar em prod
             "csp_report_only": False,  # Sempre aplicar CSP
+            "environment": settings.environment,  # Pass environment for CSP
         }
 
