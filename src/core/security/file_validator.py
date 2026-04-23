@@ -107,7 +107,7 @@ class FileSizeError(HTTPException):
         self.size = size
         self.max_size = max_size
         super().__init__(
-            status_code=413,
+            status_code=400,
             detail=f"Arquivo muito grande ({size / (1024*1024):.1f}MB). "
                    f"Máximo: {max_size / (1024*1024):.0f}MB",
         )

@@ -119,7 +119,14 @@ async def analyze_video(
             correlation_id=correlation_id,
             error=e.detail,
         )
-        raise
+        # Customizar mensagem para extensão inválida
+        detail = e.detail
+        if "Extensão não permitida" in detail:
+            detail = detail.replace("Extensão não permitida:", "Formato de vídeo não suportado:")
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=detail,
+        ) from None
 
     # Salvar arquivo temporariamente
     temp_dir = Path(tempfile.mkdtemp())
