@@ -13,7 +13,6 @@ from typing import Any
 from structlog import get_logger
 
 from src.core.config import settings
-from src.core.exceptions import RateLimitExceeded
 
 logger = get_logger(__name__)
 

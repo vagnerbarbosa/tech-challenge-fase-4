@@ -12,13 +12,6 @@ from src.core.security.auth import (
     get_rbac_validator,
 )
 from src.core.security.log_sanitizer import LogSanitizer, PatientIdHasher, SecretMasker
-from src.core.security.middleware import (
-    CORSValidation,
-    PreflightRequestValidator,
-    SecurityHeadersConfig,
-    SecurityHeadersMiddleware,
-    create_cors_middleware,
-)
 from src.core.security.models import SecurityContext
 from src.core.security.rate_limiter import (
     MemoryRateLimiterBackend,
@@ -45,12 +38,6 @@ __all__ = [
     "SecretMasker",
     "PatientIdHasher",
     "LogSanitizer",
-    # Middleware
-    "CORSValidation",
-    "PreflightRequestValidator",
-    "create_cors_middleware",
-    "SecurityHeadersMiddleware",
-    "SecurityHeadersConfig",
     # Rate Limiting
     "TokenBucketRateLimiter",
     "MemoryRateLimiterBackend",

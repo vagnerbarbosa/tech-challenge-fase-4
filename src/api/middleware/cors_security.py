@@ -488,4 +488,3 @@ class SecurityHeadersConfig:
             "csp_report_only": False,  # Sempre aplicar CSP
             "environment": settings.environment,  # Pass environment for CSP
         }
-

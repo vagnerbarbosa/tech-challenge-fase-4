@@ -6,8 +6,6 @@ T068: Security test test_cors_production.py
 - Valida comportamento com credentials
 """
 
-from unittest.mock import patch
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -101,7 +99,7 @@ class TestCORSMiddlewareSecurity:
 
     def test_cors_middleware_logs_blocked_origins(self, caplog: pytest.LogCaptureFixture) -> None:
         """T068: Middleware loga tentativas de origens bloqueadas."""
-        from src.core.security.middleware import CORSValidation
+        from src.api.middleware.cors_security import CORSValidation
 
         # Cria middleware com origens específicas
         allowed = ["http://localhost:3000"]
@@ -117,7 +115,7 @@ class TestCORSMiddlewareSecurity:
 
     def test_cors_middleware_validates_preflight(self) -> None:
         """T068/T072: Middleware valida preflight requests."""
-        from src.core.security.middleware import PreflightRequestValidator
+        from src.api.middleware.cors_security import PreflightRequestValidator
 
         validator = PreflightRequestValidator(
             allowed_methods=["GET", "POST"],
@@ -134,7 +132,7 @@ class TestCORSProductionConfiguration:
 
     def test_cors_no_star_with_credentials_in_production(self) -> None:
         """T068: Não permite '*' com credentials em produção."""
-        from src.core.security.middleware import create_cors_middleware
+        from src.api.middleware.cors_security import create_cors_middleware
 
         # Isso deve gerar warning quando em produção
         config = create_cors_middleware(
@@ -149,7 +147,7 @@ class TestCORSProductionConfiguration:
 
     def test_cors_environment_detection(self) -> None:
         """T068: Detecta ambiente de produção corretamente."""
-        from src.core.security.middleware import CORSValidation
+        from src.api.middleware.cors_security import CORSValidation
 
         middleware = CORSValidation(
             app=None,  # type: ignore
@@ -162,7 +160,7 @@ class TestCORSProductionConfiguration:
 
     def test_cors_development_environment(self) -> None:
         """T068: Desenvolvimento permite configurações mais flexíveis."""
-        from src.core.security.middleware import CORSValidation
+        from src.api.middleware.cors_security import CORSValidation
 
         middleware = CORSValidation(
             app=None,  # type: ignore

@@ -11,7 +11,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from structlog import get_logger
 
-from src.core.exceptions import RateLimitExceeded
 from src.core.security.rate_limiter import (
     RateLimiters,
     check_rate_limit,

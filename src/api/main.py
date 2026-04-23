@@ -11,6 +11,12 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.api.middleware.cors_security import (
+    CORSValidation,
+    SecurityHeadersConfig,
+    SecurityHeadersMiddleware,
+    create_cors_middleware,
+)
 from src.api.middleware.rate_limit import (
     AuthRateLimitMiddleware,
     RateLimitMiddleware,
@@ -25,12 +31,6 @@ from src.core.exceptions import (
 )
 from src.core.logging_config import configure_logging, get_logger
 from src.core.security.log_sanitizer import SecretMasker
-from src.core.security.middleware import (
-    CORSValidation,
-    SecurityHeadersConfig,
-    SecurityHeadersMiddleware,
-    create_cors_middleware,
-)
 
 # Configura logging
 configure_logging()
