@@ -35,7 +35,7 @@ RUN poetry lock \
     && poetry install --no-root --without dev
 
 # Criar diretórios necessários
-RUN mkdir -p data logs uploads models
+RUN mkdir -p data logs uploads models logs/audit
 
 # Download do modelo YOLOv8n (se não existir)
 RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')" || echo "Modelo será baixado no runtime"

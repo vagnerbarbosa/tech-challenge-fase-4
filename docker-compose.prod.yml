@@ -1,0 +1,148 @@
+# ===========================================
+# Docker Compose para Produção (Spec 007)
+# ===========================================
+# Configurações de segurança hardening para deploy em produção
+#
+# Uso: docker-compose -f docker-compose.prod.yml up -d
+#
+
+services:
+  # -------------------------------------------
+  # API FastAPI (Produção)
+  # -------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: health-api-prod
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # App
+      - APP_NAME=Multimodal Health Analysis API
+      - APP_VERSION=0.6.0
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      # Azure (obrigatório em produção)
+      - AZURE_TEXT_KEY=${AZURE_TEXT_KEY}
+      - AZURE_TEXT_ENDPOINT=${AZURE_TEXT_ENDPOINT}
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
+      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION:-brazilsouth}
+      - AZURE_VISION_KEY=${AZURE_VISION_KEY}
+      - AZURE_VISION_ENDPOINT=${AZURE_VISION_ENDPOINT}
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./data/health_analysis.db}
+      # Redis (recomendado para produção)
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - REDIS_ENABLED=${REDIS_ENABLED:-true}
+      # Rate Limiting (Azure Free Tier Protection)
+      - RATE_LIMIT_ENABLED=true
+      - MAX_TEXT_REQUESTS_PER_DAY=160
+      - MAX_SPEECH_MINUTES_PER_DAY=10
+      - MAX_VISION_REQUESTS_PER_DAY=160
+      # Security (Spec 007 - Obrigatório em produção)
+      - SECRET_KEY=${SECRET_KEY}
+      - API_KEY=${API_KEY}
+      - API_KEY_HEADER=X-API-Key
+      - SECURITY_API_KEY=${SECURITY_API_KEY}
+      - SECURITY_ENVIRONMENT=production
+      - SECURITY_CORS_ORIGINS=${SECURITY_CORS_ORIGINS}
+      - SECURITY_RATE_LIMIT_PER_MINUTE=60
+      - SECURITY_REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      # Audit Logging (LGPD Compliance)
+      - AUDIT_LOG_PATH=/app/logs/audit.log
+      - AUDIT_LOG_RETENTION_DAYS=90
+      - AUDIT_LOG_MAX_SIZE_MB=100
+      # Multimodal
+      - MULTIMODAL_TIMEOUT_SECONDS=30
+      # LGPD Compliance
+      - ANONYMIZE_PII=true
+      - CONSENT_REQUIRED=true
+      - DATA_RETENTION_DAYS=30
+    volumes:
+      - api-data:/app/data
+      - api-logs:/app/logs
+      - api-audit:/app/logs/audit
+    networks:
+      - health-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+
+  # -------------------------------------------
+  # Redis (Produção)
+  # -------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: health-redis-prod
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - health-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  # -------------------------------------------
+  # Nginx Reverse Proxy (Opcional)
+  # -------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: health-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-cache:/var/cache/nginx
+    networks:
+      - health-network
+    depends_on:
+      - api
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  api-data:
+    driver: local
+  api-logs:
+    driver: local
+  api-audit:
+    driver: local
+  redis-data:
+    driver: local
+  nginx-cache:
+    driver: local
+
+networks:
+  health-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

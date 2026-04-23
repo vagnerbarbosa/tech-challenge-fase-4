@@ -59,16 +59,31 @@ services:
       # Redis
       - REDIS_URL=redis://redis:6379/0
       - REDIS_ENABLED=false
-      # Rate Limiting (desabilitado em dev)
-      - RATE_LIMIT_ENABLED=false
-      # Security
+      # Rate Limiting (habilitado para testar em dev)
+      - RATE_LIMIT_ENABLED=true
+      - MAX_TEXT_REQUESTS_PER_DAY=160
+      - MAX_SPEECH_MINUTES_PER_DAY=10
+      - MAX_VISION_REQUESTS_PER_DAY=160
+      # Security (Spec 007)
       - SECRET_KEY=dev-secret-key
       - API_KEY=test-api-key
+      - API_KEY_HEADER=X-API-Key
+      # Security Hardening
+      - SECURITY_API_KEY=test-api-key
+      - SECURITY_ENVIRONMENT=development
+      - SECURITY_CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+      - SECURITY_RATE_LIMIT_PER_MINUTE=60
+      - SECURITY_REDIS_URL=redis://redis:6379/0
+      # Audit Logging (LGPD)
+      - AUDIT_LOG_PATH=/app/logs/audit.log
+      - AUDIT_LOG_RETENTION_DAYS=90
+      - AUDIT_LOG_MAX_SIZE_MB=100
       # Multimodal
       - MULTIMODAL_TIMEOUT_SECONDS=30
-      # LGPD
+      # LGPD Compliance
       - ANONYMIZE_PII=true
       - CONSENT_REQUIRED=true
+      - DATA_RETENTION_DAYS=30
     volumes:
       - ./src:/app/src
       - ./data:/app/data

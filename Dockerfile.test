@@ -1,11 +1,24 @@
-# Dockerfile para execução de testes
+# Dockerfile para execução de testes (Spec 007)
 FROM python:3.11-slim
 
 # Variáveis de ambiente
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false
+    POETRY_VIRTUALENVS_CREATE=false \
+    ENVIRONMENT=testing \
+    LOG_LEVEL=DEBUG \
+    # Security (Spec 007)
+    SECURITY_API_KEY=test-api-key-for-testing \
+    SECURITY_ENVIRONMENT=testing \
+    SECURITY_RATE_LIMIT_PER_MINUTE=60 \
+    SECURITY_CORS_ORIGINS=http://localhost:3000,http://localhost:8000 \
+    RATE_LIMIT_ENABLED=true \
+    AUDIT_LOG_PATH=/app/logs/audit.log \
+    AUDIT_LOG_RETENTION_DAYS=90 \
+    AUDIT_LOG_MAX_SIZE_MB=100 \
+    ANONYMIZE_PII=true \
+    CONSENT_REQUIRED=true
 
 # Instalar dependências do sistema (incluindo FFmpeg + libsndfile para audio)
 RUN apt-get update \

@@ -71,7 +71,7 @@ COPY --chown=appuser:appgroup src/ ./src/
 COPY --chown=appuser:appgroup scripts/ ./scripts/
 
 # Criar diretórios necessários com permissões corretas
-RUN mkdir -p /tmp/health-api /app/data /app/logs \
+RUN mkdir -p /tmp/health-api /app/data /app/logs /app/logs/audit \
     && chown -R appuser:appgroup /tmp/health-api /app/data /app/logs
 
 # Configurar diretório temp da aplicação

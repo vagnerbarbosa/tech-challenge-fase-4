@@ -31,22 +31,34 @@ services:
       - AZURE_VISION_ENDPOINT=${AZURE_VISION_ENDPOINT}
       # Database
       - DATABASE_URL=sqlite+aiosqlite:///./data/health_analysis.db
-      # Redis
+      # Redis (para rate limiting distribuído)
       - REDIS_URL=redis://redis:6379/0
-      - REDIS_ENABLED=false
-      # Rate Limiting
-      - RATE_LIMIT_ENABLED=true
+      - REDIS_ENABLED=${REDIS_ENABLED:-false}
+      # Rate Limiting (Azure Free Tier Protection)
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
       - MAX_TEXT_REQUESTS_PER_DAY=${MAX_TEXT_REQUESTS_PER_DAY:-160}
       - MAX_SPEECH_MINUTES_PER_DAY=${MAX_SPEECH_MINUTES_PER_DAY:-10}
       - MAX_VISION_REQUESTS_PER_DAY=${MAX_VISION_REQUESTS_PER_DAY:-160}
-      # Security
+      # Security (Spec 007)
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
       - API_KEY=${API_KEY}
+      - API_KEY_HEADER=X-API-Key
+      # Security Hardening
+      - SECURITY_API_KEY=${SECURITY_API_KEY:-${API_KEY}}
+      - SECURITY_ENVIRONMENT=${SECURITY_ENVIRONMENT:-development}
+      - SECURITY_CORS_ORIGINS=${SECURITY_CORS_ORIGINS:-http://localhost:3000,http://localhost:8000}
+      - SECURITY_RATE_LIMIT_PER_MINUTE=${SECURITY_RATE_LIMIT_PER_MINUTE:-60}
+      - SECURITY_REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      # Audit Logging (LGPD)
+      - AUDIT_LOG_PATH=/app/logs/audit.log
+      - AUDIT_LOG_RETENTION_DAYS=${AUDIT_LOG_RETENTION_DAYS:-90}
+      - AUDIT_LOG_MAX_SIZE_MB=${AUDIT_LOG_MAX_SIZE_MB:-100}
       # Multimodal
       - MULTIMODAL_TIMEOUT_SECONDS=30
-      # LGPD
-      - ANONYMIZE_PII=true
-      - CONSENT_REQUIRED=true
+      # LGPD Compliance
+      - ANONYMIZE_PII=${ANONYMIZE_PII:-true}
+      - CONSENT_REQUIRED=${CONSENT_REQUIRED:-true}
+      - DATA_RETENTION_DAYS=${DATA_RETENTION_DAYS:-30}
     volumes:
       - ./src:/app/src
       - ./data:/app/data

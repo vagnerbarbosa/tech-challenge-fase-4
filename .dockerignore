@@ -51,8 +51,16 @@ docs/
 
 # Docker
 Dockerfile
+Dockerfile.dev
+Dockerfile.test
 docker-compose.yml
+docker-compose.prod.yml
+docker-compose.mock.yml
 .dockerignore
+
+# Spec 007 - Security
+.specify/
+.claude/
 
 # Outros
 *.log
