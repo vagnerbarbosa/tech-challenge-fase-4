@@ -330,39 +330,45 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         Previne XSS e ataques de injeção de dados controlando
         quais recursos podem ser carregados.
 
+        Em desenvolvimento, permite recursos de CDN para Swagger UI.
+        Em produção, aplica políticas mais restritivas.
+
         Args:
             response: Resposta HTTP para modificar
         """
-        csp_directives = [
-            # Política padrão: apenas recursos da mesma origem
-            "default-src 'self'",
-            # Scripts: self + inline com suporte a nonce/hash
-            "script-src 'self'",
-            # Styles: self + inline (necessário para alguns frameworks UI)
-            "style-src 'self' 'unsafe-inline'",
-            # Imagens: self + data URIs + blob
-            "img-src 'self' data: blob:",
-            # Fontes: self + data URIs
-            "font-src 'self' data:",
-            # Connect: apenas self (para chamadas API)
-            "connect-src 'self'",
-            # Mídia: self + blob (para uploads de vídeo/áudio)
-            "media-src 'self' blob:",
-            # Objetos: nenhum (sem Flash/Java)
-            "object-src 'none'",
-            # Frames: nenhum (prevenir clickjacking)
-            "frame-src 'none'",
-            # Ancestrais de frame: nenhum (prevenir embedding)
-            "frame-ancestors 'none'",
-            # Base URI: apenas self
-            "base-uri 'self'",
-            # Ações de formulário: apenas self
-            "form-action 'self'",
-        ]
-
-        # Adiciona upgrade-insecure-requests em produção
         if self.environment == "production":
-            csp_directives.append("upgrade-insecure-requests")
+            # Produção: políticas restritivas
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: blob:",
+                "font-src 'self' data:",
+                "connect-src 'self'",
+                "media-src 'self' blob:",
+                "object-src 'none'",
+                "frame-src 'none'",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "upgrade-insecure-requests",
+            ]
+        else:
+            # Desenvolvimento: permite CDN para Swagger UI
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+                "img-src 'self' data: blob: https://fastapi.tiangolo.com",
+                "font-src 'self' data: https://cdn.jsdelivr.net",
+                "connect-src 'self'",
+                "media-src 'self' blob:",
+                "object-src 'none'",
+                "frame-src 'none'",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+            ]
 
         csp_value = "; ".join(csp_directives)
 
