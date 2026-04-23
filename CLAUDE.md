@@ -46,12 +46,42 @@ poetry run uvicorn src.api.main:app --reload
 # Docker
 docker-compose up --build -d
 
+# Docker Mock Mode (Azure mocks local)
+./scripts/run-mock.sh              # Padrão: sobe com build se necessário
+./scripts/run-mock.sh --quick      # Rápido: recria containers, reusa imagem
+./scripts/run-mock.sh --rebuild    # Lento: rebuilda imagem do zero
+
 # Tests
 poetry run pytest -v
 poetry run pytest --cov=src --cov-report=html
 
 # Quality
 poetry run ruff check . && poetry run mypy src/
+```
+
+### Docker Mock Mode Options
+
+O script `./scripts/run-mock.sh` gerencia containers Docker para desenvolvimento com mocks Azure:
+
+| Opção | Quando usar | Tempo | O que faz |
+|-------|-------------|-------|-----------|
+| `--quick` | Atualizar env vars (Spec 007) | ~5s | Recria containers, aplica novas env vars, **reusa imagem existente** |
+| `--rebuild` | Mudou Dockerfile/deps | ~5min | Remove e rebuilda imagem do zero |
+| (sem flag) | Primeira vez | ~1min | Build se necessário, sobe containers |
+
+**Por que `--quick` funciona:**
+- O `docker-compose.mock.yml` monta código local via volume (`./src:/app/src`)
+- Uvicorn roda com `--reload`, então código atualiza automaticamente
+- `--quick` usa `--force-recreate` para aplicar novas env vars sem rebuild
+
+**Exemplo de uso com Spec 007:**
+```bash
+# 1. Atualize o docker-compose.mock.yml com novas env vars de segurança
+# 2. Aplique as mudanças rapidamente:
+./scripts/run-mock.sh --quick
+
+# 3. Verifique se as variáveis foram aplicadas:
+docker compose -f docker-compose.mock.yml exec api env | grep SECURITY
 ```
 
 ## Critical Constraints
