@@ -4,6 +4,8 @@ Provides endpoints for API key validation with brute force protection
 via strict rate limiting (5 requests per minute).
 """
 
+from typing import Any
+
 from fastapi import APIRouter, Header, Request, status
 from structlog import get_logger
 
@@ -42,7 +44,7 @@ async def get_client_identifier(request: Request) -> str:
 async def validate_api_key(
     request: Request,
     x_api_key: str = Header(..., alias="X-API-Key"),
-) -> dict:
+) -> dict[str, Any]:
     """Validate API key with rate limiting protection.
 
     This endpoint is rate limited to 5 requests per minute per IP
@@ -100,7 +102,7 @@ async def validate_api_key(
 async def get_token(
     request: Request,
     x_api_key: str = Header(..., alias="X-API-Key"),
-) -> dict:
+) -> dict[str, Any]:
     """Get authentication token with rate limiting.
 
     Rate limited to 5 requests per minute per IP.
@@ -134,7 +136,7 @@ async def get_token(
 
 
 @router.get("/rate-limit-status")
-async def get_auth_rate_limit_status(request: Request) -> dict:
+async def get_auth_rate_limit_status(request: Request) -> dict[str, Any]:
     """Get current rate limit status for auth endpoints.
 
     Returns current rate limit information without consuming a token.
