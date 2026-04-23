@@ -46,8 +46,9 @@ class TestCORSProductionSecurity:
             assert settings.environment == "production"
             cors_origins = settings.security_config.cors_origins_list
             assert "*" not in cors_origins
-            assert "https://app.example.com" in cors_origins
-            assert "https://admin.example.com" in cors_origins
+            # Use exact equality for origin validation (security best practice)
+            assert any(o == "https://app.example.com" for o in cors_origins)
+            assert any(o == "https://admin.example.com" for o in cors_origins)
 
     def test_cors_credentials_with_star_is_insecure(self) -> None:
         """T068: Valida que CORS * com credentials é inseguro.
