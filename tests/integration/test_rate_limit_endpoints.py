@@ -16,7 +16,7 @@ class TestRateLimitHeaders:
         """Test that rate limit headers are present on protected endpoints."""
         response = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
         )
 
         # Check headers
@@ -28,7 +28,7 @@ class TestRateLimitHeaders:
         """Test that rate limit header values are valid."""
         response = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
         )
 
         limit = int(response.headers["X-RateLimit-Limit"])
@@ -45,14 +45,14 @@ class TestRateLimitHeaders:
         # First request
         response1 = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
         )
         remaining1 = int(response1.headers["X-RateLimit-Remaining"])
 
         # Second request
         response2 = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
         )
         remaining2 = int(response2.headers["X-RateLimit-Remaining"])
 
@@ -69,7 +69,7 @@ class TestRateLimitEnforcement:
         for _i in range(70):  # More than default 60/min limit
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": "test"},
+                json={"texto": "Estou me sentindo ansiosa"},
             )
             responses.append(response)
 
@@ -83,7 +83,7 @@ class TestRateLimitEnforcement:
         for _i in range(70):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": "test"},
+                json={"texto": "Estou me sentindo ansiosa"},
             )
             if response.status_code == 429:
                 assert "Retry-After" in response.headers
@@ -99,7 +99,7 @@ class TestRateLimitEnforcement:
         for _i in range(70):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": "test"},
+                json={"texto": "Estou me sentindo ansiosa"},
             )
             if response.status_code == 429:
                 data = response.json()
@@ -182,14 +182,6 @@ class TestSkippedPaths:
         assert "X-RateLimit-Limit" not in response.headers
 
 
-# Fixture auth_client import for type hints
-@pytest.fixture
-def auth_client():
-    """Import auth_client from conftest."""
-    from tests.conftest import auth_client as _auth_client
-    return _auth_client
-
-
 class TestRateLimitReset:
     """Tests for rate limit reset behavior."""
 
@@ -198,17 +190,17 @@ class TestRateLimitReset:
         # This test may be flaky depending on timing
         # Make some requests
         for _i in range(5):
-            auth_client.post("/analyze/text", json={"text": "test"})
+            auth_client.post("/analyze/text", json={"texto": "Estou me sentindo ansiosa"})
 
         # Get remaining
-        response = auth_client.post("/analyze/text", json={"text": "test"})
+        response = auth_client.post("/analyze/text", json={"texto": "Estou me sentindo ansiosa"})
         if response.status_code == 200:
             # Wait a bit (this might not be reliable in tests)
             import time
             time.sleep(1)
 
             # Make another request
-            response = auth_client.post("/analyze/text", json={"text": "test"})
+            response = auth_client.post("/analyze/text", json={"texto": "Estou me sentindo ansiosa"})
             if response.status_code == 200:
                 # Tokens might have refilled
                 pass  # Just verify it doesn't crash
@@ -222,13 +214,13 @@ class TestRateLimitDifferentClients:
         # Make requests with different X-Forwarded-For headers
         response1 = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
             headers={"X-Forwarded-For": "1.2.3.4", "X-API-Key": "test-key-1"},
         )
 
         response2 = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
             headers={"X-Forwarded-For": "5.6.7.8", "X-API-Key": "test-key-2"},
         )
 
@@ -241,7 +233,7 @@ class TestRateLimitDifferentClients:
         # Make request with API key header
         response = auth_client.post(
             "/analyze/text",
-            json={"text": "test"},
+            json={"texto": "Estou me sentindo ansiosa"},
             headers={"X-API-Key": "test-key-1"},
         )
 

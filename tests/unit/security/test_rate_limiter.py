@@ -9,7 +9,6 @@ import time
 
 import pytest
 
-from src.core.exceptions import RateLimitExceeded
 from src.core.security.rate_limiter import (
     MemoryRateLimiterBackend,
     RedisRateLimiterBackend,

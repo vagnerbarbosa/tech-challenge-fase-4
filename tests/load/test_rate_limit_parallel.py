@@ -26,7 +26,7 @@ class TestRateLimitConcurrency:
         for i in range(num_requests):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"test {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
             responses.append(response)
 
@@ -49,7 +49,7 @@ class TestRateLimitConcurrency:
         for i in range(num_requests):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"test {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
             if response.status_code == 200:
                 remaining_values.append(int(response.headers["X-RateLimit-Remaining"]))
@@ -68,13 +68,13 @@ class TestRateLimitConcurrency:
         for i in range(60):  # Burst capacity
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"burst {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
 
         # Next request should be rate limited
         response = auth_client.post(
             "/analyze/text",
-            json={"text": "should be rate limited"},
+            json={"texto": "Estou me sentindo ansiosa hoje"},
         )
 
         # May or may not be rate limited depending on refill timing
@@ -117,7 +117,7 @@ class TestAsyncRateLimitConcurrency:
         ) as client:
             # Create multiple concurrent requests
             tasks = [
-                client.post("/analyze/text", json={"text": f"async {i}"})
+                client.post("/analyze/text", json={"texto": f"Estou me sentindo ansiosa {i}"})
                 for i in range(20)
             ]
 
@@ -173,7 +173,7 @@ class TestRateLimitRaceConditions:
         def make_request():
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": "threaded test"},
+                json={"texto": "Estou me sentindo ansiosa"},
             )
             with lock:
                 results.append(response.status_code)
@@ -203,7 +203,7 @@ class TestRateLimitRaceConditions:
         for i in range(num_requests):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"stress {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
             responses.append(response.status_code)
 
@@ -231,7 +231,7 @@ class TestRateLimitDistributed:
             headers = {"X-Forwarded-For": f"192.168.1.{client_id}"}
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": "distributed test"},
+                json={"texto": "Estou me sentindo ansiosa"},
                 headers=headers,
             )
             with lock:
@@ -260,7 +260,7 @@ class TestRateLimitDistributed:
 
         # Exhaust rate limit
         for i in range(65):
-            auth_client.post("/analyze/text", json={"text": f"exhaust {i}"})
+            auth_client.post("/analyze/text", json={"texto": f"Estou me sentindo ansiosa {i}"})
 
         # Wait for some recovery (tokens refill at 1/sec)
         time.sleep(2)
@@ -268,7 +268,7 @@ class TestRateLimitDistributed:
         # Should be able to make some requests again
         response = auth_client.post(
             "/analyze/text",
-            json={"text": "after wait"},
+            json={"texto": "Estou me sentindo ansiosa"},
         )
 
         # Might be rate limited depending on exact timing
@@ -285,7 +285,7 @@ class TestRateLimitHeadersUnderLoad:
         for i in range(10):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"accuracy {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
             if response.status_code == 200:
                 remaining = int(response.headers["X-RateLimit-Remaining"])
@@ -303,7 +303,7 @@ class TestRateLimitHeadersUnderLoad:
         for i in range(5):
             response = auth_client.post(
                 "/analyze/text",
-                json={"text": f"reset test {i}"},
+                json={"texto": f"Estou me sentindo ansiosa {i}"},
             )
             if response.status_code == 200:
                 reset_after = int(response.headers["X-RateLimit-Reset"])
