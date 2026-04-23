@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-import aiofiles
+import aiofiles  # type: ignore[import-untyped]
 from fastapi import UploadFile
 from structlog import get_logger
 

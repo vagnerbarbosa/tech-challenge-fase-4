@@ -200,6 +200,7 @@ class MagicBytesValidator:
         allowed_types: dict[str, str],
     ) -> ValidationResult:
         """Valida usando a biblioteca python-magic."""
+        assert self._magic is not None, "_magic should not be None when _magic_available is True"
         try:
             mime_type = self._magic.from_buffer(content, mime=True)
         except Exception as e:
