@@ -7,7 +7,6 @@ from typing import Any, cast
 from azure.ai.textanalytics import TextAnalyticsClient
 
 from src.core.cache import get_cache
-from src.core.security.log_sanitizer import PatientIdHasher
 from src.infrastructure.azure_clients import (
     AuthenticationError,
     AzureConfigurationError,

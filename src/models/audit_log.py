@@ -5,14 +5,14 @@ to meet Brazilian LGPD (Lei Geral de Proteção de Dados) requirements.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class AuditEventType(str, Enum):
+class AuditEventType(StrEnum):
     """Types of auditable events for LGPD compliance."""
 
     DATA_ACCESS = "data_access"
@@ -142,7 +142,6 @@ class AuditLogEntry(BaseModel):
         if v is None:
             return datetime.utcnow()
         if v.tzinfo is not None:
-            from datetime import timezone
             return v.replace(tzinfo=None)
         return v
 

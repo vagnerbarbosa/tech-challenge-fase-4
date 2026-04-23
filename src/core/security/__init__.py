@@ -3,6 +3,7 @@
 Provides security-related utilities, models, and sanitization.
 """
 
+from src.api.middleware.rate_limit import AuthRateLimitMiddleware
 from src.core.security.auth import (
     APIKeyValidator,
     BOLAProtector,
@@ -20,7 +21,6 @@ from src.core.security.middleware import (
     create_cors_middleware,
 )
 from src.core.security.models import SecurityContext
-from src.api.middleware.rate_limit import AuthRateLimitMiddleware
 from src.core.security.rate_limiter import (
     MemoryRateLimiterBackend,
     RateLimiterBackend,

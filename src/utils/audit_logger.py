@@ -191,9 +191,8 @@ class AuditLogger:
 
         try:
             # Compress and move the log file
-            with open(log_file, "rb") as f_in:
-                with gzip.open(rotated_file, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+            with open(log_file, "rb") as f_in, gzip.open(rotated_file, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
 
             # Remove original file
             log_file.unlink()
@@ -599,7 +598,7 @@ class AuditLogger:
         entries = []
 
         try:
-            with open(log_file, "r", encoding="utf-8") as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
