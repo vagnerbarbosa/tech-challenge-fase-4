@@ -12,6 +12,23 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_va
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _get_package_version() -> str:
+    """Lê a versão do pacote do pyproject.toml.
+
+    Usa importlib.metadata para obter a versão instalada do pacote.
+    Fallback para versão hardcoded se pacote não estiver instalado.
+
+    Returns:
+        Versão da aplicação como string.
+    """
+    try:
+        from importlib.metadata import version
+        return version("multimodal-health-analysis")
+    except Exception:
+        # Fallback se pacote não estiver instalado (desenvolvimento)
+        return "0.6.0"
+
+
 class SecurityConfig(BaseModel):
     """Configurações de segurança para hardening da API (Spec 007).
 
@@ -112,8 +129,8 @@ class Settings(BaseSettings):
         description="Nome da aplicação",
     )
     app_version: str = Field(
-        default="0.6.0",
-        description="Versão da aplicação",
+        default_factory=_get_package_version,
+        description="Versão da aplicação (lida automaticamente do pyproject.toml)",
     )
     environment: Literal["development", "staging", "production"] = Field(
         default="development",
