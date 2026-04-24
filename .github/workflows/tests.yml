@@ -43,7 +43,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-v2
+
+      - name: Limpar cache corrompido (se necessário)
+        run: |
+          # Remove pacotes NVIDIA corrompidos do cache se existirem
+          if [ -d ".venv" ]; then
+            rm -rf .venv/lib/python*/site-packages/nvidia* || true
+            rm -rf .venv/lib/python*/site-packages/*nvidia* || true
+          fi
+        shell: bash
 
       - name: Instalar dependências
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'

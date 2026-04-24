@@ -91,6 +91,36 @@ class APIKeyValidator:
 
 **Para Júnior**: Sempre use `secrets.compare_digest()` para comparar keys, nunca `==`. Isso previne ataques de timing.
 
+##### Gerando API Keys
+
+**⚠️ IMPORTANTE - Segurança em Produção:**
+
+O endpoint `POST /admin/api-keys` é **automaticamente BLOQUEADO em produção** por segurança. Isso evita que um atacante com acesso ao admin key possa gerar keys infinitas via HTTP.
+
+**Como gerar API keys:**
+
+| Ambiente | Método | Comando |
+|----------|--------|---------|
+| Desenvolvimento | Endpoint HTTP | `POST /admin/api-keys` com header `X-Admin-Key` |
+| Produção | Python inline | `python -c "import secrets; print('ak_' + secrets.token_hex(32))"` |
+
+**Exemplo em Produção:**
+```bash
+# Gerar key via Python (não armazena em arquivo ou logs)
+python3 -c "import secrets; print('ak_' + secrets.token_hex(32))"
+
+# Saída (copie imediatamente):
+# ak_a1b2c3d4e5f6...
+```
+
+**⚠️ Atenção:** A chave é exibida uma única vez. Guarde-a imediatamente em um vault seguro (AWS Secrets Manager, Azure Key Vault, etc).
+
+**Por que bloquear em produção?**
+- Previne brute force no endpoint admin
+- Evita vazamento de keys via logs HTTP
+- Força uso de métodos offline com acesso físico ao servidor
+- Segue princípio de menor exposição (attack surface reduction)
+
 #### 2.2.2 Authorization (RBAC + BOLA)
 
 **RBAC (Role-Based Access Control)**: Define permissões por papel.

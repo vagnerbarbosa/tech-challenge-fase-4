@@ -6,17 +6,35 @@ e exportação de dados em formato compatível com ANPD conforme exigido pela LG
 
 from __future__ import annotations
 
-from datetime import datetime
+import secrets
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel, Field
 
 from src.core.config import settings
 from src.models.audit_log import AuditEventType
 from src.utils.audit_logger import AuditLogger, get_audit_logger
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+class APIKeyResponse(BaseModel):
+    """Resposta para geração de API key."""
+
+    api_key: str = Field(..., description="A API key gerada (só é mostrada uma vez)")
+    key_id: str = Field(..., description="ID da chave para referência")
+    created_at: str = Field(..., description="Data de criação ISO 8601")
+    description: str | None = Field(None, description="Descrição da chave")
+
+
+class APIKeyListResponse(BaseModel):
+    """Resposta para listagem de API keys."""
+
+    keys: list[dict[str, Any]] = Field(..., description="Lista de API keys")
+    total: int = Field(..., description="Total de chaves")
 
 
 def verify_admin_access(request: Request) -> bool:
@@ -58,6 +76,185 @@ def verify_admin_access(request: Request) -> bool:
         )
 
     return True
+
+
+def _generate_api_key() -> tuple[str, str]:
+    """Gera uma API key segura e seu ID de referência.
+
+    Returns:
+        Tupla (api_key, key_id) onde key_id é um prefixo único da chave
+    """
+    # Gera 32 bytes aleatórios e converte para hex (64 caracteres = 256 bits entropia)
+    raw_key = secrets.token_hex(32)
+    api_key = f"ak_{raw_key}"
+    # Key ID é prefixo da chave para referência em logs (não usa hash)
+    key_id = raw_key[:16]
+    return api_key, key_id
+
+
+@router.post(
+    "/api-keys",
+    response_model=APIKeyResponse,
+    summary="Gera nova API key",
+    description="""Gera uma nova API key para cliente/usuário. A chave só é exibida uma vez.
+
+    ⚠️ SECURITY WARNING: Este endpoint é automaticamente DESABILITADO em produção.
+    Para gerar keys em produção, use o script CLI: `python scripts/generate-api-key.py`
+    """,
+    responses={
+        201: {
+            "description": "API key gerada com sucesso",
+            "model": APIKeyResponse,
+        },
+        403: {"description": "Acesso de administrador necessário ou endpoint desabilitado em produção"},
+        500: {"description": "Erro ao gerar chave"},
+    },
+    status_code=status.HTTP_201_CREATED,
+)
+async def generate_api_key(
+    request: Request,
+    _: Annotated[bool, Depends(verify_admin_access)],
+    audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
+    description: str | None = Query(
+        None,
+        description="Descrição da chave (ex: 'Cliente Hospital XYZ')",
+    ),
+) -> APIKeyResponse:
+    """Gera uma nova API key para autenticação.
+
+    A chave gerada só é exibida uma vez. Guarde-a em local seguro.
+    Em produção, armazene apenas o hash da chave.
+
+    ⚠️ SECURITY: Este endpoint é automaticamente bloqueado em produção.
+    Use o script CLI `scripts/generate-api-key.py` para gerar keys em produção.
+
+    Args:
+        request: Objeto de requisição FastAPI
+        _: Verificação de acesso administrativo
+        audit_logger: Instância do audit logger
+        description: Descrição opcional da chave
+
+    Returns:
+        APIKeyResponse com a chave gerada
+
+    Raises:
+        HTTPException: Se houver erro na geração ou em ambiente de produção
+    """
+    # 🔒 BLOQUEIO DE SEGURANÇA: Endpoint desabilitado em produção
+    # Motivo: Evitar exposição de geração de keys via HTTP
+    # Alternativa: Use o script CLI scripts/generate-api-key.py
+    if settings.environment == "production":
+        audit_logger.log(
+            event_type=AuditEventType.ADMIN_EXPORT,
+            correlation_id=str(id(request)),
+            action="POST /admin/api-keys",
+            resource="/admin/api-keys",
+            result="blocked",
+            details={
+                "reason": "Endpoint disabled in production",
+                "description": description,
+                "suggestion": "Use CLI script: python scripts/generate-api-key.py",
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="API key generation via HTTP is disabled in production. "
+                   "Use the CLI script: python scripts/generate-api-key.py",
+        )
+
+    try:
+        api_key, key_id = _generate_api_key()
+        created_at = datetime.now(timezone.utc).isoformat()
+
+        # Loga a criação (sem expor a chave completa)
+        audit_logger.log(
+            event_type=AuditEventType.ADMIN_EXPORT,
+            correlation_id=str(id(request)),
+            action="POST /admin/api-keys",
+            resource="/admin/api-keys",
+            result="success",
+            details={
+                "key_id": key_id,
+                "description": description,
+                "key_prefix": api_key[:8] + "...",
+            },
+        )
+
+        return APIKeyResponse(
+            api_key=api_key,
+            key_id=key_id,
+            created_at=created_at,
+            description=description,
+        )
+
+    except Exception as e:
+        audit_logger.log(
+            event_type=AuditEventType.ADMIN_EXPORT,
+            correlation_id=str(id(request)),
+            action="POST /admin/api-keys",
+            resource="/admin/api-keys",
+            result="error",
+            details={"error": str(e)},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao gerar API key: {str(e)}",
+        ) from e
+
+
+@router.get(
+    "/api-keys",
+    response_model=APIKeyListResponse,
+    summary="Lista API keys ativas",
+    description="Retorna lista de API keys geradas (sem expor as chaves completas).",
+    responses={
+        200: {"description": "Lista de API keys", "model": APIKeyListResponse},
+        403: {"description": "Acesso de administrador necessário"},
+    },
+)
+async def list_api_keys(
+    request: Request,
+    _: Annotated[bool, Depends(verify_admin_access)],
+    audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
+) -> APIKeyListResponse:
+    """Lista API keys cadastradas (método placeholder).
+
+    Em uma implementação completa, isso consultaria um banco de dados
+    de chaves. Por enquanto, retorna apenas a chave master configurada.
+
+    Args:
+        request: Objeto de requisição FastAPI
+        _: Verificação de acesso administrativo
+        audit_logger: Instância do audit logger
+
+    Returns:
+        Lista de API keys
+    """
+    # Loga o acesso
+    audit_logger.log(
+        event_type=AuditEventType.DATA_ACCESS,
+        correlation_id=str(id(request)),
+        action="GET /admin/api-keys",
+        resource="/admin/api-keys",
+        result="success",
+        details={"message": "Listed API keys"},
+    )
+
+    # Retorna apenas a chave master configurada (máscara)
+    master_key = settings.security_config.api_key
+    masked_key = master_key[:8] + "..." + master_key[-4:] if master_key else "N/A"
+
+    return APIKeyListResponse(
+        keys=[
+            {
+                "key_id": "master",
+                "description": "Master API Key (environment)",
+                "masked": masked_key,
+                "type": "environment",
+            }
+        ],
+        total=1,
+    )
 
 
 @router.get(
@@ -181,7 +378,7 @@ async def export_audit_logs(
 
     try:
         # Gera ID de correlação para esta exportação
-        correlation_id = f"export-{id(request)}-{datetime.utcnow().isoformat()}"
+        correlation_id = f"export-{id(request)}-{datetime.now(timezone.utc).isoformat()}"
 
         # Obtém entradas filtradas (com ou sem tipo de evento)
         entries = audit_logger.get_entries(

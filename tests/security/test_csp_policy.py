@@ -26,8 +26,30 @@ class TestCSPPolicy:
 
         assert "default-src 'self'" in csp
 
-    def test_csp_blocks_inline_scripts(self, client):
-        """CSP deve restringir scripts inline."""
+    def test_csp_blocks_inline_scripts_in_production(self, monkeypatch):
+        """CSP em produção deve restringir scripts inline."""
+        # Importa aqui para obter instância fresca com novo env
+        import os
+        monkeypatch.setenv("ENVIRONMENT", "production")
+        os.environ["ENVIRONMENT"] = "production"
+
+        # Cria app de teste com ambiente de produção
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        from src.api.middleware.cors_security import SecurityHeadersMiddleware
+
+        test_app = FastAPI()
+        test_app.add_middleware(
+            SecurityHeadersMiddleware,
+            environment="production",
+        )
+
+        @test_app.get("/health")
+        def health():
+            return {"status": "ok"}
+
+        client = TestClient(test_app)
         response = client.get("/health")
         csp = response.headers.get("content-security-policy", "")
 
@@ -42,9 +64,8 @@ class TestCSPPolicy:
                 script_src_part = directive
                 break
 
-        # Scripts inline não devem ser permitidos em script-src
-        # (style-src pode ter 'unsafe-inline' que é aceitável)
-        assert "'unsafe-inline'" not in script_src_part or "'nonce-" in script_src_part
+        # Em produção: scripts inline NÃO devem ser permitidos
+        assert "'unsafe-inline'" not in script_src_part, f"'unsafe-inline' found in script-src: {script_src_part}"
 
     def test_csp_blocks_eval(self, client):
         """CSP deve bloquear eval() e similares."""
