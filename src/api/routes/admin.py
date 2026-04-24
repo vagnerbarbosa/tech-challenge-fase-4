@@ -15,8 +15,12 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from src.core.config import settings
+from src.core.security.auth import GeneratedAPIKeyStore
 from src.models.audit_log import AuditEventType
 from src.utils.audit_logger import AuditLogger, get_audit_logger
+
+# Store para chaves geradas
+_generated_key_store = GeneratedAPIKeyStore()
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -165,6 +169,9 @@ async def generate_api_key(
     try:
         api_key, key_id = _generate_api_key()
         created_at = datetime.now(timezone.utc).isoformat()
+
+        # Salva a chave no store para validação futura
+        _generated_key_store.add_key(api_key, description)
 
         # Loga a criação (sem expor a chave completa)
         audit_logger.log(

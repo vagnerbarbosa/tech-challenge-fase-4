@@ -584,6 +584,99 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Generate API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Admin-Key",
+                "value": "admin-secret-key",
+                "type": "text",
+                "description": "Admin key para autenticação"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/api-keys",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "api-keys"]
+            },
+            "description": "Gera uma nova API key (desenvolvimento apenas). A chave gerada é automaticamente salva e pode ser usada nos endpoints."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Admin-Key",
+                    "value": "admin-secret-key"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/admin/api-keys",
+                  "host": ["{{base_url}}"],
+                  "path": ["admin", "api-keys"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"api_key\": \"ak_26953200c168512949f3fe2e46ab6def7bbdb4812a2cc6848f72603923c5e75e\",\n  \"key_id\": \"26953200c1685129\",\n  \"created_at\": \"2026-04-24T01:33:18.744587+00:00\",\n  \"description\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "List API Keys",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Key",
+                "value": "admin-secret-key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/api-keys",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "api-keys"]
+            },
+            "description": "Lista API keys cadastradas (sem expor chaves completas)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audit Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Admin-Key",
+                "value": "admin-secret-key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/audit/stats",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "audit", "stats"]
+            },
+            "description": "Obtém estatísticas de logs de auditoria"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

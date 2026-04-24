@@ -12,12 +12,93 @@ Implementa:
 from __future__ import annotations
 
 import hashlib
+import json
+import os
 import secrets
+import stat
 import uuid
+from pathlib import Path
 
 from src.core.config import SecurityConfig
 from src.core.exceptions import AuthenticationException, ForbiddenException
 from src.core.security.models import SecurityContext
+
+
+class GeneratedAPIKeyStore:
+    """Armazena e gerencia chaves de API geradas dinamicamente.
+
+    Armazena chaves em arquivo JSON com permissões restritas (0o600).
+    Cria o arquivo automaticamente se não existir.
+    """
+
+    def __init__(self, storage_path: str = "data/generated_api_keys.json"):
+        """Inicializa o store com caminho do arquivo.
+
+        Args:
+            storage_path: Caminho para o arquivo de armazenamento
+        """
+        self._storage_path = Path(storage_path)
+        self._ensure_storage_exists()
+
+    def _ensure_storage_exists(self) -> None:
+        """Cria diretório e arquivo se não existirem."""
+        self._storage_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self._storage_path.exists():
+            self._storage_path.write_text("{}")
+            os.chmod(self._storage_path, stat.S_IRUSR | stat.S_IWUSR)
+
+    def add_key(self, api_key: str, description: str | None = None) -> str:
+        """Adiciona uma nova chave ao store.
+
+        Args:
+            api_key: A chave de API completa
+            description: Descrição opcional
+
+        Returns:
+            O key_id da chave armazenada
+        """
+        raw_key = api_key.replace("ak_", "")
+        key_id = raw_key[:16]
+
+        keys = self._load_keys()
+        keys[key_id] = {
+            "api_key": api_key,
+            "description": description,
+            "created_at": str(uuid.uuid4()),
+        }
+        self._save_keys(keys)
+
+        return key_id
+
+    def validate(self, api_key: str | None) -> bool:
+        """Valida se uma chave existe no store.
+
+        Args:
+            api_key: A chave de API para validar
+
+        Returns:
+            True se a chave existe, False caso contrário
+        """
+        if not api_key:
+            return False
+
+        raw_key = api_key.replace("ak_", "")
+        key_id = raw_key[:16]
+
+        keys = self._load_keys()
+        return key_id in keys and keys[key_id].get("api_key") == api_key
+
+    def _load_keys(self) -> dict:
+        """Carrega as chaves do arquivo."""
+        try:
+            return json.loads(self._storage_path.read_text())
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
+
+    def _save_keys(self, keys: dict) -> None:
+        """Salva as chaves no arquivo."""
+        self._storage_path.write_text(json.dumps(keys, indent=2))
+        os.chmod(self._storage_path, stat.S_IRUSR | stat.S_IWUSR)
 
 
 class APIKeyValidator:
@@ -39,11 +120,13 @@ class APIKeyValidator:
             config: Configuração de segurança contendo a chave de API
         """
         self.config = config
+        self._generated_keys = GeneratedAPIKeyStore()
 
     def validate(self, api_key: str | None) -> bool:
-        """Valida uma chave de API contra a chave configurada.
+        """Valida uma chave de API contra a chave configurada ou chaves geradas.
 
         Usa comparação em tempo constante para prevenir ataques de timing.
+        Também verifica chaves geradas dinamicamente via /admin/api-keys.
 
         Args:
             api_key: A chave de API para validar
@@ -59,8 +142,12 @@ class APIKeyValidator:
         if not key:
             return False
 
-        # Constant-time comparison to prevent timing attacks
-        return secrets.compare_digest(key, self.config.api_key)
+        # Check master API key (constant-time comparison)
+        if secrets.compare_digest(key, self.config.api_key):
+            return True
+
+        # Check generated API keys
+        return self._generated_keys.validate(key)
 
     def get_security_context(
         self,
