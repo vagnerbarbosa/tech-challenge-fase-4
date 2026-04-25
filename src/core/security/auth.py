@@ -18,6 +18,7 @@ import secrets
 import stat
 import uuid
 from pathlib import Path
+from typing import Any
 
 from src.core.config import SecurityConfig
 from src.core.exceptions import AuthenticationException, ForbiddenException
@@ -88,14 +89,14 @@ class GeneratedAPIKeyStore:
         keys = self._load_keys()
         return key_id in keys and keys[key_id].get("api_key") == api_key
 
-    def _load_keys(self) -> dict:
+    def _load_keys(self) -> dict[str, Any]:
         """Carrega as chaves do arquivo."""
         try:
             return json.loads(self._storage_path.read_text())
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
 
-    def _save_keys(self, keys: dict) -> None:
+    def _save_keys(self, keys: dict[str, Any]) -> None:
         """Salva as chaves no arquivo."""
         self._storage_path.write_text(json.dumps(keys, indent=2))
         os.chmod(self._storage_path, stat.S_IRUSR | stat.S_IWUSR)
