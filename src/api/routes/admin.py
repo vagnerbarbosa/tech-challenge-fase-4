@@ -7,7 +7,7 @@ e exportação de dados em formato compatível com ANPD conforme exigido pela LG
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -168,7 +168,7 @@ async def generate_api_key(
 
     try:
         api_key, key_id = _generate_api_key()
-        created_at = datetime.now(timezone.utc).isoformat()
+        created_at = datetime.now(UTC).isoformat()
 
         # Salva a chave no store para validação futura
         _generated_key_store.add_key(api_key, description)
@@ -385,7 +385,7 @@ async def export_audit_logs(
 
     try:
         # Gera ID de correlação para esta exportação
-        correlation_id = f"export-{id(request)}-{datetime.now(timezone.utc).isoformat()}"
+        correlation_id = f"export-{id(request)}-{datetime.now(UTC).isoformat()}"
 
         # Obtém entradas filtradas (com ou sem tipo de evento)
         entries = audit_logger.get_entries(

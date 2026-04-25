@@ -36,7 +36,7 @@ show_help() {
     echo "  coverage   - Executa testes com relatório de cobertura"
     echo "  lint       - Executa linting (Ruff)"
     echo "  typecheck  - Executa type checking (mypy)"
-    echo "  all        - Executa lint + typecheck + unit tests"
+    echo "  all        - Executa lint + typecheck + unit tests (instala deps uma vez)"
     echo "  rebuild    - Força rebuild da imagem (quando há novos testes/deps)"
     echo "  help       - Mostra esta ajuda"
     echo ""
@@ -48,12 +48,15 @@ show_help() {
     echo "  $0                    # Testes unitários"
     echo "  $0 unit               # Testes unitários (explícito)"
     echo "  $0 coverage           # Testes com cobertura"
-    echo "  $0 all                # Todos os checks"
+    echo "  $0 all                # Todos os checks (deps instaladas uma vez)"
     echo "  $0 rebuild            # Força rebuild (útil após novos testes)"
 }
 
 # Variáveis - Reutiliza imagem existente
 IMAGE_NAME="tech-challenge-fase-4-api"
+
+# Array para armazenar resultados
+declare -A RESULTS
 
 # Verifica se Docker está instalado
 if ! command -v docker &> /dev/null; then
@@ -165,15 +168,111 @@ run_typecheck() {
     echo -e "${GREEN}✅ Type checking passou!${NC}"
 }
 
-# Função para executar tudo
-run_all() {
-    echo -e "${BLUE}🚀 Executando todos os checks...${NC}"
+# Função para executar tudo em um único container (deps instaladas uma vez)
+run_all_optimized() {
+    check_image
+    echo -e "${BLUE}🚀 Executando todos os checks (modo otimizado)...${NC}"
+    echo -e "${BLUE}   Dependências serão instaladas uma única vez${NC}"
     echo ""
-    run_lint
+
+    # Cria script temporário que executa todos os checks
+    TEMP_SCRIPT=$(mktemp)
+    cat > "$TEMP_SCRIPT" << 'CHECKS_SCRIPT'
+#!/bin/bash
+set -e
+
+echo "📦 Instalando dependências (apenas uma vez)..."
+poetry install --with dev --no-interaction --no-root > /dev/null 2>&1
+echo "✅ Dependências instaladas!"
+echo ""
+
+# Array para resultados
+declare -A RESULTS
+
+# Lint
+echo "🔍 Executando lint (Ruff)..."
+if poetry run ruff check src/ 2>&1; then
+    RESULTS["Lint"]="✅ PASS"
+    echo "✅ Lint passou!"
+else
+    RESULTS["Lint"]="❌ FAIL"
+    echo "❌ Lint falhou!"
+fi
+echo ""
+
+# Typecheck
+echo "🔍 Executando type check (mypy)..."
+if poetry run mypy src/ 2>&1; then
+    RESULTS["Typecheck"]="✅ PASS"
+    echo "✅ Type check passou!"
+else
+    RESULTS["Typecheck"]="❌ FAIL"
+    echo "❌ Type check falhou!"
+fi
+echo ""
+
+# Tests with coverage
+echo "🧪 Executando testes com cobertura..."
+if poetry run pytest tests/unit/ -v --cov=src --cov-report=term 2>&1; then
+    RESULTS["Coverage"]="✅ PASS"
+    echo "✅ Testes passaram!"
+else
+    RESULTS["Coverage"]="❌ FAIL"
+    echo "❌ Testes falharam (coverage ou testes)!"
+fi
+echo ""
+
+# Relatório final
+echo "========================================"
+echo "           RELATÓRIO FINAL            "
+echo "========================================"
+echo ""
+echo "🔍 Lint (Ruff): ${RESULTS["Lint"]}"
+echo "🔍 Type Check (mypy): ${RESULTS["Typecheck"]}"
+echo "📊 Tests with Coverage: ${RESULTS["Coverage"]}"
+echo ""
+
+# Verifica se todos passaram
+if [ "${RESULTS["Lint"]}" = "✅ PASS" ] && [ "${RESULTS["Typecheck"]}" = "✅ PASS" ] && [ "${RESULTS["Coverage"]}" = "✅ PASS" ]; then
+    echo "✅ Todos os checks passaram! (3/3)"
+    exit 0
+else
+    echo "❌ Alguns checks falharam!"
+    exit 1
+fi
+CHECKS_SCRIPT
+
+    # Executa script no container
+    docker run --rm \
+        -v "$(pwd)/src:/app/src:ro" \
+        -v "$(pwd)/tests:/app/tests:ro" \
+        -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
+        -v "$TEMP_SCRIPT:/tmp/run-checks.sh:ro" \
+        -w /app \
+        "$IMAGE_NAME:latest" \
+        bash /tmp/run-checks.sh
+
+    RESULT=$?
+    rm -f "$TEMP_SCRIPT"
+    return $RESULT
+}
+
+# Função para executar tudo (modo antigo - individual)
+run_all_individual() {
+    echo -e "${BLUE}🚀 Executando todos os checks (modo individual)...${NC}"
     echo ""
-    run_typecheck
+
+    local exit_code=0
+
+    run_lint || exit_code=1
     echo ""
-    run_coverage
+
+    run_typecheck || exit_code=1
+    echo ""
+
+    run_coverage || exit_code=1
+
+    return $exit_code
 }
 
 
@@ -195,7 +294,7 @@ case "${1:-unit}" in
         run_typecheck
         ;;
     all)
-        run_all
+        run_all_optimized
         ;;
     rebuild)
         force_rebuild
