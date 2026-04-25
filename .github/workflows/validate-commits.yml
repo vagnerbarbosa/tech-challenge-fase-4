@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
 
     steps:
       - name: Validar título
@@ -125,7 +125,67 @@ jobs:
             plan
             research
           requireScope: false
-          subjectPattern: ^[A-Z].+$
+          # Conventional Commits: descrição deve começar com letra minúscula
+          subjectPattern: ^[a-z].+$
           subjectPatternError: |
-            O título da PR deve começar com letra maiúscula.
-            Exemplo: "feat: Adiciona nova funcionalidade"
+            ❌ **Título da PR inválido!**
+
+            O título deve seguir o padrão **Conventional Commits**:
+
+            ```
+            <tipo>[escopo opcional]: <descrição>
+            ```
+
+            **Tipos válidos:**
+            - `feat`: Nova funcionalidade
+            - `fix`: Correção de bug
+            - `docs`: Documentação
+            - `style`: Formatação (sem mudança de código)
+            - `refactor`: Refatoração de código
+            - `test`: Testes
+            - `chore`: Tarefas de build/config
+            - `perf`: Melhoria de performance
+            - `ci`: Configuração de CI/CD
+            - `build`: Sistema de build
+            - `revert`: Revertendo alterações
+            - `spec`, `clarify`, `plan`, `research`: Tipos do Specify
+
+            **Exemplos válidos:**
+            - ✅ `feat(auth): adiciona autenticação JWT`
+            - ✅ `fix(api): corrige rate limiting em uploads`
+            - ✅ `docs(readme): atualiza instruções de instalação`
+            - ✅ `refactor(services): simplifica lógica de cache`
+            - ❌ `Feat: Adiciona autenticação` (tipo em maiúscula)
+            - ❌ `fix: Corrige bug` (descrição em maiúscula)
+            - ❌ `adiciona autenticação` (falta o tipo)
+
+            📚 **Referência:** https://www.conventionalcommits.org/pt-br/v1.0.0/
+
+      - name: Comentar na PR (se inválido)
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: conventional-commit-reminder
+          message: |
+            ## ⚠️ Atenção: Título da PR não segue Conventional Commits
+
+            Por favor, edite o título da PR para seguir o padrão:
+
+            ```
+            <tipo>[escopo opcional]: <descrição em minúscula>
+            ```
+
+            **Exemplos:**
+            - `feat(api): adiciona endpoint de análise multimodal`
+            - `fix(auth): corrige validação de token expirado`
+            - `docs(readme): atualiza seção de configuração`
+            - `test(unit): adiciona testes para AudioService`
+
+            📚 [Leia mais sobre Conventional Commits](https://www.conventionalcommits.org/pt-br/v1.0.0/)
+
+      - name: Remover comentário (se válido)
+        if: success()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: conventional-commit-reminder
+          delete: true
