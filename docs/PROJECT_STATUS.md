@@ -71,7 +71,6 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ---
 
 ## ⏳ Módulos Pendentes
-
 ### 7. Fusão Multimodal (Spec 005) ✅ 100%
 - [x] Algoritmo de fusão (late fusion ponderado por confiança)
 - [x] Endpoint `/analyze/multimodal` com autenticação
@@ -91,6 +90,10 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Auditoria LGPD com logs estruturados
 - [x] CORS restritivo com whitelist
 - [x] 87 tasks implementadas, testadas e mergeadas
+
+---
+
+## ⏳ Módulos Pendentes
 
 ### 9. Deploy Azure (Spec 009) ⏳ 0%
 - [ ] Configuração App Service
@@ -237,7 +240,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ## 🔗 Links Úteis
 
 - [Repositório GitHub](https://github.com/vagnerbarbosa/tech-challenge-fase-4)
-- [Especificações](specs/README.md)
+- [Especificações](/)
 - [CLAUDE.md](CLAUDE.md) - Contexto técnico completo
 - [Docker Hub](https://hub.docker.com/r/vagnerbarbosa/tech-challenge-fase-4)
 

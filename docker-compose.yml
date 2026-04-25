@@ -95,12 +95,10 @@ services:
       retries: 3
 
   # -------------------------------------------
-  # Test Runner (para executar testes)
+  # Test Runner (usa a mesma imagem da API - economiza ~20GB)
   # -------------------------------------------
   test:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
+    image: tech-challenge-fase-4-api:latest
     container_name: health-api-test
     environment:
       - ENVIRONMENT=testing
