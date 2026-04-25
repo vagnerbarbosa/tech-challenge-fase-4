@@ -150,17 +150,14 @@ class TestValidateVideoFile:
 
     @pytest.mark.asyncio
     async def test_valid_mp4_extension(self, mock_video_upload):
-        """Testa extensão MP4 válida com mock de magic."""
+        """Testa extensão MP4 válida."""
         mock_video_upload.filename = "test.mp4"
         mock_video_upload.read.return_value = b"\x00\x00\x00\x18ftypmp4"
 
         from src.utils.file_validation import validate_video_file
 
-        # Mock magic module para o teste funcionar com ou sem magic instalado
-        mock_magic = Mock()
-        mock_magic.from_buffer = Mock(return_value="video/mp4")
-        with patch("src.utils.file_validation.magic", mock_magic):
-            await validate_video_file(mock_video_upload)
+        # Deve passar sem exceção
+        await validate_video_file(mock_video_upload)
 
 
 class TestCheckUploadSize:
@@ -234,66 +231,57 @@ class TestCheckUploadSizeStreaming:
 
 
 class TestValidateAudioFileFallback:
-    """Testes para validate_audio_file - testam validação de assinaturas com mock de magic."""
-
-    def _mock_magic(self, mime_type):
-        """Helper para criar mock do magic."""
-        mock_magic = Mock()
-        mock_magic.from_buffer = Mock(return_value=mime_type)
-        return mock_magic
+    """Testes para validate_audio_file sem python-magic."""
 
     @pytest.mark.asyncio
-    async def test_wav_validation_with_mock(self):
-        """Testa validação WAV com magic mockado."""
+    async def test_wav_fallback_validation(self):
+        """Testa validação WAV sem magic."""
         upload = Mock()
         upload.filename = "test.wav"
         upload.read = AsyncMock(return_value=b"RIFF\x00\x00\x00\x00WAVE")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic", self._mock_magic("audio/wav")):
-            await validate_audio_file(upload)
-            upload.seek.assert_called_once_with(0)
+        # Deve passar sem magic
+        await validate_audio_file(upload)
+        upload.seek.assert_called_once_with(0)
 
     @pytest.mark.asyncio
-    async def test_mp3_validation_with_mock(self):
-        """Testa validação MP3 com magic mockado."""
+    async def test_mp3_fallback_validation(self):
+        """Testa validação MP3 sem magic."""
         upload = Mock()
         upload.filename = "test.mp3"
         upload.read = AsyncMock(return_value=b"\xff\xfb\x00\x00")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic", self._mock_magic("audio/mpeg")):
-            await validate_audio_file(upload)
-            upload.seek.assert_called_once_with(0)
+        # Deve passar sem magic
+        await validate_audio_file(upload)
+        upload.seek.assert_called_once_with(0)
 
     @pytest.mark.asyncio
-    async def test_ogg_validation_with_mock(self):
-        """Testa validação OGG com magic mockado."""
+    async def test_ogg_fallback_validation(self):
+        """Testa validação OGG sem magic."""
         upload = Mock()
         upload.filename = "test.ogg"
         upload.read = AsyncMock(return_value=b"OggS\x00\x00")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic", self._mock_magic("audio/ogg")):
-            await validate_audio_file(upload)
-            upload.seek.assert_called_once_with(0)
+        # Deve passar sem magic
+        await validate_audio_file(upload)
+        upload.seek.assert_called_once_with(0)
 
     @pytest.mark.asyncio
     async def test_invalid_signature_rejected(self):
-        """Testa assinatura inválida rejeitada."""
+        """Testa assinatura inválida rejeitada no fallback."""
         upload = Mock()
         upload.filename = "test.wav"
         upload.read = AsyncMock(return_value=b"INVALID")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic", self._mock_magic("text/plain")):
-            with pytest.raises(HTTPException) as exc_info:
-                await validate_audio_file(upload)
+        with pytest.raises(HTTPException) as exc_info:
+            await validate_audio_file(upload)
 
-            assert exc_info.value.status_code == 400
-            # Pode ser "não suportado" (magic) ou "assinatura inválida" (fallback)
-            assert ("não suportado" in exc_info.value.detail.lower() or
-                    "assinatura" in exc_info.value.detail.lower())
+        assert exc_info.value.status_code == 400
+        assert "assinatura" in exc_info.value.detail.lower()
 
 
 class TestConstants:
