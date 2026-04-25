@@ -156,7 +156,10 @@ class TestValidateVideoFile:
 
         from src.utils.file_validation import validate_video_file
 
-        with patch("src.utils.file_validation.magic.from_buffer", return_value="video/mp4"):
+        # Mock magic module para o teste funcionar com ou sem magic instalado
+        mock_magic = Mock()
+        mock_magic.from_buffer = Mock(return_value="video/mp4")
+        with patch("src.utils.file_validation.magic", mock_magic):
             await validate_video_file(mock_video_upload)
 
 
@@ -233,6 +236,12 @@ class TestCheckUploadSizeStreaming:
 class TestValidateAudioFileFallback:
     """Testes para validate_audio_file - testam validação de assinaturas com mock de magic."""
 
+    def _mock_magic(self, mime_type):
+        """Helper para criar mock do magic."""
+        mock_magic = Mock()
+        mock_magic.from_buffer = Mock(return_value=mime_type)
+        return mock_magic
+
     @pytest.mark.asyncio
     async def test_wav_validation_with_mock(self):
         """Testa validação WAV com magic mockado."""
@@ -241,7 +250,7 @@ class TestValidateAudioFileFallback:
         upload.read = AsyncMock(return_value=b"RIFF\x00\x00\x00\x00WAVE")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic.from_buffer", return_value="audio/wav"):
+        with patch("src.utils.file_validation.magic", self._mock_magic("audio/wav")):
             await validate_audio_file(upload)
             upload.seek.assert_called_once_with(0)
 
@@ -253,7 +262,7 @@ class TestValidateAudioFileFallback:
         upload.read = AsyncMock(return_value=b"\xff\xfb\x00\x00")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic.from_buffer", return_value="audio/mpeg"):
+        with patch("src.utils.file_validation.magic", self._mock_magic("audio/mpeg")):
             await validate_audio_file(upload)
             upload.seek.assert_called_once_with(0)
 
@@ -265,7 +274,7 @@ class TestValidateAudioFileFallback:
         upload.read = AsyncMock(return_value=b"OggS\x00\x00")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic.from_buffer", return_value="audio/ogg"):
+        with patch("src.utils.file_validation.magic", self._mock_magic("audio/ogg")):
             await validate_audio_file(upload)
             upload.seek.assert_called_once_with(0)
 
@@ -277,7 +286,7 @@ class TestValidateAudioFileFallback:
         upload.read = AsyncMock(return_value=b"INVALID")
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic.from_buffer", return_value="text/plain"):
+        with patch("src.utils.file_validation.magic", self._mock_magic("text/plain")):
             with pytest.raises(HTTPException) as exc_info:
                 await validate_audio_file(upload)
 
