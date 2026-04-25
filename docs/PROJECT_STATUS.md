@@ -68,6 +68,9 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Cobertura >70% (atual: ~85%)
 - [ ] Testes de carga (Locust - opcional)
 
+---
+
+## ⏳ Módulos Pendentes
 ### 7. Fusão Multimodal (Spec 005) ✅ 100%
 - [x] Algoritmo de fusão (late fusion ponderado por confiança)
 - [x] Endpoint `/analyze/multimodal` com autenticação
