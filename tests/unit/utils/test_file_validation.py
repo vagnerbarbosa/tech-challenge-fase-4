@@ -22,6 +22,12 @@ requires_magic = pytest.mark.skipif(
     reason="python-magic não está disponível no ambiente"
 )
 
+# Skip tests when python-magic IS available (fallback tests)
+skip_if_magic = pytest.mark.skipif(
+    MAGIC_AVAILABLE,
+    reason="Teste só válido sem python-magic (fallback mode)"
+)
+
 
 class TestValidateAudioFile:
     """Test suite para validate_audio_file."""
@@ -148,15 +154,16 @@ class TestValidateVideoFile:
 
         assert exc_info.value.status_code == 400
 
+    @skip_if_magic
     @pytest.mark.asyncio
     async def test_valid_mp4_extension(self, mock_video_upload):
-        """Testa extensão MP4 válida."""
+        """Testa extensão MP4 válida (fallback sem magic)."""
         mock_video_upload.filename = "test.mp4"
         mock_video_upload.read.return_value = b"\x00\x00\x00\x18ftypmp4"
 
         from src.utils.file_validation import validate_video_file
 
-        # Deve passar sem exceção
+        # Deve passar sem exceção (quando magic não está disponível)
         await validate_video_file(mock_video_upload)
 
 
@@ -231,8 +238,9 @@ class TestCheckUploadSizeStreaming:
 
 
 class TestValidateAudioFileFallback:
-    """Testes para validate_audio_file sem python-magic."""
+    """Testes para validate_audio_file sem python-magic (fallback)."""
 
+    @skip_if_magic
     @pytest.mark.asyncio
     async def test_wav_fallback_validation(self):
         """Testa validação WAV sem magic."""
@@ -245,6 +253,7 @@ class TestValidateAudioFileFallback:
         await validate_audio_file(upload)
         upload.seek.assert_called_once_with(0)
 
+    @skip_if_magic
     @pytest.mark.asyncio
     async def test_mp3_fallback_validation(self):
         """Testa validação MP3 sem magic."""
@@ -257,6 +266,7 @@ class TestValidateAudioFileFallback:
         await validate_audio_file(upload)
         upload.seek.assert_called_once_with(0)
 
+    @skip_if_magic
     @pytest.mark.asyncio
     async def test_ogg_fallback_validation(self):
         """Testa validação OGG sem magic."""
@@ -269,6 +279,7 @@ class TestValidateAudioFileFallback:
         await validate_audio_file(upload)
         upload.seek.assert_called_once_with(0)
 
+    @skip_if_magic
     @pytest.mark.asyncio
     async def test_invalid_signature_rejected(self):
         """Testa assinatura inválida rejeitada no fallback."""
