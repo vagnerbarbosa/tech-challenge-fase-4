@@ -200,7 +200,10 @@ declare -A RESULTS
 
 # Lint
 echo "🔍 Executando lint (Ruff)..."
-if poetry run ruff check src/ 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
+poetry run ruff check src/ > /tmp/lint-output.txt 2>&1
+LINT_EXIT=$?
+grep -v "^WARNING:" /tmp/lint-output.txt | grep -v "^Skipping" || true
+if [ $LINT_EXIT -eq 0 ]; then
     RESULTS["Lint"]="✅ PASS"
     echo "✅ Lint passou!"
 else
@@ -211,7 +214,10 @@ echo ""
 
 # Typecheck
 echo "🔍 Executando type check (mypy)..."
-if poetry run mypy src/ 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
+poetry run mypy src/ > /tmp/mypy-output.txt 2>&1
+MYPY_EXIT=$?
+grep -v "^WARNING:" /tmp/mypy-output.txt | grep -v "^Skipping" || true
+if [ $MYPY_EXIT -eq 0 ]; then
     RESULTS["Typecheck"]="✅ PASS"
     echo "✅ Type check passou!"
 else
@@ -222,7 +228,10 @@ echo ""
 
 # Tests with coverage
 echo "🧪 Executando testes com cobertura..."
-if poetry run pytest tests/unit/ -v --cov=src --cov-report=term 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
+poetry run pytest tests/unit/ -v --cov=src --cov-report=term > /tmp/pytest-output.txt 2>&1
+PYTEST_EXIT=$?
+cat /tmp/pytest-output.txt | grep -v "^WARNING:" | grep -v "^Skipping" || true
+if [ $PYTEST_EXIT -eq 0 ]; then
     RESULTS["Coverage"]="✅ PASS"
     echo "✅ Testes passaram!"
 else
