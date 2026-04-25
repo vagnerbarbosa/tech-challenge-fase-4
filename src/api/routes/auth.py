@@ -67,7 +67,7 @@ async def validate_api_key(
     # Check rate limit (raises RateLimitExceeded if exceeded)
     _, rate_info = await check_limiter(identifier, "auth")
 
-    # Validate API key
+    # Validate API key (master or generated)
     security_config = settings.security_config
 
     if not x_api_key:
@@ -77,13 +77,30 @@ async def validate_api_key(
         )
         raise AuthenticationException(message="API key is required")
 
-    if x_api_key != security_config.api_key:
+    # Check master API key
+    is_valid = x_api_key == security_config.api_key
+
+    # Check generated API keys if master invalid
+    if not is_valid:
+        from src.core.security.auth import GeneratedAPIKeyStore
+        key_store = GeneratedAPIKeyStore()
+        is_valid = key_store.validate(x_api_key)
+
+    if not is_valid:
         logger.warning(
             "auth_attempt_invalid_key",
             client_ip=identifier,
             key_prefix=x_api_key[:4] + "..." if len(x_api_key) > 4 else None,
         )
         raise AuthenticationException(message="Invalid API key")
+
+    # ⚠️ Warning se master key usada em produção
+    if is_valid and x_api_key == security_config.api_key and settings.environment == "production":
+        logger.warning(
+            "auth_master_key_used_in_production",
+            client_ip=identifier,
+            message="MASTER KEY usada em producao - recomendado usar chaves geradas por cliente",
+        )
 
     logger.info(
         "auth_success",

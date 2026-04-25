@@ -102,7 +102,8 @@ O endpoint `POST /admin/api-keys` é **automaticamente BLOQUEADO em produção**
 | Ambiente | Método | Comando |
 |----------|--------|---------|
 | Desenvolvimento | Swagger UI | `POST /admin/api-keys` com header `X-Admin-Key: admin-secret-key` |
-| Produção | Python inline | `python -c "import secrets; print('ak_' + secrets.token_hex(32))"` |
+| Produção | Script CLI | `python scripts/generate-api-key.py --description "Cliente XYZ"` |
+| Qualquer | Python inline | `python -c "import secrets; print('ak_' + secrets.token_hex(32))"` (não registra) |
 
 **Exemplo em Desenvolvimento (via Swagger):**
 ```bash
@@ -120,10 +121,23 @@ curl -X POST \
   http://localhost:8000/analyze/text
 ```
 
+**Script CLI (Recomendado para Produção):**
+```bash
+# Gerar e registrar automaticamente
+python scripts/generate-api-key.py --description "Cliente Hospital XYZ"
+
+# Saída silenciosa (apenas a chave)
+python scripts/generate-api-key.py -q
+
+# Com variável de ambiente para caminho customizado
+API_KEYS_PATH=/mnt/secure/api-keys.json python scripts/generate-api-key.py
+```
+
 **Storage de Chaves:**
 - Chaves geradas são armazenadas em `data/generated_api_keys.json`
 - Arquivo tem permissões restritas (0o600 - apenas owner)
 - Sistema valida tanto a chave master (`SECURITY_API_KEY`) quanto as geradas
+- **Requer permissões de root/container** para escrita no arquivo
 
 **Exemplo em Produção:**
 ```bash

@@ -104,10 +104,10 @@ class TestAudioEndpointValidation:
 
     @pytest.mark.asyncio
     async def test_file_too_large_rejected(self, async_client: AsyncClient, tmp_path):
-        """Testa que arquivo muito grande é rejeitado."""
-        # Arrange
+        """Testa que arquivo muito grande é rejeitado pelo middleware (413)."""
+        # Arrange - cria arquivo maior que MAX_AUDIO_SIZE_MB (10MB)
         test_audio = tmp_path / "test.wav"
-        test_audio.write_bytes(b"RIFF" + b"WAVE" + b"\x00" * (51 * 1024 * 1024))
+        test_audio.write_bytes(b"RIFF" + b"WAVE" + b"\x00" * (15 * 1024 * 1024))
 
         with patch(
             "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
@@ -117,9 +117,9 @@ class TestAudioEndpointValidation:
                 files={"file": ("test.wav", f, "audio/wav")},
             )
 
-        # Assert
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Arquivo muito grande" in response.json()["detail"]
+        # Assert - middleware retorna 413 (Payload Too Large)
+        assert response.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        assert "Arquivo" in response.json()["detail"]
 
 
 class TestAudioFormatsEndpoint:

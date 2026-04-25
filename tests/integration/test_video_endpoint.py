@@ -247,11 +247,11 @@ class TestVideoEndpointValidation:
 
     @pytest.mark.asyncio
     async def test_file_too_large_rejected(self, async_client: AsyncClient, tmp_path):
-        """Testa que arquivo de vídeo muito grande é rejeitado."""
-        # Arrange - Criar arquivo MP4 aparentemente válido mas muito grande
+        """Testa que arquivo de vídeo muito grande é rejeitado pelo middleware (413)."""
+        # Arrange - Criar arquivo MP4 maior que MAX_VIDEO_SIZE_MB (50MB)
         test_video = tmp_path / "large.mp4"
         test_video.write_bytes(
-            b"\x00\x00\x00\x20ftypisom\x00\x00\x00\x00isommp41" + b"\x00" * (51 * 1024 * 1024)
+            b"\x00\x00\x00\x20ftypisom\x00\x00\x00\x00isommp41" + b"\x00" * (55 * 1024 * 1024)
         )
 
         with (
@@ -266,9 +266,9 @@ class TestVideoEndpointValidation:
                 data={"tipo": "consulta"},
             )
 
-        # Assert
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Arquivo muito grande" in response.json()["detail"]
+        # Assert - middleware retorna 413 (Payload Too Large)
+        assert response.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        assert "Arquivo" in response.json()["detail"]
 
     @pytest.mark.asyncio
     async def test_video_duration_exceeded(self, async_client: AsyncClient, tmp_path):

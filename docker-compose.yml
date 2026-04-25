@@ -41,10 +41,9 @@ services:
       - MAX_VISION_REQUESTS_PER_DAY=${MAX_VISION_REQUESTS_PER_DAY:-160}
       # Security (Spec 007)
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
-      - API_KEY=${API_KEY}
       - API_KEY_HEADER=X-API-Key
       # Security Hardening
-      - SECURITY_API_KEY=${SECURITY_API_KEY:-${API_KEY}}
+      - SECURITY_API_KEY=${SECURITY_API_KEY}
       - SECURITY_ENVIRONMENT=${SECURITY_ENVIRONMENT:-development}
       - SECURITY_CORS_ORIGINS=${SECURITY_CORS_ORIGINS:-http://localhost:3000,http://localhost:8000}
       - SECURITY_RATE_LIMIT_PER_MINUTE=${SECURITY_RATE_LIMIT_PER_MINUTE:-60}
@@ -54,7 +53,17 @@ services:
       - AUDIT_LOG_RETENTION_DAYS=${AUDIT_LOG_RETENTION_DAYS:-90}
       - AUDIT_LOG_MAX_SIZE_MB=${AUDIT_LOG_MAX_SIZE_MB:-100}
       # Multimodal
-      - MULTIMODAL_TIMEOUT_SECONDS=30
+      - MULTIMODAL_TIMEOUT_SECONDS=60
+      # Request Timeout
+      - REQUEST_TIMEOUT_SECONDS=300
+      - UPLOAD_TIMEOUT_SECONDS=600
+      # Upload Size Limits (Middleware) - Azure Free Tier Protection
+      # Audio: 10MB max (~5-10 min) to protect 10 min/day Azure quota
+      - MAX_AUDIO_SIZE_MB=10
+      - MAX_AUDIO_DURATION_SECONDS=300
+      # Video: Local processing (YOLOv8), 2 min max for analysis quality
+      - MAX_VIDEO_SIZE_MB=50
+      - MAX_VIDEO_DURATION_SECONDS=120
       # LGPD Compliance
       - ANONYMIZE_PII=${ANONYMIZE_PII:-true}
       - CONSENT_REQUIRED=${CONSENT_REQUIRED:-true}
