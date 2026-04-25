@@ -291,7 +291,9 @@ class TestValidateAudioFileFallback:
                 await validate_audio_file(upload)
 
             assert exc_info.value.status_code == 400
-            assert "não suportado" in exc_info.value.detail.lower()
+            # Pode ser "não suportado" (magic) ou "assinatura inválida" (fallback)
+            assert ("não suportado" in exc_info.value.detail.lower() or
+                    "assinatura" in exc_info.value.detail.lower())
 
 
 class TestConstants:
