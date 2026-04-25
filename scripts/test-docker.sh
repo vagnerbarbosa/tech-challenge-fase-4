@@ -102,6 +102,15 @@ force_rebuild() {
     fi
 }
 
+# Função para filtrar warnings do poetry
+filter_poetry_warnings() {
+    grep -v "^WARNING: This output is designed for human readability" | \
+    grep -v "^Skipping virtualenv creation" | \
+    grep -v "^Package operations:" | \
+    grep -v "^- Installing" | \
+    cat
+}
+
 # Função para executar testes unitários
 run_unit_tests() {
     check_image
@@ -112,7 +121,7 @@ run_unit_tests() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/unit/ -v"
+        bash -c "poetry install --with dev --no-interaction --no-root 2>/dev/null && poetry run pytest tests/unit/ -v" 2>&1 | filter_poetry_warnings
 }
 
 # Função para executar testes com cobertura
@@ -125,7 +134,7 @@ run_coverage() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/unit/ -v --cov=src --cov-report=term"
+        bash -c "poetry install --with dev --no-interaction --no-root 2>/dev/null && poetry run pytest tests/unit/ -v --cov=src --cov-report=term" 2>&1 | filter_poetry_warnings
 }
 
 # Função para executar testes de integração
@@ -139,7 +148,7 @@ run_integration_tests() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/integration/ -v"
+        bash -c "poetry install --with dev --no-interaction --no-root 2>/dev/null && poetry run pytest tests/integration/ -v" 2>&1 | filter_poetry_warnings
 }
 
 # Função para executar linting
@@ -151,7 +160,7 @@ run_lint() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        bash -c "poetry install --with dev --no-interaction --no-root && poetry run ruff check src/"
+        bash -c "poetry install --with dev --no-interaction --no-root 2>/dev/null && poetry run ruff check src/" 2>&1 | filter_poetry_warnings
     echo -e "${GREEN}✅ Linting passou!${NC}"
 }
 
@@ -164,7 +173,7 @@ run_typecheck() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        bash -c "poetry install --with dev --no-interaction --no-root && poetry run mypy src/"
+        bash -c "poetry install --with dev --no-interaction --no-root 2>/dev/null && poetry run mypy src/" 2>&1 | filter_poetry_warnings
     echo -e "${GREEN}✅ Type checking passou!${NC}"
 }
 
@@ -191,7 +200,7 @@ declare -A RESULTS
 
 # Lint
 echo "🔍 Executando lint (Ruff)..."
-if poetry run ruff check src/ 2>&1; then
+if poetry run ruff check src/ 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
     RESULTS["Lint"]="✅ PASS"
     echo "✅ Lint passou!"
 else
@@ -202,7 +211,7 @@ echo ""
 
 # Typecheck
 echo "🔍 Executando type check (mypy)..."
-if poetry run mypy src/ 2>&1; then
+if poetry run mypy src/ 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
     RESULTS["Typecheck"]="✅ PASS"
     echo "✅ Type check passou!"
 else
@@ -213,7 +222,7 @@ echo ""
 
 # Tests with coverage
 echo "🧪 Executando testes com cobertura..."
-if poetry run pytest tests/unit/ -v --cov=src --cov-report=term 2>&1; then
+if poetry run pytest tests/unit/ -v --cov=src --cov-report=term 2>&1 | grep -v "^WARNING:" | grep -v "^Skipping"; then
     RESULTS["Coverage"]="✅ PASS"
     echo "✅ Testes passaram!"
 else
