@@ -10,7 +10,8 @@ Multimodal health analysis API for women's health:
 - **Text**: Azure AI Language (sentiment analysis)
 - **Audio**: Azure AI Speech (transcription + prosody)
 - **Video**: YOLOv8 local detection (instruments, bleeding, posture)
-- **Multimodal**: Fusion endpoint (pending)
+- **Multimodal**: Fusion endpoint (late fusion)
+- **Security**: OWASP + LGPD compliance (API Key, rate limiting, audit)
 
 ## Stack
 
@@ -24,15 +25,23 @@ Multimodal health analysis API for women's health:
 
 ```
 src/
-├── api/routes/        # FastAPI endpoints
-├── services/          # Business logic
-├── core/              # Config, logging, rate limiting
+├── api/
+│   ├── routes/        # FastAPI endpoints (text, audio, video, multimodal, auth, admin)
+│   ├── middleware/    # Security middleware (CORS, headers, rate limit)
+│   └── dependencies.py # FastAPI dependencies (auth, rate limit)
+├── services/          # Business logic (analysis + fusion)
+├── core/
+│   ├── security/      # Auth, rate limiter, file validator, log sanitizer
+│   ├── config.py      # Settings including SecurityConfig
+│   ├── rate_limit.py  # QuotaManager for Azure Free Tier
+│   └── logging_config.py # Structured logging with sanitization
 ├── infrastructure/    # Azure clients
-└── utils/             # Video validation, etc.
+└── utils/             # Audit logger, file validation
 
 tests/
 ├── unit/              # Service tests
 ├── integration/       # API endpoint tests
+├── security/          # Security-specific tests (Spec 007)
 └── load/              # Locust tests
 ```
 
@@ -118,6 +127,7 @@ Requires: `export GITHUB_TOKEN=ghp_your_token`
 
 - Full architecture: `docs/architecture.md`
 - API contracts: `docs/api-contracts.md`
+- Project status: `docs/PROJECT_STATUS.md`
+- Security guide: `docs/technical/security-guide.md`
 - Context7 best practices: `docs/technical/context7-best-practices.md`
 - GitHub tools strategy: `memory/github_tools_strategy.md`
-- Security audit: `docs/technical/security-audit.md`

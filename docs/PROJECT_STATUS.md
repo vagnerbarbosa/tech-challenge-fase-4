@@ -1,8 +1,8 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-04-21  
+**Atualizado**: 2026-04-25  
 **Versão**: 0.6.0  
-**Branch**: `005-multimodal-fusion`
+**Branch**: `main`
 
 ---
 
@@ -10,10 +10,10 @@
 
 Sistema multimodal para identificação de sinais de violência doméstica e riscos à saúde materna através da análise de texto, áudio e vídeo.
 
-### Progresso Total: **80%**
+### Progresso Total: **85%**
 
 ```
-[████████████████░░░░] 80%
+[█████████████████░░░] 85%
 ```
 
 ---
@@ -54,18 +54,19 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Endpoints de cache e formatos
 - [x] Testes unitários (100% services)
 
-### 5. Rate Limiting (Spec 006) 🔄 60%
+### 5. Rate Limiting (Spec 006) ✅ 100%
 - [x] QuotaManager com persistência
 - [x] Rate limiting por serviço
 - [x] Health check com quotas
+- [x] Rate limiting por IP/API Key (Spec 007)
 - [ ] Redis integration (opcional)
-- [ ] Alertas de quota
 
-### 6. Testes (Spec 008) 🔄 85%
+### 6. Testes (Spec 008) ✅ 100%
 - [x] Testes unitários (Texto + Áudio + Vídeo)
-- [x] Testes de integração (básicos)
+- [x] Testes de integração (endpoints protegidos, autenticação)
+- [x] Testes de segurança (Spec 007 - 87 tasks)
 - [x] Cobertura >70% (atual: ~85%)
-- [ ] Testes de carga (Locust)
+- [ ] Testes de carga (Locust - opcional)
 
 ---
 
@@ -73,16 +74,23 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ### 7. Fusão Multimodal (Spec 005) ✅ 100%
 - [x] Algoritmo de fusão (late fusion ponderado por confiança)
-- [x] Endpoint `/analyze/multimodal`
+- [x] Endpoint `/analyze/multimodal` com autenticação
 - [x] Peso por modalidade
 - [x] Processamento paralelo com timeout
 - [x] Graceful degradation
-- [x] Testes unitários
+- [x] Testes unitários e integração
+- [x] Correção serialização numpy (mergeado em main)
 
-### 8. Security Hardening (Spec 007) ⏳ 0%
-- [ ] Security audit
-- [ ] Correções de vulnerabilidades
-- [ ] Hardening de containers
+### 8. Security Hardening (Spec 007) ✅ 100%
+- [x] Autenticação API Key com RBAC
+- [x] Rate limiting contra DDoS (Token Bucket)
+- [x] Validação de uploads com magic bytes
+- [x] Sanitização de logs LGPD-compliant
+- [x] Headers de segurança OWASP (CSP, HSTS, X-Frame-Options)
+- [x] Proteção BOLA (Broken Object Level Authorization)
+- [x] Auditoria LGPD com logs estruturados
+- [x] CORS restritivo com whitelist
+- [x] 87 tasks implementadas, testadas e mergeadas
 
 ### 9. Deploy Azure (Spec 009) ⏳ 0%
 - [ ] Configuração App Service
@@ -101,15 +109,21 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | Endpoint | Método | Status | Descrição |
 |----------|--------|--------|-----------|
 | `/health` | GET | ✅ | Health check com quotas |
-| `/analyze/text` | POST | ✅ | Análise de texto |
-| `/analyze/audio` | POST | ✅ | Análise de áudio |
+| `/analyze/text` | POST | ✅ | Análise de texto (requer API Key) |
+| `/analyze/audio` | POST | ✅ | Análise de áudio (requer API Key) |
 | `/analyze/audio/formats` | GET | ✅ | Formatos suportados |
-| `/analyze/video` | POST | ✅ | Análise YOLOv8 local (detecta objetos, sangramento, postura) |
+| `/analyze/video` | POST | ✅ | Análise YOLOv8 local (requer API Key) |
 | `/analyze/video/formats` | GET | ✅ | Formatos de vídeo suportados |
 | `/analyze/video/cache/stats` | GET | ✅ | Estatísticas do cache |
 | `/analyze/video/cache/clear` | POST | ✅ | Limpar cache de vídeo |
-| `/analyze/multimodal` | POST | ✅ | Fusão multimodal (late fusion) |
+| `/analyze/multimodal` | POST | ✅ | Fusão multimodal (requer API Key) |
+| `/auth/api-key` | POST | ✅ | Gerar nova API Key (admin) |
+| `/auth/api-key/revoke` | POST | ✅ | Revogar API Key (admin) |
+| `/admin/audit/stats` | GET | ✅ | Estatísticas de auditoria (admin) |
+| `/admin/audit/export` | GET | ✅ | Exportação LGPD (admin) |
+| `/admin/audit/verify` | GET | ✅ | Verificação de integridade (admin) |
 | `/docs` | GET | ✅ | Swagger UI |
+| `/redoc` | GET | ✅ | ReDoc documentation |
 
 ---
 
@@ -136,8 +150,9 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - ✅ Docker + Docker Compose
 - ✅ Multi-stage Dockerfile
 - ✅ Health checks
-- ✅ Rate limiting
-- ⏳ Redis (opcional)
+- ✅ Rate limiting (token bucket)
+- ✅ Segurança OWASP + LGPD
+- ⏳ Redis (opcional - rate limiting distribuído)
 - ⏳ Azure App Service
 
 ---
@@ -148,8 +163,9 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | Tipo | Status | Cobertura |
 |------|--------|-----------|
 | Unitários | ✅ Completo | ~85% |
-| Integração | ✅ Completo | Texto + Áudio + Vídeo |
-| Carga | ⏳ Pendente | - |
+| Integração | ✅ Completo | Texto + Áudio + Vídeo + Multimodal + Auth |
+| Segurança | ✅ Completo | 87 tasks (Spec 007) |
+| Carga | ⏳ Pendente | Locust (opcional) |
 
 ### Linting
 | Ferramenta | Status |
@@ -170,27 +186,21 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ## 🚀 Próximos Passos Recomendados
 
 ### Prioridade Alta (P1)
-1. **Spec 005 - Fusão Multimodal**
-   - Endpoint `/analyze/video` ✅ implementado (YOLOv8 local)
-   - Implementar algoritmo de fusão das 3 modalidades
-   - Implementar endpoint `/analyze/multimodal`
-   - Criar algoritmo de fusão de scores
-
-### Prioridade Média (P2)
-2. **Spec 007 - Security Hardening**
-   - Executar security audit
-   - Corrigir vulnerabilidades
-
-3. **Spec 009 - Deploy Azure**
+1. **Spec 009 - Deploy Azure**
    - Configurar App Service
    - CI/CD pipeline
+   - Domínio customizado
 
-### Prioridade Baixa (P3)
-4. **Spec 008 - Testes**
-   - Testes de carga com Locust (opcional)
-
-5. **Spec 010 - Documentação**
+2. **Spec 010 - Documentação Final**
    - Criar vídeo demonstrativo (YouTube)
+   - API Guide completo
+
+### Prioridade Baixa (P2)
+3. **Testes de Carga (Opcional)**
+   - Testes com Locust para validar rate limiting
+
+4. **Redis para Rate Limiting (Opcional)**
+   - Backend distribuído para rate limiting em produção
 
 ---
 
@@ -234,4 +244,4 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ---
 
 **Grupo 27 - FIAP/Alura AI para Devs**  
-*Última atualização: 2026-04-20*
+*Última atualização: 2026-04-25*
