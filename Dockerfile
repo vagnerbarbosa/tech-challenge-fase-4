@@ -31,6 +31,14 @@ COPY pyproject.toml ./
 RUN poetry install --no-root --without dev
 
 # -------------------------------------------
+# Stage 1.5: Test (com dependências de dev)
+# -------------------------------------------
+FROM builder AS test
+
+# Instalar dependências de desenvolvimento também
+RUN poetry install --no-root --with dev
+
+# -------------------------------------------
 # Stage 2: Runtime (imagem final)
 # -------------------------------------------
 FROM python:3.11-slim AS runtime

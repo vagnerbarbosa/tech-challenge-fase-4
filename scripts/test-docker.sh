@@ -106,9 +106,10 @@ run_unit_tests() {
     docker run --rm \
         -v "$(pwd)/src:/app/src:ro" \
         -v "$(pwd)/tests:/app/tests:ro" \
+        -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        poetry run pytest tests/unit/ -v
+        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/unit/ -v"
 }
 
 # Função para executar testes com cobertura
@@ -118,9 +119,10 @@ run_coverage() {
     docker run --rm \
         -v "$(pwd)/src:/app/src:ro" \
         -v "$(pwd)/tests:/app/tests:ro" \
+        -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        poetry run pytest tests/unit/ -v --cov=src --cov-report=term
+        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/unit/ -v --cov=src --cov-report=term"
 }
 
 # Função para executar testes de integração
@@ -131,9 +133,10 @@ run_integration_tests() {
     docker run --rm --network=host \
         -v "$(pwd)/src:/app/src:ro" \
         -v "$(pwd)/tests:/app/tests:ro" \
+        -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        poetry run pytest tests/integration/ -v
+        bash -c "poetry install --with dev --no-interaction --no-root && poetry run pytest tests/integration/ -v"
 }
 
 # Função para executar linting
@@ -145,7 +148,7 @@ run_lint() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        poetry run ruff check src/
+        bash -c "poetry install --with dev --no-interaction --no-root && poetry run ruff check src/"
     echo -e "${GREEN}✅ Linting passou!${NC}"
 }
 
@@ -158,7 +161,7 @@ run_typecheck() {
         -v "$(pwd)/pyproject.toml:/app/pyproject.toml:ro" \
         -w /app \
         "$IMAGE_NAME:latest" \
-        poetry run mypy src/
+        bash -c "poetry install --with dev --no-interaction --no-root && poetry run mypy src/"
     echo -e "${GREEN}✅ Type checking passou!${NC}"
 }
 
