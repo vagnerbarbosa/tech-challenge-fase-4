@@ -258,14 +258,11 @@ poetry run mypy src/services/audio_analysis.py
 
 ### Comandos para Executar
 ```bash
-# Build imagem de teste
-docker build -f Dockerfile.test -t health-api-test:latest .
-
-# Executar todos os testes
-docker run --rm health-api-test:latest poetry run pytest tests/unit/ -v --cov=src
+# Executar todos os testes (reutiliza imagem existente da API)
+./scripts/test-docker.sh coverage
 
 # Executar linting
-docker run --rm health-api-test:latest poetry run ruff check src/
+./scripts/test-docker.sh lint
 
 # Executar type check
 docker run --rm health-api-test:latest poetry run mypy src/

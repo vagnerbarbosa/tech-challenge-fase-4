@@ -353,43 +353,36 @@ Os testes deste projeto **dependem de bibliotecas nativas complexas** (especialm
 > ./scripts/test-docker.sh help
 > ```
 
-#### Passo 1: Build da Imagem de Teste
+#### Executar Testes Unitários
 
 ```bash
-# Build da imagem Docker específica para testes
-docker build -f Dockerfile.test -t health-api-test:latest .
-
-# Ou use o script que faz build automaticamente:
-# ./scripts/test-docker.sh build
-```
-
-#### Passo 2: Executar Testes Unitários
-
-```bash
-# Executar todos os testes unitários
-docker run --rm health-api-test:latest \
-  poetry run pytest tests/unit/ -v
-
-# Executar testes específicos do módulo de áudio
-docker run --rm health-api-test:latest \
-  poetry run pytest tests/unit/services/test_audio_analysis.py -v
+# Executar todos os testes unitários (reutiliza imagem existente)
+./scripts/test-docker.sh unit
 
 # Executar testes com cobertura
-docker run --rm health-api-test:latest \
-  poetry run pytest tests/unit/ -v --cov=src --cov-report=term
+./scripts/test-docker.sh coverage
+
+# Executar testes específicos do módulo de áudio
+docker run --rm \
+  -v "$(pwd)/src:/app/src:ro" \
+  -v "$(pwd)/tests:/app/tests:ro" \
+  -w /app \
+  tech-challenge-fase-4-api:latest \
+  poetry run pytest tests/unit/services/test_audio_analysis.py -v
 ```
 
-#### Passo 3: Executar Linting e Type Check
+#### Executar Linting e Type Check
 
 ```bash
-# Ruff linting
-docker run --rm health-api-test:latest \
-  poetry run ruff check src/
+# Ruff linting + mypy type checking + testes
+./scripts/test-docker.sh all
 
-# mypy type checking
-docker run --rm health-api-test:latest \
-  poetry run mypy src/services/audio_analysis.py
+# Ou individualmente:
+./scripts/test-docker.sh lint
+./scripts/test-docker.sh typecheck
 ```
+
+> **Nota sobre a imagem**: O script reutiliza automaticamente a imagem `tech-challenge-fase-4-api` (a mesma da API), economizando ~20GB de espaço. Se a imagem não existir, ela será buildada automaticamente via `run-mock.sh`. Use `./scripts/test-docker.sh rebuild` quando adicionar novos testes ou dependências.
 
 #### Passo 4: Testes de Integração (requer API rodando)
 
@@ -789,8 +782,7 @@ O sistema implementa uma **estratégia de hard stop** que garante **zero custos*
 
 ```bash
 # Build e execução completa
-docker build -f Dockerfile.test -t health-api-test:latest . && \
-docker run --rm health-api-test:latest poetry run pytest tests/unit/ -v --cov=src
+./scripts/test-docker.sh coverage  # Reutiliza imagem existente (economiza ~20GB)
 ```
 
 ### Comandos Locais (sem Docker)
@@ -966,7 +958,7 @@ tech-challenge-fase-4/
 ├── docker-compose.yml
 ├── docker-compose.mock.yml
 ├── Dockerfile                # Multi-stage production
-├── Dockerfile.test           # ⚠️ Imagem para testes - USE ESTE PARA TESTES
+├── scripts/test-docker.sh    # Script para testes (reutiliza imagem da API, economiza ~20GB)
 └── README.md
 ```
 
