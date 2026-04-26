@@ -109,25 +109,19 @@ def main():
     # Registra no arquivo
     registered_id = register_key(api_key, args.description)
 
-    # Output
-    if args.quiet:
-        # Saída completa apenas com --quiet (uso em scripts/automação)
-        print(api_key)
-    else:
-        # Saída padrão: chave mascarada por segurança
-        masked_key = f"{api_key[:8]}...{api_key[-8:]}"
-        print("=" * 70)
-        print("API Key gerada e registrada com sucesso!")
-        print("=" * 70)
-        print(f"\nChave:     {masked_key}  (use --quiet para ver completa)")
-        print(f"Key ID:    {registered_id}")
-        print(f"Arquivo:   {STORAGE_PATH.absolute()}")
-        if args.description:
-            print(f"Descrição: {args.description}")
-        print("\n" + "=" * 70)
-        print("⚠️  ATENÇÃO: Guarde esta chave em local seguro!")
-        print("    Use --quiet para capturar a chave completa se necessário.")
-        print("=" * 70)
+    # Output - Nunca exibe a chave completa no stdout (segurança CodeQL)
+    print("=" * 70)
+    print("API Key gerada e registrada com sucesso!")
+    print("=" * 70)
+    print(f"\nKey ID:    {registered_id}")
+    print(f"Arquivo:   {STORAGE_PATH.absolute()}")
+    if args.description:
+        print(f"Descrição: {args.description}")
+    print("\n" + "=" * 70)
+    print("⚠️  ATENÇÃO: A chave está armazenada no arquivo acima.")
+    print("    Leia o arquivo diretamente com: sudo cat", STORAGE_PATH.absolute())
+    print("    Arquivo tem permissão 0o600 (apenas owner).")
+    print("=" * 70)
 
     return 0
 
