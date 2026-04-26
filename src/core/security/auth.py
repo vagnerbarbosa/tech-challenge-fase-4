@@ -20,10 +20,11 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from structlog import get_logger
+
 from src.core.config import SecurityConfig
 from src.core.exceptions import AuthenticationException, ForbiddenException
 from src.core.security.models import SecurityContext
-from structlog import get_logger
 
 logger = get_logger(__name__)
 
