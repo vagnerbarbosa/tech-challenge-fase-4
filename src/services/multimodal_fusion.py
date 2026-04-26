@@ -30,7 +30,7 @@ from src.services.video_analysis import VideoAnalysisService
 
 logger = get_logger()
 
-DEFAULT_TIMEOUT_SECONDS = int(os.getenv("MULTIMODAL_TIMEOUT_SECONDS", "30"))
+DEFAULT_TIMEOUT_SECONDS = int(os.getenv("MULTIMODAL_TIMEOUT_SECONDS", "60"))
 
 
 @dataclass

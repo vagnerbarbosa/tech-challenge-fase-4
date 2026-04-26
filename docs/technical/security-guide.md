@@ -102,7 +102,7 @@ O endpoint `POST /admin/api-keys` é **automaticamente BLOQUEADO em produção**
 | Ambiente | Método | Comando |
 |----------|--------|---------|
 | Desenvolvimento | Swagger UI | `POST /admin/api-keys` com header `X-Admin-Key: admin-secret-key` |
-| Produção | Python inline | `python -c "import secrets; print('ak_' + secrets.token_hex(32))"` |
+| Produção | Endpoint admin | Via Docker volume ou acesso ao container com `POST /admin/api-keys` |
 
 **Exemplo em Desenvolvimento (via Swagger):**
 ```bash
@@ -120,21 +120,47 @@ curl -X POST \
   http://localhost:8000/analyze/text
 ```
 
+**Gerando Chaves em Produção:**
+
+Como o endpoint `/admin/api-keys` pode estar bloqueado em produção, use o seguinte fluxo:
+
+```bash
+# Acesse o container em execução
+docker exec -it health-api /bin/bash
+
+# Dentro do container, gere a chave via Python
+cd /app && python3 -c "
+import secrets
+import json
+from datetime import UTC, datetime
+
+api_key = 'ak_' + secrets.token_hex(32)
+key_id = secrets.token_hex(32)[:16]
+
+with open('data/generated_api_keys.json', 'r') as f:
+    keys = json.load(f)
+
+keys[key_id] = {
+    'api_key': api_key,
+    'description': 'Cliente XYZ',
+    'created_at': datetime.now(UTC).isoformat()
+}
+
+with open('data/generated_api_keys.json', 'w') as f:
+    json.dump(keys, f, indent=2)
+
+print(f'Key ID: {key_id}')
+print(f'Arquivo atualizado: data/generated_api_keys.json')
+"
+```
+
 **Storage de Chaves:**
 - Chaves geradas são armazenadas em `data/generated_api_keys.json`
 - Arquivo tem permissões restritas (0o600 - apenas owner)
 - Sistema valida tanto a chave master (`SECURITY_API_KEY`) quanto as geradas
+- **Requer permissões de root/container** para escrita no arquivo
 
-**Exemplo em Produção:**
-```bash
-# Gerar key via Python (não armazena em arquivo ou logs)
-python3 -c "import secrets; print('ak_' + secrets.token_hex(32))"
-
-# Saída (copie imediatamente):
-# ak_a1b2c3d4e5f6...
-```
-
-**⚠️ Atenção:** A chave é exibida uma única vez. Guarde-a imediatamente em um vault seguro (AWS Secrets Manager, Azure Key Vault, etc).
+**⚠️ Atenção:** A chave é exibida uma única vez durante a geração. Guarde-a imediatamente em um vault seguro (AWS Secrets Manager, Azure Key Vault, etc).
 
 **Por que bloquear em produção?**
 - Previne brute force no endpoint admin

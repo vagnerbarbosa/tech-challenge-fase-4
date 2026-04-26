@@ -103,7 +103,7 @@ def _generate_api_key() -> tuple[str, str]:
     description="""Gera uma nova API key para cliente/usuário. A chave só é exibida uma vez.
 
     ⚠️ SECURITY WARNING: Este endpoint é automaticamente DESABILITADO em produção.
-    Para gerar keys em produção, use o script CLI: `python scripts/generate-api-key.py`
+    Para gerar keys em produção, use: python -c "import secrets; print('ak_' + secrets.token_hex(32))"
     """,
     responses={
         201: {
@@ -130,7 +130,7 @@ async def generate_api_key(
     Em produção, armazene apenas o hash da chave.
 
     ⚠️ SECURITY: Este endpoint é automaticamente bloqueado em produção.
-    Use o script CLI `scripts/generate-api-key.py` para gerar keys em produção.
+    Para gerar keys em produção: python -c "import secrets; print('ak_' + secrets.token_hex(32))"
 
     Args:
         request: Objeto de requisição FastAPI
@@ -146,7 +146,7 @@ async def generate_api_key(
     """
     # 🔒 BLOQUEIO DE SEGURANÇA: Endpoint desabilitado em produção
     # Motivo: Evitar exposição de geração de keys via HTTP
-    # Alternativa: Use o script CLI scripts/generate-api-key.py
+    # Alternativa: python -c "import secrets; print('ak_' + secrets.token_hex(32))"
     if settings.environment == "production":
         audit_logger.log(
             event_type=AuditEventType.ADMIN_EXPORT,
@@ -157,13 +157,13 @@ async def generate_api_key(
             details={
                 "reason": "Endpoint disabled in production",
                 "description": description,
-                "suggestion": "Use CLI script: python scripts/generate-api-key.py",
+                "suggestion": "Use: python -c \"import secrets; print('ak_' + secrets.token_hex(32))\"",
             },
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="API key generation via HTTP is disabled in production. "
-                   "Use the CLI script: python scripts/generate-api-key.py",
+                   "Use: python -c \"import secrets; print('ak_' + secrets.token_hex(32))\"",
         )
 
     try:
@@ -224,10 +224,10 @@ async def list_api_keys(
     _: Annotated[bool, Depends(verify_admin_access)],
     audit_logger: Annotated[AuditLogger, Depends(get_audit_logger)],
 ) -> APIKeyListResponse:
-    """Lista API keys cadastradas (método placeholder).
+    """Lista API keys cadastradas (master + geradas).
 
-    Em uma implementação completa, isso consultaria um banco de dados
-    de chaves. Por enquanto, retorna apenas a chave master configurada.
+    Retorna a chave master configurada no ambiente e todas as chaves
+    geradas via POST /admin/api-keys.
 
     Args:
         request: Objeto de requisição FastAPI
@@ -237,6 +237,8 @@ async def list_api_keys(
     Returns:
         Lista de API keys
     """
+    from src.core.security.auth import GeneratedAPIKeyStore
+
     # Loga o acesso
     audit_logger.log(
         event_type=AuditEventType.DATA_ACCESS,
@@ -247,20 +249,40 @@ async def list_api_keys(
         details={"message": "Listed API keys"},
     )
 
-    # Retorna apenas a chave master configurada (máscara)
+    keys = []
+
+    # Chave master configurada no ambiente
     master_key = settings.security_config.api_key
-    masked_key = master_key[:8] + "..." + master_key[-4:] if master_key else "N/A"
+    if master_key:
+        masked_key = master_key[:8] + "..." + master_key[-4:] if len(master_key) > 12 else "***"
+        # ⚠️ Warning em produção: master key não deve ser usada por clientes
+        if settings.environment == "production":
+            description = "⚠️ MASTER KEY - Nao usar em clientes/aplicacoes. Use chaves geradas por cliente"
+        else:
+            description = "Master API Key (environment)"
+        keys.append({
+            "key_id": "master",
+            "description": description,
+            "masked": masked_key,
+            "type": "environment",
+        })
+
+    # Chaves geradas via /admin/api-keys
+    key_store = GeneratedAPIKeyStore()
+    generated_keys = key_store._load_keys()
+    for key_id, key_data in generated_keys.items():
+        api_key = key_data.get("api_key", "")
+        masked = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+        keys.append({
+            "key_id": key_id,
+            "description": key_data.get("description") or "Generated key",
+            "masked": masked,
+            "type": "generated",
+        })
 
     return APIKeyListResponse(
-        keys=[
-            {
-                "key_id": "master",
-                "description": "Master API Key (environment)",
-                "masked": masked_key,
-                "type": "environment",
-            }
-        ],
-        total=1,
+        keys=keys,
+        total=len(keys),
     )
 
 

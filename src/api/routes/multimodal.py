@@ -4,6 +4,7 @@ Endpoint para processamento simultâneo de texto, áudio e vídeo,
 combinando resultados via late fusion ponderado por confiança.
 """
 
+import asyncio
 import tempfile
 from pathlib import Path
 
@@ -95,6 +96,9 @@ async def analyze_multimodal(
         has_video=video is not None,
     )
 
+    # Timeout global para análise multimodal (90s = 60s processamento + margem)
+    request_timeout_seconds = 90
+
     # Validação: pelo menos uma modalidade
     if texto is None and audio is None and video is None:
         logger.warning(
@@ -152,12 +156,14 @@ async def analyze_multimodal(
 
     try:
         service = get_fusion_service()
-        response = await service.analyze(
-            texto=texto,
-            audio=audio,
-            video=video,
-            patient_id=patient_id,
-        )
+        # Timeout global para evitar requisições travadas (ex: vídeos muito grandes)
+        async with asyncio.timeout(request_timeout_seconds):
+            response = await service.analyze(
+                texto=texto,
+                audio=audio,
+                video=video,
+                patient_id=patient_id,
+            )
 
         # Atualizar correlation_id no metadata
         response.metadata.correlation_id = correlation_id
@@ -215,6 +221,36 @@ async def analyze_multimodal(
             details={"modalities": modalities},
         )
         raise
+    except TimeoutError:
+        # Log timeout
+        modalities = []
+        if texto:
+            modalities.append("text")
+        if audio:
+            modalities.append("audio")
+        if video:
+            modalities.append("video")
+
+        audit = get_audit_logger()
+        audit.log(
+            event_type=AuditEventType.ANALYSIS_CREATED,
+            correlation_id=correlation_id,
+            action="POST /analyze/multimodal",
+            resource="/analyze/multimodal",
+            result="error",
+            patient_id=patient_id,
+            details={"error": "timeout", "modalities": modalities},
+        )
+        logger.error(
+            "multimodal_timeout",
+            correlation_id=correlation_id,
+            timeout_seconds=request_timeout_seconds,
+        )
+        raise HTTPException(
+            status_code=504,
+            detail=f"Análise excedeu o tempo limite de {request_timeout_seconds}s. "
+                   "Tente com um vídeo menor ou menos modalidades.",
+        ) from None
     except Exception as e:
         # Log failed analysis
         modalities = []

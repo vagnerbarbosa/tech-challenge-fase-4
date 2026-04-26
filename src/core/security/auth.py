@@ -20,9 +20,13 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from structlog import get_logger
+
 from src.core.config import SecurityConfig
 from src.core.exceptions import AuthenticationException, ForbiddenException
 from src.core.security.models import SecurityContext
+
+logger = get_logger(__name__)
 
 
 class GeneratedAPIKeyStore:
@@ -145,6 +149,12 @@ class APIKeyValidator:
 
         # Check master API key (constant-time comparison)
         if secrets.compare_digest(key, self.config.api_key):
+            # ⚠️ Warning: Master key em produção deve ser evitada
+            if getattr(self.config, 'environment', None) == "production":
+                logger.warning(
+                    "master_key_used_in_production",
+                    message="Master API key usada em producao. Recomendado: usar chaves geradas por cliente",
+                )
             return True
 
         # Check generated API keys

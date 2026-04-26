@@ -75,26 +75,6 @@
             "description": "Valida se a API Key está funcionando"
           },
           "response": []
-        },
-        {
-          "name": "Rate Limit Status",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-API-Key",
-                "value": "{{api_key}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/auth/rate-limit-status",
-              "host": ["{{base_url}}"],
-              "path": ["auth", "rate-limit-status"]
-            },
-            "description": "Verifica o status do rate limit do client"
-          },
-          "response": []
         }
       ]
     },

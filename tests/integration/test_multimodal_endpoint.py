@@ -5,6 +5,7 @@ o app FastAPI diretamente, sem necessidade de servidor rodando.
 """
 
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient
@@ -106,3 +107,21 @@ async def test_latencia_15s(async_client: AsyncClient) -> None:
     elapsed = time.perf_counter() - start
     assert response.status_code == 200
     assert elapsed < 15.0, f"Latência {elapsed:.2f}s excedeu 15s"
+
+
+@pytest.mark.asyncio
+async def test_endpoint_timeout(async_client: AsyncClient) -> None:
+    """T0XX: Simula timeout do serviço de fusão -> 504."""
+    with patch("src.api.routes.multimodal.get_fusion_service") as mock_get_service:
+        mock_service = AsyncMock()
+        # Simula TimeoutError (builtin) lançado pelo asyncio.timeout
+        mock_service.analyze = AsyncMock(side_effect=TimeoutError)
+        mock_get_service.return_value = mock_service
+
+        response = await async_client.post(
+            "/analyze/multimodal",
+            data={"texto": "Texto de teste para timeout"},
+        )
+        assert response.status_code == 504
+        body = response.json()
+        assert "timeout" in body["detail"].lower() or "504" in str(response.status_code)

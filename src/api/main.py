@@ -21,6 +21,7 @@ from src.api.middleware.rate_limit import (
     AuthRateLimitMiddleware,
     RateLimitMiddleware,
 )
+from src.api.middleware.request_timeout import RequestTimeoutMiddleware
 from src.api.routes import admin, audio, auth, health, multimodal, text, video
 from src.core.config import settings
 from src.core.exceptions import (
@@ -147,6 +148,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configura Request Timeout (deve ser adicionado antes de outros middlewares)
+# Timeout global: 5 min default, 10 min para uploads
+app.add_middleware(RequestTimeoutMiddleware)
+logger.info("request_timeout_middleware_configured")
+
 # Configura CORS
 configure_cors(app)
 
@@ -182,7 +188,7 @@ if settings.security_config.rate_limit_per_minute > 0:
     # Auth-specific rate limiting middleware (5 req/min)
     app.add_middleware(
         AuthRateLimitMiddleware,
-        protected_paths=["/auth", "/login", "/token", "/api-key"],
+        protected_paths=["/auth", "/login", "/api-key"],
     )
 
     logger.info(

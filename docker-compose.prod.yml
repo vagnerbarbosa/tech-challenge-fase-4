@@ -45,7 +45,6 @@ services:
       - MAX_VISION_REQUESTS_PER_DAY=160
       # Security (Spec 007 - Obrigatório em produção)
       - SECRET_KEY=${SECRET_KEY}
-      - API_KEY=${API_KEY}
       - API_KEY_HEADER=X-API-Key
       - SECURITY_API_KEY=${SECURITY_API_KEY}
       - SECURITY_ENVIRONMENT=production
@@ -57,7 +56,17 @@ services:
       - AUDIT_LOG_RETENTION_DAYS=90
       - AUDIT_LOG_MAX_SIZE_MB=100
       # Multimodal
-      - MULTIMODAL_TIMEOUT_SECONDS=30
+      - MULTIMODAL_TIMEOUT_SECONDS=60
+      # Request Timeout
+      - REQUEST_TIMEOUT_SECONDS=300
+      - UPLOAD_TIMEOUT_SECONDS=600
+      # Upload Size Limits (Middleware) - Azure Free Tier Protection
+      # Audio: 10MB max (~5-10 min) to protect 10 min/day Azure quota
+      - MAX_AUDIO_SIZE_MB=10
+      - MAX_AUDIO_DURATION_SECONDS=300
+      # Video: Local processing (YOLOv8), 2 min max for analysis quality
+      - MAX_VIDEO_SIZE_MB=50
+      - MAX_VIDEO_DURATION_SECONDS=120
       # LGPD Compliance
       - ANONYMIZE_PII=true
       - CONSENT_REQUIRED=true
