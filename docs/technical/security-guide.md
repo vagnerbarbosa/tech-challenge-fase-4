@@ -154,6 +154,16 @@ print(f'Arquivo atualizado: data/generated_api_keys.json')
 "
 ```
 
+**Visualizando API Keys Geradas:**
+
+As chaves geradas são salvas no arquivo `data/generated_api_keys.json`. Para visualizar:
+
+1. Acesse o container: `docker exec -it <nome-container> /bin/bash`
+2. Abra o arquivo com um editor: `nano data/generated_api_keys.json` ou visualize com `cat`
+3. Procure pelo campo `api_key` no JSON
+
+> **⚠️ Nota de Segurança:** Este arquivo contém credenciais. Não o commite no git.
+
 **Storage de Chaves:**
 - Chaves geradas são armazenadas em `data/generated_api_keys.json`
 - Arquivo tem permissões restritas (0o600 - apenas owner)
