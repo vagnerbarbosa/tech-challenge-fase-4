@@ -187,7 +187,6 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         self.protected_paths = protected_paths or [
             "/auth",
             "/login",
-            "/token",
             "/api-key",
         ]
 

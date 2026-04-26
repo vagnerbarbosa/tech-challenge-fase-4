@@ -188,7 +188,7 @@ if settings.security_config.rate_limit_per_minute > 0:
     # Auth-specific rate limiting middleware (5 req/min)
     app.add_middleware(
         AuthRateLimitMiddleware,
-        protected_paths=["/auth", "/login", "/token", "/api-key"],
+        protected_paths=["/auth", "/login", "/api-key"],
     )
 
     logger.info(

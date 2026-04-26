@@ -115,43 +115,6 @@ async def validate_api_key(
     }
 
 
-@router.post("/token", status_code=status.HTTP_200_OK)
-async def get_token(
-    request: Request,
-    x_api_key: str = Header(..., alias="X-API-Key"),
-) -> dict[str, Any]:
-    """Get authentication token with rate limiting.
-
-    Rate limited to 5 requests per minute per IP.
-
-    Args:
-        request: FastAPI request
-        x_api_key: API key for authentication
-
-    Returns:
-        Token response
-
-    Raises:
-        RateLimitExceeded: If too many attempts
-        AuthenticationException: If API key is invalid
-    """
-    identifier = await get_client_identifier(request)
-
-    # Check rate limit
-    _, rate_info = await check_limiter(identifier, "auth")
-
-    # Validate API key
-    if x_api_key != settings.security_config.api_key:
-        raise AuthenticationException(message="Invalid API key")
-
-    return {
-        "token": "mock-jwt-token",  # TODO: Implement JWT
-        "type": "Bearer",
-        "expires_in": 3600,
-        "rate_limit_remaining": rate_info.get("remaining", 0),
-    }
-
-
 @router.get("/rate-limit-status")
 async def get_auth_rate_limit_status(request: Request) -> dict[str, Any]:
     """Get current rate limit status for auth endpoints.
