@@ -5,11 +5,29 @@ rate limiting e configurações de segurança. Usa Pydantic Settings para valida
 e carregamento de variáveis de ambiente.
 """
 
+import os
 from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, ValidationInfo, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def is_running_in_azure() -> bool:
+    """Detecta se a aplicação está rodando no Azure App Service.
+
+    Verifica a presença de variáveis de ambiente específicas do Azure.
+
+    Returns:
+        True se estiver no Azure App Service, False caso contrário.
+    """
+    # WEBSITE_SITE_NAME é definida automaticamente no Azure App Service
+    # WEBSITE_INSTANCE_ID também indica App Service
+    return bool(
+        os.environ.get("WEBSITE_SITE_NAME")
+        or os.environ.get("WEBSITE_INSTANCE_ID")
+        or os.environ.get("WEBSITE_RESOURCE_GROUP")
+    )
 
 
 def _get_package_version() -> str:
@@ -377,6 +395,15 @@ class Settings(BaseSettings):
     def max_upload_size_bytes(self) -> int:
         """Retorna tamanho máximo de upload em bytes."""
         return self.max_upload_size_mb * 1024 * 1024
+
+    @property
+    def is_azure(self) -> bool:
+        """Detecta se está rodando no Azure App Service.
+
+        Returns:
+            True se estiver no Azure, False caso contrário.
+        """
+        return is_running_in_azure()
 
     @property
     def allowed_image_extensions_list(self) -> list[str]:

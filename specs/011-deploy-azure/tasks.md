@@ -89,11 +89,11 @@
 **Independent Test**: Aplicação não expõe stack traces em erros 500
 
 ### Implementation
-- [ ] T028 [P] Atualizar `src/core/config.py` - detectar ambiente Azure
-- [ ] T029 [P] Configurar logs estruturados para App Service Logs (não Azure Monitor)
-- [ ] T030 Implementar error handling genérico para produção (não expõe stack)
-- [ ] T031 [P] Desabilitar reload do uvicorn em produção
-- [ ] T032 Configurar log level INFO para produção
+- [X] T028 [P] Atualizar `src/core/config.py` - detectar ambiente Azure
+- [X] T029 [P] Configurar logs estruturados para App Service Logs (já em JSON no main.py)
+- [X] T030 Implementar error handling genérico para produção (já implementado em main.py)
+- [X] T031 [P] Desabilitar reload do uvicorn em produção (Dockerfile já sem reload)
+- [X] T032 Configurar log level INFO para produção
 - [ ] T033 Verificar que `/docs` está acessível via HTTPS
 - [ ] T034 Testar endpoint de análise com API key válida
 
