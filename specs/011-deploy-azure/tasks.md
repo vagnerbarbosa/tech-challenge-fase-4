@@ -108,14 +108,14 @@
 **Independent Test**: Push na main dispara deploy automático
 
 ### Implementation
-- [ ] T035 [P] Criar workflow `.github/workflows/deploy-azure.yml`
+- [X] T035 [P] Criar workflow `.github/workflows/deploy-azure.yml`
 - [ ] T036 [P] Configurar job de testes no workflow
 - [ ] T037 [P] Configurar build e push Docker image para ghcr.io
 - [ ] T038 Configurar job de deploy para Azure App Service
 - [ ] T039 Implementar verificação de health check após deploy
 - [ ] T040 Configurar rollback automático via GitHub Actions se health check falhar
-- [ ] T041 [P] Adicionar notificação de falha no workflow
-- [ ] T042 Testar pipeline completo com push na main
+- [X] T041 [P] Adicionar notificação de falha no workflow (via job rollback)
+- [ ] T042 Testar pipeline completo com push na main (requer merge)
 
 **Checkpoint**: US2 funcional - Push na main dispara deploy com rollback automático se health check falhar
 
@@ -125,7 +125,7 @@
 
 **Purpose**: Documentação e validação final
 
-- [ ] T043 [P] Criar `quickstart.md` com passo a passo do deploy manual
+- [X] T043 [P] Criar `quickstart.md` com passo a passo do deploy manual
 - [ ] T044 [P] Atualizar `README.md` com seção Deploy Azure
 - [ ] T045 [P] Documentar variáveis de ambiente necessárias no Azure
 - [ ] T046 Validar quickstart.md seguindo passo a passo
