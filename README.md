@@ -7,6 +7,7 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Spec Kit](https://img.shields.io/badge/Spec%20Kit-SDD-2ea44f?style=flat-square)](https://github.com/github/spec-kit)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-ff6b35?style=flat-square&logo=anthropic&logoColor=white)](https://claude.ai/code)
 
 **Análise multimodal de saúde da mulher usando Azure AI Services e YOLOv8 local**
 
