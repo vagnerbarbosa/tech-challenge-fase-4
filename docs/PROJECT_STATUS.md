@@ -1,6 +1,6 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-04-25  
+**Atualizado**: 2026-04-29  
 **Versão**: 0.6.0  
 **Branch**: `main`
 
@@ -10,10 +10,10 @@
 
 Sistema multimodal para identificação de sinais de violência doméstica e riscos à saúde materna através da análise de texto, áudio e vídeo.
 
-### Progresso Total: **85%**
+### Progresso Total: **90%**
 
 ```
-[█████████████████░░░] 85%
+[██████████████████░░] 90%
 ```
 
 ---
@@ -95,10 +95,15 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## ⏳ Módulos Pendentes
 
-### 9. Deploy Azure (Spec 009) ⏳ 0%
-- [ ] Configuração App Service
-- [ ] CI/CD Pipeline
-- [ ] Domínio customizado
+### 9. Deploy Azure (Spec 011) ✅ 100%
+- [x] Azure AI Services criados (Text, Speech, Vision)
+- [x] Azure Container Instances criado e funcionando
+- [x] CI/CD Pipeline configurado (GitHub Actions)
+- [x] Health check passando
+- [x] Collection/Environment atualizados
+- [ ] Domínio customizado (opcional - futuro)
+
+**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.226.196.195:8000
 
 ### 10. Documentação Final (Spec 010) ⏳ 0%
 - [ ] Vídeo demonstrativo
