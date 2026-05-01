@@ -269,6 +269,40 @@ Cobertura:
 
 ---
 
+## Provisionamento
+
+O Azure AI Content Safety é provisionado **automaticamente junto com os outros serviços cognitivos** (Text, Speech, Vision). Não requer passos adicionais manuais.
+
+### Scripts de Provisionamento
+
+**check-azure.sh** - Deploy manual:
+```bash
+./scripts/check-azure.sh deploy
+# Cria: Text, Speech, Vision, Content Safety
+```
+
+**deploy-azure.yml** - CI/CD Pipeline:
+- Trigger em push para main
+- Cria todos os serviços cognitivos automaticamente
+- Configura variáveis de ambiente no container
+
+### Recursos Criados
+
+| Recurso | Tipo | SKU |
+|---------|------|-----|
+| tech-challenge-text | TextAnalytics | F0 (Free) |
+| tech-challenge-speech | SpeechServices | F0 (Free) |
+| tech-challenge-vision | ComputerVision | F0 (Free) |
+| **tech-challenge-content-safety** | **ContentSafety** | **F0 (Free)** |
+
+### Variáveis Configuradas Automaticamente
+
+- `AZURE_CONTENT_SAFETY_ENDPOINT`
+- `AZURE_CONTENT_SAFETY_KEY`
+- `CONTENT_SAFETY_ENABLED=true`
+
+---
+
 ## Changelog
 
 ### 2026-05-01 - Implementação Concluída
@@ -278,6 +312,7 @@ Cobertura:
 - ✅ Testes unitários completos
 - ✅ Configuração via env vars
 - ✅ Integração com sistema existente
+- ✅ Provisionamento integrado aos scripts existentes
 
 ---
 
