@@ -116,7 +116,6 @@ jobs:
           cache-to: |
             type=gha,mode=max
             type=local,dest=/tmp/.buildx-cache-new,mode=max
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true
 
       - name: Mover cache
         run: |
