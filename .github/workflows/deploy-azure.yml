@@ -10,7 +10,6 @@ on:
       - 'docker-compose.yml'
       - 'pyproject.toml'
       - 'poetry.lock'
-      - 'entrypoint.sh'
       - '.github/workflows/deploy-azure.yml'
   workflow_dispatch:  # Permite execução manual
 
@@ -19,6 +18,7 @@ permissions:
   packages: write  # Necessário para push no ghcr.io
 
 env:
+  AZURE_WEBAPP_NAME: tech-challenge-api-grupo-27
   AZURE_RESOURCE_GROUP: rg-tech-challenge-fase4
   REGISTRY: ghcr.io
   IMAGE_NAME: vagnerbarbosa/tech-challenge-fase4
@@ -81,6 +81,7 @@ jobs:
   build:
     name: Build e Push Docker Image
     runs-on: ubuntu-latest
+    needs: [test]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     outputs:
@@ -127,12 +128,10 @@ jobs:
           platforms: linux/amd64
 
   deploy:
-    name: Deploy para Azure Container Instances
+    name: Deploy para Azure
     runs-on: ubuntu-latest
     needs: [build]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    outputs:
-      container_ip: ${{ steps.deploy.outputs.container_ip }}
 
     steps:
       - name: Login na Azure
@@ -140,104 +139,31 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Criar Resource Group (se não existir)
+      - name: Configurar imagem no App Service
         run: |
-          az group create \
-            --name ${{ env.AZURE_RESOURCE_GROUP }} \
-            --location brazilsouth \
-            --tags "project=tech-challenge" "environment=production" || true
-
-      - name: Criar Azure AI Services
-        run: |
-          # Text Analytics
-          az cognitiveservices account create \
-            --name tech-challenge-text \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --location brazilsouth \
-            --kind TextAnalytics \
-            --sku F0 || true
-
-          # Speech Service
-          az cognitiveservices account create \
-            --name tech-challenge-speech \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --location brazilsouth \
-            --kind SpeechServices \
-            --sku F0 || true
-
-          # Vision Service
-          az cognitiveservices account create \
-            --name tech-challenge-vision \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --location brazilsouth \
-            --kind ComputerVision \
-            --sku F0 || true
-
-      - name: Obter credenciais dos serviços
-        id: credentials
-        run: |
-          TEXT_ENDPOINT=$(az cognitiveservices account show --name tech-challenge-text --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)
-          TEXT_KEY=$(az cognitiveservices account keys list --name tech-challenge-text --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)
-          SPEECH_KEY=$(az cognitiveservices account keys list --name tech-challenge-speech --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)
-          VISION_ENDPOINT=$(az cognitiveservices account show --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)
-          VISION_KEY=$(az cognitiveservices account keys list --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)
-
-          echo "text_endpoint=$TEXT_ENDPOINT" >> $GITHUB_OUTPUT
-          echo "text_key=$TEXT_KEY" >> $GITHUB_OUTPUT
-          echo "speech_key=$SPEECH_KEY" >> $GITHUB_OUTPUT
-          echo "vision_endpoint=$VISION_ENDPOINT" >> $GITHUB_OUTPUT
-          echo "vision_key=$VISION_KEY" >> $GITHUB_OUTPUT
-
-      - name: Deploy Container Instance
-        id: deploy
-        run: |
-          IMAGE_URL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          IMAGE_URL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image_digest }}"
           echo "🚀 Deploying image: $IMAGE_URL"
-
-          # Deletar container existente se houver
-          az container delete \
+          az webapp config container set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name tech-challenge-api \
-            --yes 2>/dev/null || true
+            --container-image-name $IMAGE_URL \
+            --container-registry-url https://${{ env.REGISTRY }}
 
-          # Criar novo container
-          az container create \
+      - name: Configurar startup command
+        run: |
+          az webapp config set \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name tech-challenge-api \
-            --image $IMAGE_URL \
-            --cpu 1 \
-            --memory 2 \
-            --ports 8000 \
-            --ip-address public \
-            --os-type Linux \
-            --location brazilsouth \
-            --environment-variables \
-              ENVIRONMENT=production \
-              LOG_LEVEL=INFO \
-              AZURE_TEXT_ENDPOINT="${{ steps.credentials.outputs.text_endpoint }}" \
-              AZURE_TEXT_KEY="${{ steps.credentials.outputs.text_key }}" \
-              AZURE_SPEECH_KEY="${{ steps.credentials.outputs.speech_key }}" \
-              AZURE_SPEECH_REGION=brazilsouth \
-              AZURE_VISION_ENDPOINT="${{ steps.credentials.outputs.vision_endpoint }}" \
-              AZURE_VISION_KEY="${{ steps.credentials.outputs.vision_key }}" \
-              DATABASE_URL=sqlite:///tmp/app.db \
-              REDIS_ENABLED=false \
-              SECURITY_API_KEY="${{ secrets.API_KEY }}" \
-              SECURITY_ADMIN_KEY="${{ secrets.ADMIN_KEY }}" \
-            --restart-policy OnFailure
+            --startup-file "uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
 
-          # Obter IP do container
-          CONTAINER_IP=$(az container show \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name tech-challenge-api \
-            --query ipAddress.ip \
-            --output tsv)
+      - name: Restart App Service
+        run: |
+          az webapp restart \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
 
-          echo "container_ip=$CONTAINER_IP" >> $GITHUB_OUTPUT
-          echo "✅ Container deployed at: $CONTAINER_IP:8000"
-
-      - name: Aguardar inicialização
-        run: sleep 60
+      - name: Aguardar deploy (30s)
+        run: sleep 30
 
   health-check:
     name: Health Check e Validação
@@ -245,29 +171,13 @@ jobs:
     needs: [deploy]
 
     steps:
-      - name: Login na Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Obter IP do Container
-        id: get_ip
-        run: |
-          CONTAINER_IP=$(az container show \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name tech-challenge-api \
-            --query ipAddress.ip \
-            --output tsv)
-          echo "container_ip=$CONTAINER_IP" >> $GITHUB_OUTPUT
-          echo "🌐 Container IP: $CONTAINER_IP"
-
       - name: Health Check
         id: health
         run: |
           echo "⏳ Aguardando aplicação iniciar..."
-          MAX_RETRIES=15
+          MAX_RETRIES=10
           RETRY_COUNT=0
-          APP_URL="http://${{ steps.get_ip.outputs.container_ip }}:8000/health"
+          APP_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health"
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL" || echo "000")
@@ -277,7 +187,7 @@ jobs:
             fi
             echo "⏳ Tentativa $((RETRY_COUNT + 1))/$MAX_RETRIES - Status: $RESPONSE"
             RETRY_COUNT=$((RETRY_COUNT + 1))
-            sleep 20
+            sleep 15
           done
 
           echo "❌ Health check falhou após $MAX_RETRIES tentativas"
@@ -285,8 +195,8 @@ jobs:
 
       - name: Testar endpoints principais
         run: |
-          BASE_URL="http://${{ steps.get_ip.outputs.container_ip }}:8000"
-          echo "🧪 Testando endpoints em: $BASE_URL"
+          BASE_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          echo "🧪 Testando endpoints..."
 
           # Testar health endpoint
           curl -sSf "$BASE_URL/health" > /dev/null && echo "✅ /health OK" || echo "⚠️ /health não responde"
@@ -294,13 +204,10 @@ jobs:
           # Testar docs endpoint
           curl -sSf "$BASE_URL/docs" > /dev/null && echo "✅ /docs OK" || echo "⚠️ /docs não responde"
 
-          echo ""
           echo "🎉 Deploy validado!"
-          echo "🌐 API URL: $BASE_URL"
-          echo "📚 Docs: $BASE_URL/docs"
 
   rollback:
-    name: Notificar Falha
+    name: Rollback (se necessário)
     runs-on: ubuntu-latest
     needs: [health-check]
     if: failure()
@@ -311,15 +218,28 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Obter logs do container
+      - name: Rollback para versão anterior
         run: |
-          echo "📋 Logs do container:"
-          az container logs \
+          echo "🔄 Iniciando rollback..."
+
+          # Obter imagem anterior
+          PREVIOUS_IMAGE=$(az webapp config container show \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name tech-challenge-api \
-            --lines 50 || echo "Não foi possível obter logs"
+            --query '[0].image' -o tsv 2>/dev/null || echo "")
+
+          if [ -n "$PREVIOUS_IMAGE" ]; then
+            echo "🔄 Revertendo para: $PREVIOUS_IMAGE"
+            az webapp config container set \
+              --name ${{ env.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --container-image-name $PREVIOUS_IMAGE
+          else
+            echo "⚠️ Não foi possível obter imagem anterior"
+          fi
 
       - name: Notificar falha
+        if: failure()
         run: |
-          echo "❌ Deploy falhou"
-          echo "Por favor, verifique os logs acima e no Azure Portal"
+          echo "❌ Deploy falhou e rollback não foi possível"
+          echo "Por favor, verifique manualmente no Azure Portal"
