@@ -509,7 +509,15 @@ Esta seção documenta as motivações para escolha de cada tecnologia principal
 
 **Uso no projeto**: Detecção de instrumentos cirúrgicos, sangramento (análise HSV), postura da paciente
 
-**Alternativas**: Azure AI Vision (custo, latência), TensorFlow Object Detection (mais complexo)
+**Por que YOLOv8 e não só Azure AI Vision?**
+- YOLOv8 é **processamento local** (obrigatório no PDF) - zero custo Azure
+- Azure AI Vision é **opcional** para contexto geral da cena (usa quota)
+- YOLOv8 detecta **instrumentos médicos específicos** que Azure Vision não reconhece
+- YOLOv8 é **mais rápido** (10-50ms vs 100-500ms)
+
+**Complementaridade**: Veja seção [Azure AI Vision vs YOLOv8](#azure-ai-vision-vs-yolov8-por-que-ambos)
+
+**Alternativas**: TensorFlow Object Detection (mais complexo), Detectron2 (Facebook - overkill)
 
 ### Librosa + SoundFile
 
