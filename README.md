@@ -117,6 +117,7 @@ O vídeo demonstra:
 | `./scripts/test-docker.sh` | Executa testes via Docker |
 | `./scripts/lint.sh` | Verifica código (Ruff + mypy) |
 | `./scripts/check-azure.sh` | Verifica credenciais Azure |
+| `./scripts/update-deploy-docs.sh` | Atualiza documentação com IP de deploy |
 
 ---
 
