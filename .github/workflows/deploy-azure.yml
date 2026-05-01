@@ -196,6 +196,7 @@ jobs:
               REDIS_ENABLED=false \
               SECURITY_API_KEY="${{ secrets.API_KEY }}" \
               SECURITY_ADMIN_KEY="${{ secrets.ADMIN_KEY }}" \
+              SECRET_KEY="${{ secrets.SECRET_KEY }}" \
             --restart-policy OnFailure
 
       - name: Aguardar inicialização
