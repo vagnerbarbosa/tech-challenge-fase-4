@@ -148,8 +148,9 @@ async def analyze_multimodal(
             )
 
             # Validar arquivo salvo
-            from fastapi import UploadFile as UploadFileType
             from io import BytesIO
+
+            from fastapi import UploadFile as UploadFileType
 
             # Criar UploadFile temporário para validação
             validation_file = UploadFileType(
@@ -174,8 +175,9 @@ async def analyze_multimodal(
             )
 
             # Validar arquivo salvo
-            from fastapi import UploadFile as UploadFileType
             from io import BytesIO
+
+            from fastapi import UploadFile as UploadFileType
 
             validation_file = UploadFileType(
                 filename=video.filename,
