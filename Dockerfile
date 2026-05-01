@@ -79,7 +79,8 @@ RUN mkdir -p /tmp/health-api /app/data /app/logs /app/logs/audit \
 # Configurar diretório temp da aplicação
 ENV TMPDIR=/tmp/health-api \
     TEMP=/tmp/health-api \
-    TMP=/tmp/health-api
+    TMP=/tmp/health-api \
+    NUMBA_CACHE_DIR=/tmp/health-api/numba_cache
 
 # Baixar modelo YOLOv8n (executa como root para ter permissões)
 RUN python scripts/download_yolo_model.py || echo "Modelo será baixado no runtime"
