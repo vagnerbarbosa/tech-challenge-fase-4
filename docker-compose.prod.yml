@@ -22,7 +22,7 @@ services:
     environment:
       # App
       - APP_NAME=Multimodal Health Analysis API
-      - APP_VERSION=0.7.0
+      - APP_VERSION=0.8.0
       - ENVIRONMENT=production
       - DEBUG=false
       - LOG_LEVEL=INFO
