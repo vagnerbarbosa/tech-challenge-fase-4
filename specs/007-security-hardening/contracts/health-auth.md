@@ -37,7 +37,7 @@ X-RateLimit-Remaining: 59
 ```json
 {
   "status": "healthy",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "rate_limit_info": {
     "limit": 60,
     "remaining": 59,

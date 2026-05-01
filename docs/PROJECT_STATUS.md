@@ -1,7 +1,7 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
 **Atualizado**: 2026-04-29  
-**Versão**: 0.6.0  
+**Versão**: 0.7.0  
 **Branch**: `main`
 
 ---

@@ -147,7 +147,7 @@ curl http://20.226.196.195:8000/health
 |-----------|----------|-----------|--------|
 | **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
 | **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
-| **App** | `APP_VERSION` | Versão da API | `0.6.0` |
+| **App** | `APP_VERSION` | Versão da API | `0.7.0` |
 | **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
 | **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
 | **Rate Limit** | `MAX_TEXT_REQUESTS_PER_DAY` | Limite diário texto | `160` |
