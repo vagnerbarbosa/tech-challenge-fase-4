@@ -45,7 +45,7 @@
         },
         {
           "key": "api_key",
-          "value": "demo-api-key",
+          "value": "tc-api-1777642853",
           "type": "secret",
           "enabled": true
         }
