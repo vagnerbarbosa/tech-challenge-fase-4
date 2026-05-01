@@ -142,7 +142,7 @@ jobs:
 
       - name: Criar Azure AI Services
         run: |
-          for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+          for service in tech-challenge-text tech-challenge-speech tech-challenge-vision tech-challenge-content-safety; do
             echo "Verificando serviço: $service"
 
             # Tentar verificar se o serviço já existe e está saudável
@@ -158,7 +158,7 @@ jobs:
               --location brazilsouth 2>/dev/null || true
 
             echo "🔄 Criando serviço: $service"
-            KIND=$(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi)
+            KIND=$(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; elif [ "$service" = "tech-challenge-content-safety" ]; then echo "ContentSafety"; else echo "ComputerVision"; fi)
             az resource create \
               --id "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.CognitiveServices/accounts/$service" \
               --properties "{ \"kind\": \"$KIND\", \"sku\": { \"name\": \"F0\" }, \"location\": \"brazilsouth\", \"properties\": { \"publicNetworkAccess\": \"Enabled\" } }" \
@@ -173,6 +173,8 @@ jobs:
           echo "speech_key=$(az cognitiveservices account keys list --name tech-challenge-speech --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
           echo "vision_endpoint=$(az cognitiveservices account show --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)" >> $GITHUB_OUTPUT
           echo "vision_key=$(az cognitiveservices account keys list --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
+          echo "content_safety_endpoint=$(az cognitiveservices account show --name tech-challenge-content-safety --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)" >> $GITHUB_OUTPUT
+          echo "content_safety_key=$(az cognitiveservices account keys list --name tech-challenge-content-safety --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
 
       - name: Deploy Container Instance
         run: |
@@ -192,6 +194,9 @@ jobs:
               AZURE_SPEECH_REGION=brazilsouth \
               AZURE_VISION_ENDPOINT="${{ steps.credentials.outputs.vision_endpoint }}" \
               AZURE_VISION_KEY="${{ steps.credentials.outputs.vision_key }}" \
+              AZURE_CONTENT_SAFETY_ENDPOINT="${{ steps.credentials.outputs.content_safety_endpoint }}" \
+              AZURE_CONTENT_SAFETY_KEY="${{ steps.credentials.outputs.content_safety_key }}" \
+              CONTENT_SAFETY_ENABLED=true \
               DATABASE_URL="sqlite:///tmp/app.db" \
               REDIS_ENABLED=false \
               SECURITY_API_KEY="${{ secrets.API_KEY }}" \

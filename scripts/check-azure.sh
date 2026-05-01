@@ -69,7 +69,7 @@ cmd_check() {
 
     # Verificar AI Services
     log_info "Verificando Azure AI Services..."
-    for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+    for service in tech-challenge-text tech-challenge-speech tech-challenge-vision tech-challenge-content-safety; do
         if az cognitiveservices account show --name $service --resource-group $RESOURCE_GROUP > /dev/null 2>&1; then
             log_success "✓ $service"
         else
@@ -165,6 +165,16 @@ cmd_deploy() {
         > /dev/null 2>&1 || true
     log_success "Vision Service OK"
 
+    # Content Safety Service
+    az cognitiveservices account create \
+        --name tech-challenge-content-safety \
+        --resource-group $RESOURCE_GROUP \
+        --location $LOCATION \
+        --kind ContentSafety \
+        --sku F0 \
+        > /dev/null 2>&1 || true
+    log_success "Content Safety Service OK"
+
     # Obter credenciais
     log_info "Obtendo credenciais..."
 
@@ -173,6 +183,8 @@ cmd_deploy() {
     SPEECH_KEY=$(az cognitiveservices account keys list --name tech-challenge-speech --resource-group $RESOURCE_GROUP --query key1 -o tsv)
     VISION_ENDPOINT=$(az cognitiveservices account show --name tech-challenge-vision --resource-group $RESOURCE_GROUP --query properties.endpoint -o tsv)
     VISION_KEY=$(az cognitiveservices account keys list --name tech-challenge-vision --resource-group $RESOURCE_GROUP --query key1 -o tsv)
+    CONTENT_SAFETY_ENDPOINT=$(az cognitiveservices account show --name tech-challenge-content-safety --resource-group $RESOURCE_GROUP --query properties.endpoint -o tsv)
+    CONTENT_SAFETY_KEY=$(az cognitiveservices account keys list --name tech-challenge-content-safety --resource-group $RESOURCE_GROUP --query key1 -o tsv)
 
     log_success "Credenciais obtidas"
 
@@ -205,6 +217,9 @@ cmd_deploy() {
             AZURE_SPEECH_REGION="$LOCATION" \
             AZURE_VISION_ENDPOINT="$VISION_ENDPOINT" \
             AZURE_VISION_KEY="$VISION_KEY" \
+            AZURE_CONTENT_SAFETY_ENDPOINT="$CONTENT_SAFETY_ENDPOINT" \
+            AZURE_CONTENT_SAFETY_KEY="$CONTENT_SAFETY_KEY" \
+            CONTENT_SAFETY_ENABLED=true \
             DATABASE_URL="sqlite:///tmp/app.db" \
             REDIS_ENABLED=false \
             SECURITY_API_KEY="demo-api-key" \
