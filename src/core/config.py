@@ -44,7 +44,7 @@ def _get_package_version() -> str:
         return version("multimodal-health-analysis")
     except Exception:
         # Fallback se pacote não estiver instalado (desenvolvimento)
-        return "0.6.0"
+        return "0.7.0"
 
 
 class SecurityConfig(BaseSettings):
