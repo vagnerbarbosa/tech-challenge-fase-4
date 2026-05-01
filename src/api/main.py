@@ -138,13 +138,14 @@ async def lifespan(app: FastAPI) -> Any:
 
 
 # Cria aplicação FastAPI
-# Documentação sempre habilitada - acesso controlado via CORS e middleware de rate limiting
+# Swagger UI e ReDoc desabilitados em produção (HTTP sem HTTPS causa Mixed Content errors)
+# openapi.json mantido para importação em Postman/Insomnia
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="API multimodal para análise de saúde da mulher usando Azure AI Services",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.environment != "production" else None,
+    redoc_url="/redoc" if settings.environment != "production" else None,
     openapi_url="/openapi.json",
     lifespan=lifespan,
 )

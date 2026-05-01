@@ -197,9 +197,17 @@ curl -X POST http://localhost:8000/analyze/text \
   -d '{"texto": "Estou me sentindo ansiosa"}'
 ```
 
-### Documentação Swagger
+### Documentação da API
 
-Abra no navegador: http://localhost:8000/docs
+**Desenvolvimento (local):**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- OpenAPI JSON: http://localhost:8000/openapi.json
+
+**Produção (Azure):**
+- Swagger UI e ReDoc estão **desabilitados** (HTTP sem HTTPS causa erros de Mixed Content)
+- Use o OpenAPI JSON: `<DEPLOY_URL>/openapi.json`
+- Importe em Postman/Insomnia para interface visual
 
 ---
 
@@ -369,7 +377,8 @@ export PATH="$HOME/.local/bin:$PATH"
 | Mock Azure Text | 3001 | Simulador Azure Language |
 | Mock Azure Speech | 3002 | Simulador Azure Speech |
 | Redis | 6379 | Cache e rate limiting |
-| Swagger UI | 8000/docs | Documentação interativa |
+| OpenAPI JSON | 8000/openapi.json | Schema da API (Postman/Insomnia) |
+| Swagger UI* | 8000/docs | *Apenas desenvolvimento (não produção) |
 
 ---
 
@@ -515,15 +524,25 @@ curl -X POST "$API_URL/analyze/multimodal" \
 
 **Solução**: Aguarde até o horário de reset ou use o modo mock localmente.
 
-### 6. Documentação Interativa
+### 6. Documentação da API (OpenAPI)
 
-Acesse a documentação Swagger da API Azure:
+**NOTA:** Swagger UI e ReDoc estão **desabilitados em produção** porque a API roda em HTTP (não HTTPS). Navegadores modernos bloqueiam recursos de CDN externos em páginas HTTP por segurança (Mixed Content).
 
+Para acessar a documentação em produção:
+
+1. **Baixe o OpenAPI JSON:**
+```bash
+curl -H "X-API-Key: sua-api-key" \
+  "<DEPLOY_URL>/openapi.json" > openapi.json
 ```
-<DEPLOY_URL>/docs
-```
 
-Clique no botão **Authorize** 🔒 e insira sua API Key para testar os endpoints diretamente pelo navegador.
+2. **Importe em Postman/Insomnia:**
+   - Postman: File → Import → Upload Files → openapi.json
+   - Insomnia: Workspace → Import/Export → Import Data → From File
+
+3. **Configure o Environment:**
+   - `base_url`: <DEPLOY_URL>
+   - `api_key`: sua-api-key
 
 ### 7. Limites e Rate Limiting
 
@@ -541,7 +560,7 @@ X-RateLimit-Remaining: 59
 X-RateLimit-Reset: 58
 ```
 
-### 8. Collection Postman/Insomnia
+### 7. Collection Postman/Insomnia
 
 Baixe as collections em `docs/collection.json` e `docs/environment.json` para importar no Postman ou Insomnia com todos os endpoints configurados.
 
