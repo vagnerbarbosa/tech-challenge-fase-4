@@ -17,10 +17,11 @@
 | 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
 | 007 | Security Hardening | ✅ Concluído | `main` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
-| 009 | Deploy Azure | 📝 Draft | `009-deploy-azure` | P1 |
-| 010 | Documentação Final | 📝 Draft | `010-documentation` | P1 |
+| 011 | Deploy Azure | ✅ Concluído | `main` | P1 |
+| 012 | Documentação Final | ✅ Concluído | `main` | P1 |
+| 013 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
 
-> **Nota**: Rate Limiting e Testes possuem implementação base (QuotaManager, testes unitários para áudio), mas podem ser expandidos.
+> **Nota**: Todas as specs P0-P1 estão concluídas. As specs 011-013 foram renumeradas (originalmente 009-010 eram drafts, substituídas pelas versões finais 011-012).
 
 ---
 
@@ -43,8 +44,8 @@
 005 (Multimodal) → 008 (Tests)
 002-004 → 006 (Rate Limiting)
 Tudo → 007 (Security)
-Tudo → 009 (Deploy)
-Tudo → 010 (Docs)
+Tudo → 011 (Deploy)
+Tudo → 012 (Docs)
 ```
 
 ---
