@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Multimodal Health Analysis API",
-    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis, Multimodal Fusion\n\n⚠️ Autenticação: Todas as requisições (exceto Health) precisam do header X-API-Key\n\n🚀 Ambientes:\n• Local: http://localhost:8000 (variável: {{base_url}})\n• Produção (Azure): http://20.226.196.195:8000\n\n📁 Arquivos de Environment:\n• environment.json - Configuração com múltiplos ambientes\n• environment-production.json - Ambiente de produção Azure",
+    "description": "API para análise multimodal de dados de saúde da mulher (texto, áudio, vídeo)\n\nStatus atual:\n✅ Implementado: Health, Text Analysis, Audio Analysis, Video Analysis, Multimodal Fusion\n\n⚠️ Autenticação: Todas as requisições (exceto Health) precisam do header X-API-Key\n\n🚀 Ambientes:\n• Local: http://localhost:8000 (variável: {{base_url}})\n• Produção (Azure): <DEPLOY_URL>\n\n📁 Arquivos de Environment:\n• environment.json - Configuração com múltiplos ambientes\n• environment-production.json - Ambiente de produção Azure",
     "version": "1.2.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

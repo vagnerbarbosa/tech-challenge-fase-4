@@ -104,7 +104,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Collection/Environment atualizados
 - [ ] Domínio customizado (opcional - futuro)
 
-**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.226.196.195:8000
+**Status**: ✅ DEPLOY CONCLUÍDO - API online em: <DEPLOY_URL>
 
 ### 10. Documentação Final (Spec 010) ⏳ 0%
 - [ ] Vídeo demonstrativo
