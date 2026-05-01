@@ -33,6 +33,7 @@
 ┌───────▼─────────────▼────────────▼────────┐
 │          Infrastructure Layer              │
 │  Azure Clients (Text, Speech, Vision)     │
+│  Azure AI Content Safety (Text moderate)│
 │  YOLOv8 (Ultralytics) - Local ML          │
 │  OpenCV - Frame extraction                │
 │  librosa - Audio prosody analysis         │
@@ -46,6 +47,7 @@
 │  - Cache (in-memory TTL)                │
 │  - Temp File Manager (LGPD compliant)   │
 │  - Exceptions (custom error hierarchy)  │
+│  - MultilingualRiskDetector (CS + Keywords)│
 └─────────────────────────────────────────┘
 ```
 
@@ -82,6 +84,7 @@
 | Azure Text Client | `azure-ai-textanalytics` | Text analysis API calls |
 | Azure Speech Client | `azure-cognitiveservices-speech` | Speech-to-text |
 | Azure Vision Client | `azure-ai-vision-imageanalysis` | Image analysis (fallback) |
+| Azure Content Safety | `azure-ai-contentsafety` | Text moderation, risk detection |
 
 ### Core Layer (`src/core/`)
 
@@ -93,6 +96,7 @@
 | `cache.py` | In-memory TTL cache for results |
 | `temp_file_manager.py` | LGPD-compliant temp file handling |
 | `exceptions.py` | Custom exception hierarchy |
+| `risk_detector.py` | MultilingualRiskDetector (CS + Keywords) |
 
 ## Data Flow
 
@@ -102,10 +106,12 @@
 2. Validate request (Pydantic)
 3. Check rate limit (160/day)
 4. Call Azure Text Analytics API
-5. Detect risk keywords locally
-6. Calculate risk levels
-7. Return JSON response
-8. Cache result
+5. Call Azure Content Safety API (severidade 0-6)
+6. Detect risk keywords local (PT + EN fallback)
+7. Combinar scores (MultilingualRiskDetector)
+8. Calculate risk levels
+9. Return JSON response com risco_violencia, risco_saude_mental
+10. Cache result
 ```
 
 ### Audio Analysis Flow
@@ -114,11 +120,13 @@
 2. Validate file (WAV/MP3/OGG, <50MB)
 3. Check rate limit (10 min/day)
 4. Save temp file
-5. Call Azure Speech-to-Text
+5. Call Azure Speech-to-Text (transcrição)
 6. Analyze prosody with librosa (pitch, energy, pauses)
-7. Run text analysis on transcription
-8. Calculate risk levels
-9. Return response + cleanup temp files
+7. Call Azure Content Safety API na transcrição (severidade 0-6)
+8. Detect risk keywords na transcrição (PT + EN fallback)
+9. Combinar scores (MultilingualRiskDetector)
+10. Calculate risk levels
+11. Return response + cleanup temp files
 ```
 
 ### Video Analysis Flow
@@ -147,6 +155,144 @@ Located in `src/core/config.py` - `RISK_KEYWORDS["saude_mental"]`
 - Depression markers: depressão, tristeza, vazio, desanimo
 - Anxiety markers: ansiedade, pânico, crise, insônia
 - Critical markers: suicídio, morrer, não aguento mais
+
+## Content Safety Integration
+
+### Overview
+O sistema utiliza **Azure AI Content Safety** combinado com detecção por keywords locais para identificação robusta de riscos em texto e transcrições de áudio. Essa abordagem híbrida maximiza a cobertura linguística enquanto mantém controle sobre termos específicos do contexto de saúde da mulher.
+
+### Architecture Components
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│               MultilingualRiskDetector                      │
+│                                                             │
+│  ┌─────────────────┐        ┌──────────────────────┐       │
+│  │  Azure AI       │        │  Local Keywords      │       │
+│  │  Content Safety │        │  (PT + EN)           │       │
+│  │                 │        │                      │       │
+│  │  - 100+ idiomas │        │  - Violência         │       │
+│  │  - Severidade   │        │  - Saúde mental      │       │
+│  │    0-6          │        │  - Contexto BR       │       │
+│  └────────┬────────┘        └──────────┬───────────┘       │
+│           │                            │                 │
+│           └────────────┬───────────────┘                 │
+│                        ▼                                 │
+│           ┌─────────────────────────┐                   │
+│           │   Combinação de scores  │                   │
+│           │   (fallback híbrido)    │                   │
+│           └────────────┬────────────┘                   │
+│                        ▼                                 │
+│           ┌─────────────────────────┐                   │
+│           │  risco_violencia: bool  │                   │
+│           │  risco_saude_mental: bool│                  │
+│           └─────────────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Design Decision: Por que CS + Keywords?
+
+| Aspect | Azure Content Safety | Keywords Locais |
+|--------|---------------------|-----------------|
+| **Idiomas** | 100+ idiomas suportados | PT/EN otimizados |
+| **Contexto cultural** | Genérico, global | Específico para Brasil |
+| **Termos médicos** | Cobertura limitada | "aborto espontâneo", "hemorragia" |
+| **Dependência** | API externa (quota) | 100% local, zero custo |
+| **Latência** | ~50-200ms | <1ms |
+
+**Estratégia combinada:**
+1. **Content Safety como detector primário** - Cobertura multilíngue nativa
+2. **Keywords como fallback e reforço** - Termos específicos do domínio
+3. **Score combinado** - OR lógico: CS severidade > 3 OU keyword match
+
+### Language Agnostic Detection
+
+O Azure AI Content Safety é **agnóstico a idioma** por design:
+- Mesmo modelo para todos os idiomas suportados
+- Sem necessidade de especificar `language` no request
+- Treinado em conteúdo multilíngue real
+- Severidade 0-6 consistente across idiomas
+
+```python
+# Exemplo: mesmo comportamento para PT, EN, ES
+from azure.ai.contentsafety import ContentSafetyClient
+
+# Não requer language parameter
+response = client.analyze_text(text="conteúdo em qualquer idioma")
+# Retorna severidade 0-6 independente do idioma detectado
+```
+
+### Detection Flow
+
+#### Text Analysis com Content Safety
+```
+1. Client POST /analyze/text
+2. Validate request (Pydantic)
+3. Check rate limit (160/day)
+4. Call Azure Text Analytics API (sentimento)
+5. Call Azure Content Safety API (moderação)
+   └─ Retorna severidades: hate, self-harm, violence
+6. Executar keyword matching local (PT/EN)
+7. Combinar resultados (MultilingualRiskDetector)
+8. Calcular risk levels
+9. Return JSON response com risco_violencia, risco_saude_mental
+```
+
+#### Audio Analysis com Content Safety
+```
+1. Client POST /analyze/audio (multipart/form-data)
+2. Validate file (WAV/MP3/OGG, <50MB)
+3. Check rate limit (10 min/day)
+4. Save temp file
+5. Call Azure Speech-to-Text (transcrição)
+6. Call Azure Content Safety API na transcrição
+   └─ Severidade 0-6 para cada categoria
+7. Executar keyword matching na transcrição
+8. Combinar resultados com prosody analysis
+9. Calculate risk levels
+10. Return response + cleanup temp files
+```
+
+### Severity Mapping
+
+| Severity CS | Significado | Keywords Match | Resultado |
+|-------------|-------------|----------------|-----------|
+| 0 | Conteúdo seguro | Nenhuma | `risco_violencia: false` |
+| 1-2 | Baixo risco | - | `risco_violencia: false` |
+| 3-4 | Médio risco | Sim | `risco_violencia: true` |
+| 5-6 | Alto risco | Sim/Não | `risco_violencia: true` |
+
+### MultilingualRiskDetector
+
+Localizado em `src/core/risk_detector.py`:
+
+```python
+class MultilingualRiskDetector:
+    """
+    Combina Azure Content Safety com keyword matching local.
+    Retorna risk flags independente do idioma de entrada.
+    """
+
+    def analyze(self, text: str) -> RiskAssessment:
+        # 1. Chama Azure Content Safety
+        cs_result = self.content_safety.analyze(text)
+
+        # 2. Executa keyword matching (PT + EN)
+        keyword_result = self.keywords.analyze(text)
+
+        # 3. Combina resultados (OR lógico)
+        return RiskAssessment(
+            risco_violencia=cs_result.severity > 3 or keyword_result.violence,
+            risco_saude_mental=cs_result.self_harm > 3 or keyword_result.mental_health
+        )
+```
+
+### Quota Considerations
+
+Content Safety compartilha quota com outros serviços Azure:
+- **Free Tier**: 5,000 transações/mês (compartilhado com Text Analytics)
+- Fallback para keywords locais quando quota excedida
+- Cache de resultados para textos repetidos
 
 ## Azure Free Tier Protection
 
@@ -199,6 +345,107 @@ tech-challenge-fase-4/
 └── docker-compose.yml   # Docker setup
 ```
 
+## Azure AI Vision vs YOLOv8: Por que Ambos?
+
+O sistema utiliza duas tecnologias complementares para análise visual, cada uma com propósito específico:
+
+### Azure AI Vision
+
+**Propósito**: Análise contextual de imagem para compreensão geral da cena.
+
+**Capacidades**:
+- Geração de descrições detalhadas do conteúdo visual
+- Extração de tags e categorias semânticas
+- Detecção de objetos genéricos (mobília, pessoas, ambientes)
+- Análise de contexto e relacionamentos entre elementos
+
+**Casos de uso no projeto**:
+- Descrever o ambiente de uma consulta médica
+- Identificar objetos gerais presentes na cena
+- Prover contexto sobre a situação capturada
+
+**Considerações**:
+- Consome quota do Azure Free Tier (5.000 requests/mês)
+- API externa com latência de rede (~100-500ms)
+- Cobertura multilíngue nas descrições
+
+### YOLOv8 (Ultralytics)
+
+**Propósito**: Detecção específica para domínio médico/saúde da mulher.
+
+**Capacidades**:
+- Detecção de instrumentos médicos (tesouras, bisturis, agulhas)
+- Identificação de sangramento via análise de cor HSV
+- Análise de postura e linguagem corporal
+- Detecção em tempo real em CPU
+
+**Casos de uso no projeto**:
+- Detectar instrumentos cirúrgicos em procedimentos
+- Identificar sangramento anômalo (hemorragia)
+- Analisar postura da paciente (sinais de desconforto, medo)
+- Calcular riscos específicos de violência e saúde mental
+
+**Considerações**:
+- Processamento 100% local (zero custo Azure)
+- Modelo YOLOv8n (~6MB) otimizado para edge/CPU
+- Latência baixa (<100ms por frame)
+- Especializado para casos de uso de saúde da mulher
+
+### Por que Usar Ambos?
+
+| Aspecto | Azure AI Vision | YOLOv8 |
+|---------|----------------|--------|
+| **Propósito** | Contexto geral da imagem | Detalhes médicos específicos |
+| **Objetos detectados** | Genéricos (cadeiras, mesas, pessoas) | Médicos (tesouras, sangue, posturas) |
+| **Custo** | Consome quota Azure | Gratuito (local) |
+| **Latência** | ~100-500ms | ~10-50ms |
+| **Idioma** | Multilíngue | Agnóstico (visão pura) |
+| **Precisão médica** | Limitada | Alta (modelo customizado) |
+
+**Arquitetura complementar**:
+```
+Vídeo/Imagem de Entrada
+         │
+         ├──→ YOLOv8 (local) ──→ Detecção instrumentos, sangue, postura
+         │                              │
+         │                              ▼
+         │                    Cálculo de risco específico
+         │                              │
+         ▼                              ▼
+Azure AI Vision (opcional) ──→ Contexto geral da cena
+         │                              │
+         └────────────┬─────────────────┘
+                      ▼
+              Fusão de análises
+                      │
+         ┌────────────┼────────────┐
+         ▼            ▼            ▼
+   risco_violencia  risco_saude_mental  metadata
+```
+
+**Exemplo prático de trabalho conjunto**:
+
+Considerando um vídeo de uma consulta de emergência:
+
+1. **YOLOv8 detecta**:
+   - Uma tesoura cirúrgica (classe: `scissors`, confiança: 92%)
+   - Área de sangue no campo visual (severidade: alta)
+   - Postura retraída da paciente (indicador de medo)
+
+2. **Resultado combinado**:
+   - `risco_violencia: alto` (instrumento + postura de medo)
+   - `risco_saude_mental: médio` (sangramento pode indicar autoagressão ou acidente)
+   - Alerta específico: "Instrumento cirúrgico + sangue detectado"
+
+3. **Sem Azure AI Vision** (modo padrão para economia):
+   - Apenas YOLOv8 executa
+   - Detecções médicas são priorizadas
+   - Zero consumo de quota Azure para vídeo
+
+**Decisão de design**:
+- **YOLOv8 é obrigatório**: Fornece detecções médicas específicas necessárias para o domínio
+- **Azure AI Vision é opcional**: Pode ser usado em casos onde contexto geral da cena é necessário, mas priorizamos YOLOv8 para manter o uso dentro do Azure Free Tier
+
 ## Technology Stack
 
 | Category | Technology | Version |
@@ -208,6 +455,7 @@ tech-challenge-fase-4/
 | Validation | Pydantic | v2 |
 | Azure SDK | azure-ai-textanalytics | 5.4.0 |
 | Azure SDK | azure-cognitiveservices-speech | 1.48.x |
+| Azure SDK | azure-ai-vision-imageanalysis | 1.0+ |
 | ML | Ultralytics (YOLOv8) | 8.x |
 | CV | OpenCV | 4.8+ |
 | Audio | librosa | 0.10+ |

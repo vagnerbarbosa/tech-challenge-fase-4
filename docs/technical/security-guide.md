@@ -362,7 +362,7 @@ bash ./scripts/run-mock.sh
 curl http://localhost:8000/health
 
 # Deve retornar:
-# {"status": "healthy", "version": "0.7.0"}
+# {"status": "healthy", "version": "0.8.0"}
 ```
 
 **🎉 Parabéns!** A API está rodando!

@@ -22,7 +22,7 @@ services:
     environment:
       # App
       - APP_NAME=Multimodal Health Analysis API
-      - APP_VERSION=0.7.0
+      - APP_VERSION=0.8.0
       - ENVIRONMENT=production
       - DEBUG=false
       - LOG_LEVEL=INFO
@@ -33,6 +33,10 @@ services:
       - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION:-brazilsouth}
       - AZURE_VISION_KEY=${AZURE_VISION_KEY}
       - AZURE_VISION_ENDPOINT=${AZURE_VISION_ENDPOINT}
+      # Azure AI Content Safety (Multilingual Risk Detection)
+      - AZURE_CONTENT_SAFETY_KEY=${AZURE_CONTENT_SAFETY_KEY}
+      - AZURE_CONTENT_SAFETY_ENDPOINT=${AZURE_CONTENT_SAFETY_ENDPOINT}
+      - CONTENT_SAFETY_ENABLED=${CONTENT_SAFETY_ENABLED:-false}
       # Database
       - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./data/health_analysis.db}
       # Redis (recomendado para produção)

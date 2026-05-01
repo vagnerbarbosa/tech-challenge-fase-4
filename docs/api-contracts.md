@@ -30,7 +30,7 @@ Check system health and Azure quota status.
 ```json
 {
   "status": "healthy",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "timestamp": "2026-04-21T12:00:00Z",
   "services": {
     "text_analytics": "connected",
@@ -328,6 +328,72 @@ Get supported audio formats and limits.
   }
 }
 ```
+
+---
+
+### 9. Azure AI Content Safety
+
+The API integrates with Azure AI Content Safety for multilingual risk detection in text and audio content. This feature provides additional severity scores across multiple harm categories.
+
+**Configuration:**
+Content Safety analysis is enabled via the environment variable `CONTENT_SAFETY_ENABLED=true`. When disabled, the `content_safety` field is omitted from responses.
+
+**Coverage:**
+- Text Analysis (`POST /analyze/text`)
+- Audio Analysis (`POST /analyze/audio`) - applied to transcribed content
+
+**Content Safety Fields:**
+
+| Field | Type | Range | Description |
+|-------|------|-------|-------------|
+| content_safety | object | - | Container for severity scores |
+| content_safety.self_harm_severity | integer | 0-6 | Severity of self-harm content |
+| content_safety.violence_severity | integer | 0-6 | Severity of violent content |
+| content_safety.hate_severity | integer | 0-6 | Severity of hate speech |
+| content_safety.sexual_severity | integer | 0-6 | Severity of sexual content |
+| content_safety.is_harmful | boolean | - | True if any category exceeds threshold |
+| content_safety.highest_category | string | - | Category with highest severity |
+| content_safety.highest_severity | integer | 0-6 | Highest severity score across categories |
+
+**Severity Scale:**
+- `0` - No content detected
+- `1-2` - Low severity
+- `3-4` - Medium severity
+- `5-6` - High severity
+
+**Example Response with Content Safety:**
+
+```json
+{
+  "sentimento": "negativo",
+  "score": -0.85,
+  "risco_violencia": "alto",
+  "risco_saude_mental": "alto",
+  "palavras_chave": ["ansiosa", "medo", "casa"],
+  "indicadores": ["ansiedade", "medo"],
+  "content_safety": {
+    "self_harm_severity": 4,
+    "violence_severity": 5,
+    "hate_severity": 0,
+    "sexual_severity": 0,
+    "is_harmful": true,
+    "highest_category": "violence",
+    "highest_severity": 5
+  },
+  "metadata": {
+    "correlation_id": "txt-123456",
+    "timestamp": "2026-04-21T12:00:00Z",
+    "tempo_processamento_ms": 680,
+    "cache_hit": false,
+    "azure_calls": 2
+  }
+}
+```
+
+**Notes:**
+- Content Safety analysis consumes Azure AI Content Safety quota (separate from Text Analytics quota)
+- The `is_harmful` flag is set to `true` when any severity score exceeds the configured threshold (default: 2)
+- When `CONTENT_SAFETY_ENABLED=false`, the field is completely omitted from the response
 
 ---
 

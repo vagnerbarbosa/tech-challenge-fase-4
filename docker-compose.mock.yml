@@ -19,10 +19,12 @@ services:
       - "3001:3001"  # Text Analytics
       - "3002:3002"  # Speech Services
       - "3003:3003"  # Vision
+      - "3004:3004"  # Content Safety
     environment:
       - PORT_TEXT=3001
       - PORT_SPEECH=3002
       - PORT_VISION=3003
+      - PORT_CONTENT_SAFETY=3004
       - LOG_LEVEL=debug
     volumes:
       - ./mock/azure:/app
@@ -43,7 +45,7 @@ services:
     environment:
       # App
       - APP_NAME=Multimodal Health Analysis API (Mock Mode)
-      - APP_VERSION=0.7.0
+      - APP_VERSION=0.8.0
       - ENVIRONMENT=development
       - DEBUG=true
       - LOG_LEVEL=DEBUG
@@ -54,6 +56,10 @@ services:
       - AZURE_SPEECH_REGION=local
       - AZURE_VISION_KEY=fake-key-for-local-dev
       - AZURE_VISION_ENDPOINT=http://mock-azure:3003/
+      # Azure AI Content Safety (Multilingual Risk Detection)
+      - AZURE_CONTENT_SAFETY_KEY=fake-key-for-local-dev
+      - AZURE_CONTENT_SAFETY_ENDPOINT=http://mock-azure:3004/
+      - CONTENT_SAFETY_ENABLED=false  # Habilitar quando mock CS estiver pronto
       # Database
       - DATABASE_URL=sqlite+aiosqlite:///./data/health_analysis.db
       # Redis

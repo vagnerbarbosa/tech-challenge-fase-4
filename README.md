@@ -21,6 +21,7 @@
 1. ✅ **Detectar precocemente riscos em saúde materna e ginecológica**
 2. ✅ **Identificar sinais de violência doméstica ou abuso**
 3. ✅ **Utilizar serviços em nuvem** (Azure Free Tier)
+4. ✅ **Detecção de risco multilíngue com Azure AI Content Safety**
 
 ### Foco do Projeto: Saúde Mental Feminina
 
@@ -45,6 +46,7 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 | **Texto** | Azure AI Language (Text Analytics) | `azure-ai-textanalytics` | Análise de sentimento, NLP |
 | **Áudio** | Azure AI Speech | `azure-cognitiveservices-speech` | Transcrição + análise de voz |
 | **Vídeo** | **YOLOv8** (local) | `ultralytics` + `opencv-python` | Detecção instrumentos, sangramento, postura |
+| **Multilíngue** | Azure AI Content Safety | `azure-ai-contentsafety` | Detecção de risco em 100+ idiomas |
 
 > **Nota YOLOv8**: YOLOv8 roda **localmente no container** (custo zero), atendendo requisito obrigatório do PDF de "YOLOv8 customizado para instrumentos cirúrgicos, áreas críticas e sangramento anômalo". Aceita vídeos MP4 e imagens (processadas como vídeo de 1 frame).
 
@@ -147,7 +149,9 @@ curl http://20.226.196.195:8000/health
 |-----------|----------|-----------|--------|
 | **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
 | **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
-| **App** | `APP_VERSION` | Versão da API | `0.7.0` |
+| **Azure** | `AZURE_CONTENT_SAFETY_KEY` / `AZURE_CONTENT_SAFETY_ENDPOINT` | Azure AI Content Safety | - |
+| **Content Safety** | `CONTENT_SAFETY_ENABLED` | Ativar detecção multilíngue | `true` |
+| **App** | `APP_VERSION` | Versão da API | `0.8.0` |
 | **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
 | **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
 | **Rate Limit** | `MAX_TEXT_REQUESTS_PER_DAY` | Limite diário texto | `160` |
@@ -726,6 +730,42 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 - ✅ Fallback para 1 modalidade (retorna resultado direto)
 - ✅ Graceful degradation (continua se uma modalidade falhar)
 
+### Detecção Multilíngue (Content Safety)
+
+Analisa texto em qualquer idioma suportado (PT, EN, +100 idiomas) com detecção de conteúdo violento, depressivo ou de autoagressão.
+
+**Exemplo de Request:**
+```bash
+curl -X POST "http://localhost:8000/analyze/text" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua-api-key" \
+  -d '{
+    "texto": "I am feeling very anxious and scared about what happens at home",
+    "idioma": "auto"
+  }'
+```
+
+**Exemplo de Response:**
+```json
+{
+  "sentimento": "negativo",
+  "score": -0.82,
+  "risco_violencia": "alto",
+  "risco_saude_mental": "alto",
+  "idioma_detectado": "en",
+  "content_safety": {
+    "enabled": true,
+    "violence_level": "medium",
+    "self_harm_detected": false,
+    "hate_detected": false
+  },
+  "palavras_chave": ["anxious", "scared", "home"],
+  "indicadores": ["expressao_medo", "sinalizacao_isolamento"]
+}
+```
+
+> **Nota**: O Content Safety é aplicado automaticamente quando `CONTENT_SAFETY_ENABLED=true`. O idioma é detectado automaticamente se não especificado.
+
 ---
 
 ## Modalidades de Dados
@@ -769,6 +809,121 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 **Exemplos de entrada:**
 - Vídeos curtos de atendimento (MP4, max 30s)
 - Fotos de consulta (JPEG, PNG)
+
+---
+
+## Tecnologias de Análise Visual: Azure AI Vision vs YOLOv8
+
+O sistema utiliza uma **abordagem híbrida** para análise de vídeo/imagem, combinando duas tecnologias complementares:
+
+### Azure AI Vision (Opcional)
+
+Serviço de visão computacional da Azure que fornece **compreensão contextual** da imagem.
+
+**O que faz:**
+- Gera descrições textuais do conteúdo visual
+- Identifica objetos genéricos (móveis, equipamentos, ambientes)
+- Extrai tags semânticas sobre a cena
+- Entende o contexto geral do local (hospital, consultório, etc.)
+
+**Quando usar:**
+- Quando é necessário entender o contexto geral da cena
+- Para descrições textuais do ambiente
+- Para integração com outros serviços Azure
+
+**Custo:** Consome quota do Azure Free Tier (5.000 requests/mês)
+
+### YOLOv8 (Obrigatório - Local)
+
+Modelo de detecção de objetos que roda **localmente no container** para identificar elementos específicos de saúde.
+
+**O que faz:**
+- Detecta **instrumentos médicos** (tesouras, bisturis, agulhas)
+- Identifica **sangramento** via análise de cor HSV
+- Analisa **postura** da paciente (sinais de medo, desconforto)
+- Calcula riscos específicos de violência e saúde mental
+
+**Quando usar:**
+- Sempre - é a tecnologia principal para vídeo
+- Para detecções médicas específicas
+- Quando é necessário zero custo (não consome quota Azure)
+
+**Custo:** **Gratuito** - processamento 100% local
+
+### Por que Ambos?
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Análise de Vídeo                           │
+├──────────────────────┬───────────────────────────────────────┤
+│  Azure AI Vision     │  YOLOv8 (Local)                       │
+│  (Opcional)          │  (Obrigatório)                        │
+├──────────────────────┼───────────────────────────────────────┤
+│  • Contexto geral    │  • Instrumentos médicos               │
+│  • Cenário/ambiente  │  • Sangramento anômalo                │
+│  • Objetos comuns    │  • Postura e linguagem corporal      │
+│  • Tags semânticas   │  • Cálculo de risco específico        │
+├──────────────────────┴───────────────────────────────────────┤
+│                    Fusão de Resultados                        │
+│         risco_violencia + risco_saude_mental                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Exemplo prático:**
+
+Um vídeo mostra uma consulta de emergência:
+
+1. **YOLOv8 detecta** (processamento local):
+   - Tesoura cirúrgica presente (87% confiança)
+   - Área de sangramento no campo visual
+   - Postura retraída da paciente
+
+2. **Resultado combinado**:
+   - `risco_violencia: alto` - instrumento + postura de medo
+   - `risco_saude_mental: médio` - sangramento pode indicar emergência
+   - Alerta: "Instrumento cirúrgico + sangue detectado"
+
+**Decisão de arquitetura:**
+
+| Característica | Azure AI Vision | YOLOv8 |
+|----------------|-----------------|--------|
+| Propósito | Contexto geral | Detalhes médicos |
+| Custo | Consome quota | **Zero custo** |
+| Latência | ~100-500ms | ~10-50ms |
+| Objetos | Genéricos | Específicos saúde |
+| Execução | Nuvem | Local |
+
+> **Nota:** No modo padrão, apenas YOLOv8 é executado para economizar a quota Azure. Azure AI Vision está disponível como opção quando contexto semântico detalhado é necessário.
+
+---
+
+## Suporte Multilíngue (Azure AI Content Safety)
+
+O sistema oferece **detecção de risco em múltiplos idiomas** através do Azure AI Content Safety:
+
+### Idiomas Suportados
+
+- 🇧🇷 **Português (pt-BR)** - Idioma principal, otimizado
+- 🇺🇸 **Inglês (en-US)** - Suporte nativo completo
+- 🌍 **100+ idiomas** - Cobertura global via Azure AI Content Safety
+
+### Casos de Uso
+
+- **Pacientes estrangeiras** em atendimento de emergência
+- **Telemedicina internacional** com profissionais de outros países
+- **Documentação médica** em múltiplos idiomas
+- **Delegações e eventos** com participantes internacionais
+
+### Configuração
+
+```bash
+# Ativar Content Safety (recomendado)
+CONTENT_SAFETY_ENABLED=true
+AZURE_CONTENT_SAFETY_KEY=sua-chave-aqui
+AZURE_CONTENT_SAFETY_ENDPOINT=https://<resource>.cognitiveservices.azure.com/
+```
+
+> **Nota**: Quando `CONTENT_SAFETY_ENABLED=true`, o sistema automaticamente detecta o idioma do texto e aplica as regras de Content Safety apropriadas para o idioma detectado.
 
 ---
 

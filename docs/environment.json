@@ -39,7 +39,7 @@
       "values": [
         {
           "key": "base_url",
-          "value": "http://20.226.196.195:8000",
+          "value": "<DEPLOY_URL>",
           "type": "default",
           "enabled": true
         },

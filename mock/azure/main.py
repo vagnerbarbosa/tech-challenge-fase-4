@@ -1,7 +1,7 @@
 """
 Mock Server para Azure AI Services
-Simula endpoints de Text Analytics, Speech e Vision
-Roda servidores nas portas 3001, 3002 e 3003
+Simula endpoints de Text Analytics, Speech, Vision e Content Safety
+Roda servidores nas portas 3001, 3002, 3003 e 3004
 """
 
 import multiprocessing
@@ -35,6 +35,16 @@ class VisionAnalysisResponse(BaseModel):
     description: dict[str, Any]
     tags: list[dict[str, Any]]
     objects: list[dict[str, Any]]
+
+
+class ContentSafetyRequest(BaseModel):
+    text: str
+    categories: list[str] | None = None
+    outputType: str = "FourSeverityLevels"
+
+
+class ContentSafetyResponse(BaseModel):
+    categoriesAnalysis: list[dict[str, Any]]
 
 
 # ==========================================
@@ -227,6 +237,89 @@ def create_vision_app():
 
 
 # ==========================================
+# CONTENT SAFETY (porta 3004)
+# ==========================================
+
+
+def create_content_safety_app():
+    """Cria aplicação Content Safety."""
+    app = FastAPI(title="Azure AI Content Safety Mock", port=3004)
+
+    @app.post("/contentsafety/text:analyze")
+    async def analyze_content_safety(request: ContentSafetyRequest):
+        """Mock do Azure AI Content Safety - Análise de conteúdo prejudicial."""
+        text = request.text.lower()
+
+        # Lógica para detectar risco baseado em palavras-chave
+        self_harm_keywords = [
+            "suicide", "suicidal", "kill myself", "end my life",
+            "don't want to live", "better off dead", "self harm",
+            "cutting", "suicídio", "suicida", "morrer", "acabar com tudo",
+            "não quero mais viver", "cortar", "me machucar",
+        ]
+        violence_keywords = [
+            "kill", "murder", "hurt", "attack", "weapon", "gun", "knife",
+            "hit me", "beating", "violence", "abuse", "matar", "matou",
+            "bater", "violência", "agressão", "ameaça", "arma",
+        ]
+        hate_keywords = [
+            "hate", "hate you", "die", "worthless", "scum", "idiot",
+            "stupid", "ódio", "odeio", "nojento", "idiota",
+        ]
+        sexual_keywords = [
+            "sexual", "abuse", "molest", "rape", "assault",
+        ]
+
+        # Calcula severidade baseado em matches
+        self_harm_count = sum(1 for word in self_harm_keywords if word in text)
+        violence_count = sum(1 for word in violence_keywords if word in text)
+        hate_count = sum(1 for word in hate_keywords if word in text)
+        sexual_count = sum(1 for word in sexual_keywords if word in text)
+
+        def calculate_severity(count: int) -> int:
+            """Converte contagem de keywords em severidade 0-6."""
+            if count >= 4:
+                return 6
+            elif count >= 3:
+                return 5
+            elif count == 2:
+                return 4
+            elif count == 1:
+                return 2
+            return 0
+
+        categories_analysis = [
+            {
+                "category": "SelfHarm",
+                "severity": calculate_severity(self_harm_count),
+            },
+            {
+                "category": "Violence",
+                "severity": calculate_severity(violence_count),
+            },
+            {
+                "category": "Hate",
+                "severity": calculate_severity(hate_count),
+            },
+            {
+                "category": "Sexual",
+                "severity": calculate_severity(sexual_count),
+            },
+        ]
+
+        return {
+            "categoriesAnalysis": categories_analysis,
+            "blocklistsMatch": [],
+        }
+
+    @app.get("/health")
+    async def health_check():
+        return {"status": "healthy", "service": "content-safety-mock", "port": 3004}
+
+    return app
+
+
+# ==========================================
 # SERVIDORES
 # ==========================================
 
@@ -255,6 +348,14 @@ def run_vision_server():
     uvicorn.run(app, host="0.0.0.0", port=3003, log_level="info")
 
 
+def run_content_safety_server():
+    """Inicia servidor Content Safety na porta 3004."""
+    import uvicorn
+
+    app = create_content_safety_app()
+    uvicorn.run(app, host="0.0.0.0", port=3004, log_level="info")
+
+
 # ==========================================
 # MAIN
 # ==========================================
@@ -262,27 +363,32 @@ def run_vision_server():
 if __name__ == "__main__":
     multiprocessing.set_start_method("spawn")
 
-    # Inicia 3 processos separados para cada serviço
+    # Inicia 4 processos separados para cada serviço
     text_process = multiprocessing.Process(target=run_text_server)
     speech_process = multiprocessing.Process(target=run_speech_server)
     vision_process = multiprocessing.Process(target=run_vision_server)
+    content_safety_process = multiprocessing.Process(target=run_content_safety_server)
 
     text_process.start()
     speech_process.start()
     vision_process.start()
+    content_safety_process.start()
 
     print("🚀 Mock Azure AI Services iniciado:")
     print("   - Text Analytics: http://localhost:3001")
     print("   - Speech Services: http://localhost:3002")
     print("   - Computer Vision: http://localhost:3003")
+    print("   - Content Safety: http://localhost:3004")
 
     try:
         text_process.join()
         speech_process.join()
         vision_process.join()
+        content_safety_process.join()
     except KeyboardInterrupt:
         print("\n🛑 Encerrando serviços...")
         text_process.terminate()
         speech_process.terminate()
         vision_process.terminate()
+        content_safety_process.terminate()
         sys.exit(0)
