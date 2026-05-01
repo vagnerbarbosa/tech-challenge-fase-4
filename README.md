@@ -10,8 +10,8 @@
 [![Ruff](https://img.shields.io/badge/Ruff-EF3939?style=flat-square&logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-> **📅 Última Atualização**: 2026-04-21
-> **✅ Status**: 4/4 Módulos Core Implementados (Texto + Áudio + Vídeo + Multimodal)
+> **📅 Última Atualização**: 2026-05-01
+> **✅ Status**: 4/4 Módulos Core + Deploy Azure Concluído (Texto + Áudio + Vídeo + Multimodal + Produção)
 
 ## Objetivo
 
@@ -101,6 +101,41 @@ curl http://localhost:8000/health
 ```
 
 Veja o [guia completo](docs/RUNNING.md) para outras opções (Docker manual, Poetry, Azure).
+
+---
+
+## 🚀 Deploy em Produção (Azure)
+
+[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](http://20.226.196.195:8000/health)
+
+✅ **API Online**: http://20.226.196.195:8000
+
+A aplicação está hospedada em **Azure Container Instances** com CI/CD via GitHub Actions.
+
+### Endpoints de Produção
+
+| Endpoint | URL | Descrição |
+|----------|-----|-----------|
+| API Base | http://20.226.196.195:8000 | API principal |
+| Health | http://20.226.196.195:8000/health | Status e quotas |
+| Swagger | http://20.226.196.195:8000/docs | Documentação interativa |
+| ReDoc | http://20.226.196.195:8000/redoc | Documentação alternativa |
+
+### CI/CD Pipeline
+
+Deploy automático a cada push na branch `main`:
+
+1. **Build**: Docker multi-stage com cache
+2. **Push**: Imagem para GitHub Container Registry (ghcr.io)
+3. **Deploy**: Azure Container Instances atualizado
+4. **Health Check**: Validação automática da API
+
+### Collection Postman
+
+Importe `docs/collection.json` e use o environment **"Azure Production"**:
+```bash
+curl http://20.226.196.195:8000/health
+```
 
 ---
 

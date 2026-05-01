@@ -1,146 +1,62 @@
 # Quickstart: Deploy Azure
 
-Guia rápido para fazer deploy da API no Azure App Service (Free Tier F1).
+Guia rápido para deploy da API no Azure Container Instances (ACI).
 
-## Pré-requisitos
+## Status
 
-- Conta Azure (Free Tier disponível em [azure.microsoft.com/free](https://azure.microsoft.com/free))
-- Azure CLI instalado: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`
-- Repositório clonado e Docker funcionando localmente
+✅ **DEPLOY CONCLUÍDO** (2026-05-01)
 
-## Setup Inicial (Executar uma vez)
+**URL de Produção**: http://20.226.196.195:8000
 
-### 1. Login Azure
+---
 
-```bash
-az login
-# Selecione a subscription correta se tiver múltiplas
-az account set --subscription "Sua Subscription"
-```
+## Arquitetura
 
-### 2. Criar Resource Group
+A aplicação está rodando em **Azure Container Instances** com os seguintes componentes:
 
-```bash
-az group create \
-  --name rg-tech-challenge-fase4 \
-  --location brazilsouth
-```
+- **Container**: `tech-challenge-api` (imagem: ghcr.io/vagnerbarbosa/tech-challenge-fase4)
+- **Recursos Cognitivos**: Azure AI Services (Text, Speech, Vision)
+- **Registro**: GitHub Container Registry (ghcr.io)
+- **CI/CD**: GitHub Actions
 
-### 3. Criar App Service Plan (Free Tier)
+---
+
+## Scripts de Diagnóstico
 
 ```bash
-az appservice plan create \
-  --name plan-tech-challenge \
-  --resource-group rg-tech-challenge-fase4 \
-  --sku F1 \
-  --is-linux
+# Verificar status completo do deploy
+./scripts/check-azure.sh check
+
+# Ver logs do container
+./scripts/check-azure.sh logs
+
+# Ver status detalhado
+./scripts/check-azure.sh status
+
+# Fazer deploy manual (se necessário)
+./scripts/check-azure.sh deploy
+
+# Limpar todos os recursos (CUIDADO!)
+./scripts/check-azure.sh delete
 ```
 
-### 4. Criar Web App
+---
 
-```bash
-az webapp create \
-  --name tech-challenge-api-grupo-27 \
-  --plan plan-tech-challenge \
-  --resource-group rg-tech-challenge-fase4 \
-  --deployment-container-image-name ghcr.io/vagnerbarbosa/tech-challenge-fase4:latest
-```
+## CI/CD Pipeline
 
-### 5. Configurar Variáveis de Ambiente
+O deploy automático é feito via GitHub Actions (`.github/workflows/deploy-azure.yml`):
 
-```bash
-# Azure Keys
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings AZURE_TEXT_KEY="sua-key-aqui"
+### Workflow Steps
 
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings AZURE_SPEECH_KEY="sua-key-aqui"
+1. **Check Image** - Verifica cache de imagem Docker
+2. **Build** - Constrói imagem multi-stage
+3. **Push** - Envia para ghcr.io
+4. **Deploy** - Cria/recursos Azure e Container Instance
+5. **Health Check** - Valida que a API responde
 
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings AZURE_VISION_KEY="sua-key-aqui"
+### Trigger
 
-# Security Keys
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings SECURITY_API_KEY="sua-api-key-segura"
-
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings SECURITY_ADMIN_KEY="sua-admin-key-segura"
-
-# Configurações
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings ENVIRONMENT="production" LOG_LEVEL="INFO"
-```
-
-### 6. Configurar Porta e Startup
-
-```bash
-az webapp config set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --startup-file "uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
-
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings WEBSITES_PORT=8000
-```
-
-### 7. Configurar Azure Files (SQLite)
-
-```bash
-az webapp config appsettings set \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --settings DATABASE_URL="sqlite:///home/site/data/app.db"
-```
-
-### 8. Habilitar HTTPS
-
-```bash
-az webapp update \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4 \
-  --https-only true
-```
-
-### 9. Configurar GitHub Secrets (para CI/CD)
-
-No GitHub, vá em Settings > Secrets and variables > Actions, e adicione:
-
-```
-AZURE_CREDENTIALS={
-  "clientId": "...",
-  "clientSecret": "...",
-  "subscriptionId": "...",
-  "tenantId": "..."
-}
-```
-
-Para obter as credenciais:
-
-```bash
-az ad sp create-for-rbac \
-  --name "github-actions-tech-challenge" \
-  --role contributor \
-  --scopes /subscriptions/{subscription-id}/resourceGroups/rg-tech-challenge-fase4 \
-  --sdk-auth
-```
-
-## Deploy Automático (CI/CD)
-
-Após o setup inicial, cada push na branch `main` dispara deploy automático:
+Push na branch `main` dispara deploy automático:
 
 ```bash
 git add .
@@ -148,81 +64,142 @@ git commit -m "feat: minha nova feature"
 git push origin main
 ```
 
-O workflow faz:
-1. Roda testes (pytest)
-2. Build e push da imagem Docker para ghcr.io
-3. Deploy para Azure App Service
-4. Health check
-5. Rollback automático se falhar
+---
 
-## Deploy Manual
+## Acesso aos Serviços
 
-Se precisar fazer deploy manualmente:
+| Endpoint | URL |
+|----------|-----|
+| API Base | http://20.226.196.195:8000 |
+| Health | http://20.226.196.195:8000/health |
+| Swagger | http://20.226.196.195:8000/docs |
+| ReDoc | http://20.226.196.195:8000/redoc |
 
-```bash
-# Usar o script
-./scripts/deploy-azure.sh
+---
 
-# Ou com tag específica
-./scripts/deploy-azure.sh v1.0.0
-```
+## Configuração do Ambiente
 
-## Verificar Deploy
+### Variáveis Configuradas (via CI/CD)
 
 ```bash
-# Health check
-curl https://tech-challenge-api-grupo-27.azurewebsites.net/health
-
-# Swagger
-curl https://tech-challenge-api-grupo-27.azurewebsites.net/docs
+ENVIRONMENT=production
+LOG_LEVEL=INFO
+AZURE_TEXT_ENDPOINT=<auto-configured>
+AZURE_TEXT_KEY=<auto-configured>
+AZURE_SPEECH_KEY=<auto-configured>
+AZURE_SPEECH_REGION=brazilsouth
+AZURE_VISION_ENDPOINT=<auto-configured>
+AZURE_VISION_KEY=<auto-configured>
+DATABASE_URL=sqlite:///tmp/app.db
+REDIS_ENABLED=false
+SECURITY_API_KEY=<from secrets>
+SECURITY_ADMIN_KEY=<from secrets>
+SECRET_KEY=<from secrets>
 ```
 
-## Logs
+### GitHub Secrets Necessários
 
-```bash
-# Ver logs em tempo real
-az webapp log tail \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4
+Configurados em Settings > Secrets and variables > Actions:
 
-# Ou no portal Azure: App Service > Monitoring > Log stream
-```
+- `AZURE_CREDENTIALS` - Service Principal para Azure
+- `API_KEY` - Chave de API para autenticação
+- `ADMIN_KEY` - Chave admin para endpoints administrativos
+- `SECRET_KEY` - Secret key para FastAPI/session
+
+---
 
 ## Troubleshooting
 
-### App não inicia
+### Container não inicia
+
 ```bash
-az webapp log tail --name tech-challenge-api-grupo-27 --resource-group rg-tech-challenge-fase4
+# Ver logs via Azure CLI
+az container logs --resource-group rg-tech-challenge-fase4 --name tech-challenge-api
+
+# Ou usar o script
+./scripts/check-azure.sh logs
 ```
 
 ### Health check falha
+
 ```bash
-# Verificar variáveis de ambiente
-az webapp config appsettings list \
-  --name tech-challenge-api-grupo-27 \
-  --resource-group rg-tech-challenge-fase4
+# Verificar status do container
+./scripts/check-azure.sh status
+
+# Verificar se variáveis estão configuradas
+az container show --resource-group rg-tech-challenge-fase4 --name tech-challenge-api \
+  --query 'containers[0].environmentVariables'
 ```
 
-### Reiniciar app
+### Recriar container manualmente
+
 ```bash
-az webapp restart --name tech-challenge-api-grupo-27 --resource-group rg-tech-challenge-fase4
+# Deletar e recriar via script
+./scripts/check-azure.sh deploy
 ```
 
-## Limpar Recursos (Se necessário)
+---
+
+## Azure CLI Commands
+
+### Ver Resource Group
 
 ```bash
-# Deletar App Service
-az webapp delete --name tech-challenge-api-grupo-27 --resource-group rg-tech-challenge-fase4 --yes
+az group show --name rg-tech-challenge-fase4
+```
 
-# Deletar App Service Plan
-az appservice plan delete --name plan-tech-challenge --resource-group rg-tech-challenge-fase4 --yes
+### Ver Container Instance
 
-# Deletar Resource Group (CUIDADO: apaga tudo!)
+```bash
+az container show --resource-group rg-tech-challenge-fase4 --name tech-challenge-api
+```
+
+### Ver AI Services
+
+```bash
+az cognitiveservices account list --resource-group rg-tech-challenge-fase4
+```
+
+### Ver Logs
+
+```bash
+az container logs --resource-group rg-tech-challenge-fase4 --name tech-challenge-api
+```
+
+---
+
+## Limpar Recursos (CUIDADO!)
+
+```bash
+# Deletar Container Instance
+az container delete --resource-group rg-tech-challenge-fase4 \
+  --name tech-challenge-api --yes
+
+# Deletar AI Services
+for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+  az cognitiveservices account delete --name $service \
+    --resource-group rg-tech-challenge-fase4
+done
+
+# Deletar Resource Group (apaga TUDO!)
 az group delete --name rg-tech-challenge-fase4 --yes --no-wait
 ```
 
+---
+
+## Collection/Environment
+
+Importe o arquivo `docs/collection.json` no Postman/Insomnia:
+
+**Environments disponíveis:**
+- **Local**: http://localhost:8000 (api_key: test-api-key)
+- **Azure Production**: http://20.226.196.195:8000 (api_key: demo-api-key)
+
+---
+
 ## Recursos
 
-- [Azure CLI Reference](https://docs.microsoft.com/cli/azure/)
-- [App Service Documentation](https://docs.microsoft.com/azure/app-service/)
+- [Azure Container Instances Docs](https://docs.microsoft.com/azure/container-instances/)
+- [Azure AI Services](https://docs.microsoft.com/azure/cognitive-services/)
 - [GitHub Actions Azure](https://docs.github.com/actions/deployment/deploying-to-azure)
+- [Docker Build Push Action](https://github.com/marketplace/actions/build-and-push-docker-images)
