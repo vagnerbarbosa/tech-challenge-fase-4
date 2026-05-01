@@ -69,10 +69,12 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copiar código da aplicação
 COPY --chown=appuser:appgroup src/ ./src/
 COPY --chown=appuser:appgroup scripts/ ./scripts/
+COPY --chown=appuser:appgroup entrypoint.sh ./entrypoint.sh
 
 # Criar diretórios necessários com permissões corretas
 RUN mkdir -p /tmp/health-api /app/data /app/logs /app/logs/audit \
-    && chown -R appuser:appgroup /tmp/health-api /app/data /app/logs
+    && chown -R appuser:appgroup /tmp/health-api /app/data /app/logs \
+    && chmod +x /app/entrypoint.sh
 
 # Configurar diretório temp da aplicação
 ENV TMPDIR=/tmp/health-api \
@@ -92,5 +94,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expor porta
 EXPOSE $PORT
 
-# Comando de inicialização
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando de inicialização via entrypoint script
+CMD ["/bin/sh", "/app/entrypoint.sh"]
