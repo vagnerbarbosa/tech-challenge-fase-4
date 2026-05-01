@@ -128,31 +128,73 @@ async def analyze_multimodal(
                 detail="Rate limit excedido para análise de texto",
             ) from None
 
-    if audio:
-        try:
-            await validate_audio_file(audio)
+    # Diretório temporário para arquivos (LGPD) - CRIAR ANTES DA VALIDAÇÃO
+    temp_dir = Path(tempfile.mkdtemp(prefix="multimodal_"))
+
+    # Salvar arquivos em disco IMEDIATAMENTE após receber (antes de qualquer validação
+    # que consuma o stream), pois UploadFile é de única leitura
+    audio_path: Path | None = None
+    video_path: Path | None = None
+
+    try:
+        if audio:
+            audio_path = temp_dir / "audio_input"
+            content = await audio.read()
+            audio_path.write_bytes(content)
+            logger.debug(
+                "audio_saved_temp",
+                correlation_id=correlation_id,
+                size_bytes=len(content),
+            )
+
+            # Validar arquivo salvo
+            from fastapi import UploadFile as UploadFileType
+            from io import BytesIO
+
+            # Criar UploadFile temporário para validação
+            validation_file = UploadFileType(
+                filename=audio.filename,
+                file=BytesIO(content),
+            )
+            await validate_audio_file(validation_file)
             check_and_increment_quota(
                 "audio",
                 daily_limit=RATE_LIMITS["audio"]["daily_minutes"],
                 monthly_limit=RATE_LIMITS["audio"]["monthly_minutes"],
             )
-        except HTTPException:
-            raise
-        except Exception:
-            logger.warning(
-                "audio_rate_limit_exceeded",
+
+        if video:
+            video_path = temp_dir / "video_input"
+            content = await video.read()
+            video_path.write_bytes(content)
+            logger.debug(
+                "video_saved_temp",
                 correlation_id=correlation_id,
+                size_bytes=len(content),
             )
-            raise HTTPException(
-                status_code=429,
-                detail="Rate limit excedido para análise de áudio",
-            ) from None
 
-    if video:
-        await validate_video_file(video)
+            # Validar arquivo salvo
+            from fastapi import UploadFile as UploadFileType
+            from io import BytesIO
 
-    # Diretório temporário para arquivos (LGPD)
-    temp_dir = Path(tempfile.mkdtemp(prefix="multimodal_"))
+            validation_file = UploadFileType(
+                filename=video.filename,
+                file=BytesIO(content),
+            )
+            await validate_video_file(validation_file)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            "file_save_error",
+            correlation_id=correlation_id,
+            error=str(e),
+        )
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao processar arquivo: {str(e)}",
+        ) from None
 
     try:
         service = get_fusion_service()
@@ -160,8 +202,8 @@ async def analyze_multimodal(
         async with asyncio.timeout(request_timeout_seconds):
             response = await service.analyze(
                 texto=texto,
-                audio=audio,
-                video=video,
+                audio_path=audio_path,
+                video_path=video_path,
                 patient_id=patient_id,
             )
 
@@ -180,9 +222,9 @@ async def analyze_multimodal(
         modalities = []
         if texto:
             modalities.append("text")
-        if audio:
+        if audio_path:
             modalities.append("audio")
-        if video:
+        if video_path:
             modalities.append("video")
 
         audit = get_audit_logger()
@@ -226,9 +268,9 @@ async def analyze_multimodal(
         modalities = []
         if texto:
             modalities.append("text")
-        if audio:
+        if audio_path:
             modalities.append("audio")
-        if video:
+        if video_path:
             modalities.append("video")
 
         audit = get_audit_logger()
@@ -256,9 +298,9 @@ async def analyze_multimodal(
         modalities = []
         if texto:
             modalities.append("text")
-        if audio:
+        if audio_path:
             modalities.append("audio")
-        if video:
+        if video_path:
             modalities.append("video")
 
         audit = get_audit_logger()
