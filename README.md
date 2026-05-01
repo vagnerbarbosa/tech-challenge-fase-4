@@ -812,6 +812,91 @@ curl -X POST "http://localhost:8000/analyze/text" \
 
 ---
 
+## Tecnologias de Análise Visual: Azure AI Vision vs YOLOv8
+
+O sistema utiliza uma **abordagem híbrida** para análise de vídeo/imagem, combinando duas tecnologias complementares:
+
+### Azure AI Vision (Opcional)
+
+Serviço de visão computacional da Azure que fornece **compreensão contextual** da imagem.
+
+**O que faz:**
+- Gera descrições textuais do conteúdo visual
+- Identifica objetos genéricos (móveis, equipamentos, ambientes)
+- Extrai tags semânticas sobre a cena
+- Entende o contexto geral do local (hospital, consultório, etc.)
+
+**Quando usar:**
+- Quando é necessário entender o contexto geral da cena
+- Para descrições textuais do ambiente
+- Para integração com outros serviços Azure
+
+**Custo:** Consome quota do Azure Free Tier (5.000 requests/mês)
+
+### YOLOv8 (Obrigatório - Local)
+
+Modelo de detecção de objetos que roda **localmente no container** para identificar elementos específicos de saúde.
+
+**O que faz:**
+- Detecta **instrumentos médicos** (tesouras, bisturis, agulhas)
+- Identifica **sangramento** via análise de cor HSV
+- Analisa **postura** da paciente (sinais de medo, desconforto)
+- Calcula riscos específicos de violência e saúde mental
+
+**Quando usar:**
+- Sempre - é a tecnologia principal para vídeo
+- Para detecções médicas específicas
+- Quando é necessário zero custo (não consome quota Azure)
+
+**Custo:** **Gratuito** - processamento 100% local
+
+### Por que Ambos?
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    Análise de Vídeo                           │
+├──────────────────────┬───────────────────────────────────────┤
+│  Azure AI Vision     │  YOLOv8 (Local)                       │
+│  (Opcional)          │  (Obrigatório)                        │
+├──────────────────────┼───────────────────────────────────────┤
+│  • Contexto geral    │  • Instrumentos médicos               │
+│  • Cenário/ambiente  │  • Sangramento anômalo                │
+│  • Objetos comuns    │  • Postura e linguagem corporal      │
+│  • Tags semânticas   │  • Cálculo de risco específico        │
+├──────────────────────┴───────────────────────────────────────┤
+│                    Fusão de Resultados                        │
+│         risco_violencia + risco_saude_mental                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Exemplo prático:**
+
+Um vídeo mostra uma consulta de emergência:
+
+1. **YOLOv8 detecta** (processamento local):
+   - Tesoura cirúrgica presente (87% confiança)
+   - Área de sangramento no campo visual
+   - Postura retraída da paciente
+
+2. **Resultado combinado**:
+   - `risco_violencia: alto` - instrumento + postura de medo
+   - `risco_saude_mental: médio` - sangramento pode indicar emergência
+   - Alerta: "Instrumento cirúrgico + sangue detectado"
+
+**Decisão de arquitetura:**
+
+| Característica | Azure AI Vision | YOLOv8 |
+|----------------|-----------------|--------|
+| Propósito | Contexto geral | Detalhes médicos |
+| Custo | Consome quota | **Zero custo** |
+| Latência | ~100-500ms | ~10-50ms |
+| Objetos | Genéricos | Específicos saúde |
+| Execução | Nuvem | Local |
+
+> **Nota:** No modo padrão, apenas YOLOv8 é executado para economizar a quota Azure. Azure AI Vision está disponível como opção quando contexto semântico detalhado é necessário.
+
+---
+
 ## Suporte Multilíngue (Azure AI Content Safety)
 
 O sistema oferece **detecção de risco em múltiplos idiomas** através do Azure AI Content Safety:

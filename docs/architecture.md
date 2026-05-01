@@ -345,6 +345,107 @@ tech-challenge-fase-4/
 └── docker-compose.yml   # Docker setup
 ```
 
+## Azure AI Vision vs YOLOv8: Por que Ambos?
+
+O sistema utiliza duas tecnologias complementares para análise visual, cada uma com propósito específico:
+
+### Azure AI Vision
+
+**Propósito**: Análise contextual de imagem para compreensão geral da cena.
+
+**Capacidades**:
+- Geração de descrições detalhadas do conteúdo visual
+- Extração de tags e categorias semânticas
+- Detecção de objetos genéricos (mobília, pessoas, ambientes)
+- Análise de contexto e relacionamentos entre elementos
+
+**Casos de uso no projeto**:
+- Descrever o ambiente de uma consulta médica
+- Identificar objetos gerais presentes na cena
+- Prover contexto sobre a situação capturada
+
+**Considerações**:
+- Consome quota do Azure Free Tier (5.000 requests/mês)
+- API externa com latência de rede (~100-500ms)
+- Cobertura multilíngue nas descrições
+
+### YOLOv8 (Ultralytics)
+
+**Propósito**: Detecção específica para domínio médico/saúde da mulher.
+
+**Capacidades**:
+- Detecção de instrumentos médicos (tesouras, bisturis, agulhas)
+- Identificação de sangramento via análise de cor HSV
+- Análise de postura e linguagem corporal
+- Detecção em tempo real em CPU
+
+**Casos de uso no projeto**:
+- Detectar instrumentos cirúrgicos em procedimentos
+- Identificar sangramento anômalo (hemorragia)
+- Analisar postura da paciente (sinais de desconforto, medo)
+- Calcular riscos específicos de violência e saúde mental
+
+**Considerações**:
+- Processamento 100% local (zero custo Azure)
+- Modelo YOLOv8n (~6MB) otimizado para edge/CPU
+- Latência baixa (<100ms por frame)
+- Especializado para casos de uso de saúde da mulher
+
+### Por que Usar Ambos?
+
+| Aspecto | Azure AI Vision | YOLOv8 |
+|---------|----------------|--------|
+| **Propósito** | Contexto geral da imagem | Detalhes médicos específicos |
+| **Objetos detectados** | Genéricos (cadeiras, mesas, pessoas) | Médicos (tesouras, sangue, posturas) |
+| **Custo** | Consome quota Azure | Gratuito (local) |
+| **Latência** | ~100-500ms | ~10-50ms |
+| **Idioma** | Multilíngue | Agnóstico (visão pura) |
+| **Precisão médica** | Limitada | Alta (modelo customizado) |
+
+**Arquitetura complementar**:
+```
+Vídeo/Imagem de Entrada
+         │
+         ├──→ YOLOv8 (local) ──→ Detecção instrumentos, sangue, postura
+         │                              │
+         │                              ▼
+         │                    Cálculo de risco específico
+         │                              │
+         ▼                              ▼
+Azure AI Vision (opcional) ──→ Contexto geral da cena
+         │                              │
+         └────────────┬─────────────────┘
+                      ▼
+              Fusão de análises
+                      │
+         ┌────────────┼────────────┐
+         ▼            ▼            ▼
+   risco_violencia  risco_saude_mental  metadata
+```
+
+**Exemplo prático de trabalho conjunto**:
+
+Considerando um vídeo de uma consulta de emergência:
+
+1. **YOLOv8 detecta**:
+   - Uma tesoura cirúrgica (classe: `scissors`, confiança: 92%)
+   - Área de sangue no campo visual (severidade: alta)
+   - Postura retraída da paciente (indicador de medo)
+
+2. **Resultado combinado**:
+   - `risco_violencia: alto` (instrumento + postura de medo)
+   - `risco_saude_mental: médio` (sangramento pode indicar autoagressão ou acidente)
+   - Alerta específico: "Instrumento cirúrgico + sangue detectado"
+
+3. **Sem Azure AI Vision** (modo padrão para economia):
+   - Apenas YOLOv8 executa
+   - Detecções médicas são priorizadas
+   - Zero consumo de quota Azure para vídeo
+
+**Decisão de design**:
+- **YOLOv8 é obrigatório**: Fornece detecções médicas específicas necessárias para o domínio
+- **Azure AI Vision é opcional**: Pode ser usado em casos onde contexto geral da cena é necessário, mas priorizamos YOLOv8 para manter o uso dentro do Azure Free Tier
+
 ## Technology Stack
 
 | Category | Technology | Version |
@@ -354,6 +455,7 @@ tech-challenge-fase-4/
 | Validation | Pydantic | v2 |
 | Azure SDK | azure-ai-textanalytics | 5.4.0 |
 | Azure SDK | azure-cognitiveservices-speech | 1.48.x |
+| Azure SDK | azure-ai-vision-imageanalysis | 1.0+ |
 | ML | Ultralytics (YOLOv8) | 8.x |
 | CV | OpenCV | 4.8+ |
 | Audio | librosa | 0.10+ |
