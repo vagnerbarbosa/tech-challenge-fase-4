@@ -20,7 +20,7 @@ Este projeto segue a metodologia **Spec Kit** ([github/spec-kit](https://github.
 - **specs/**: Especificações detalhadas para cada feature
 - **Fases**: Especificar → Planejar → Taskificar → Implementar → Validar
 - **Rastreabilidade**: Cada feature tem ID (001-011) e spec documentada
-- **Constitution**: Regras em `.specify/memory/constitution.md`
+- **Constitution**: Regras em `specs/constitution.md` (conforme Spec Kit)
 
 ## Stack
 

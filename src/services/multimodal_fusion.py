@@ -183,8 +183,10 @@ class FusionService:
     async def analyze(
         self,
         texto: str | None,
-        audio: UploadFile | None,
-        video: UploadFile | None,
+        audio: UploadFile | None = None,
+        video: UploadFile | None = None,
+        audio_path: Path | None = None,
+        video_path: Path | None = None,
         patient_id: str | None = None,
     ) -> MultimodalResponse:
         """Processa múltiplas modalidades em paralelo e retorna fusão.
@@ -238,26 +240,52 @@ class FusionService:
             )
             task_names.append("texto")
 
-        if audio:
-            # Salvar áudio temporariamente
-            audio_path = Path(f"/tmp/audio_{correlation_id}.wav")
-            tasks.append(
-                asyncio.wait_for(
-                    self._process_audio(audio, audio_path, patient_id),  # type: ignore[arg-type]
-                    timeout=DEFAULT_TIMEOUT_SECONDS,
+        # Áudio: aceitar UploadFile (legacy) ou Path (recomendado)
+        if audio or audio_path:
+            if audio:
+                # Modo legado: salvar UploadFile temporariamente
+                audio_path = Path(f"/tmp/audio_{correlation_id}.wav")
+                tasks.append(
+                    asyncio.wait_for(
+                        self._process_audio(audio, audio_path, patient_id),  # type: ignore[arg-type]
+                        timeout=DEFAULT_TIMEOUT_SECONDS,
+                    )
                 )
-            )
+            else:
+                # Modo novo: Path já fornecido
+                tasks.append(
+                    asyncio.wait_for(
+                        self._audio_service.analyze(audio_path, patient_id),  # type: ignore[arg-type]
+                        timeout=DEFAULT_TIMEOUT_SECONDS,
+                    )
+                )
             task_names.append("audio")
 
-        if video:
-            # Salvar vídeo temporariamente
-            video_path = Path(f"/tmp/video_{correlation_id}.mp4")
-            tasks.append(
-                asyncio.wait_for(
-                    self._process_video(video, video_path),  # type: ignore[arg-type]
-                    timeout=DEFAULT_TIMEOUT_SECONDS,
+        # Vídeo: aceitar UploadFile (legacy) ou Path (recomendado)
+        if video or video_path:
+            if video:
+                # Modo legado: salvar UploadFile temporariamente
+                video_path_tmp = Path(f"/tmp/video_{correlation_id}.mp4")
+                tasks.append(
+                    asyncio.wait_for(
+                        self._process_video(video, video_path_tmp),  # type: ignore[arg-type]
+                        timeout=DEFAULT_TIMEOUT_SECONDS,
+                    )
                 )
-            )
+            else:
+                # Modo novo: Path já fornecido
+                temp_dir = video_path.parent / f"video_tmp_{correlation_id}"  # type: ignore[union-attr]
+                temp_dir.mkdir(exist_ok=True)
+                tasks.append(
+                    asyncio.wait_for(
+                        self._video_service.analyze(
+                            video_path=video_path,  # type: ignore[arg-type]
+                            duration_seconds=0.0,
+                            temp_dir=temp_dir,
+                        ),
+                        timeout=DEFAULT_TIMEOUT_SECONDS,
+                    )
+                )
             task_names.append("video")
 
         # Processar em paralelo com graceful degradation

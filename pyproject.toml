@@ -24,8 +24,6 @@ python-multipart = ">=0.0.6"
 azure-ai-textanalytics = ">=5.4.0"
 azure-cognitiveservices-speech = ">=1.48.0"
 azure-ai-vision-imageanalysis = ">=1.0.0"
-azure-storage-blob = ">=12.0.0"
-azure-identity = ">=1.15.0"
 
 # Processamento de mídia
 opencv-python = ">=4.8.0"
@@ -68,14 +66,7 @@ respx = ">=0.20.0"
 # Qualidade de código
 ruff = ">=0.1.0"
 mypy = ">=1.7.0"
-pre-commit = ">=3.5.0"
 
-# Load testing
-locust = ">=2.18.0"
-
-# Documentação
-mkdocs = ">=1.5.0"
-mkdocs-material = ">=9.4.0"
 
 [tool.poetry.extras]
 security = ["slowapi", "redis"]
@@ -189,31 +180,3 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
-# ============================================
-# Security Scanning (Bandit)
-# ============================================
-[tool.bandit]
-# Arquivos/padrões para excluir da análise
-exclude_dirs = [
-    "tests",
-    ".venv",
-    "venv",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
-]
-
-# Testes a ignorar (false positives comuns)
-skips = [
-    "B101",  # assert_used - permitido em código Python (não em produção)
-    "B311",  # random - usado em testes é aceitável
-]
-
-# Severidade mínima para reportar
-severity = "low"
-
-# Confiança mínima para reportar
-confidence = "medium"
-
-# Targets para análise
-targets = ["src"]

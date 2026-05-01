@@ -3,7 +3,7 @@
 **Data**: 2026-04-21
 **Auditor**: Claude
 **Artefatos Auditados**: plan.md, tasks.md
-**Referências**: spec.md, constitution.md
+**Referências**: spec.md, [constitution.md](../constitution.md)
 
 ---
 

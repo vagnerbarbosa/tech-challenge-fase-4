@@ -446,6 +446,133 @@ Considerando um vídeo de uma consulta de emergência:
 - **YOLOv8 é obrigatório**: Fornece detecções médicas específicas necessárias para o domínio
 - **Azure AI Vision é opcional**: Pode ser usado em casos onde contexto geral da cena é necessário, mas priorizamos YOLOv8 para manter o uso dentro do Azure Free Tier
 
+## Technology Decisions
+
+Esta seção documenta as motivações para escolha de cada tecnologia principal do projeto.
+
+### FastAPI
+
+**Por que FastAPI?**
+- **Async nativo**: Processamento paralelo de múltiplas modalidades (texto + áudio + vídeo simultaneamente)
+- **Documentação automática**: Gera Swagger UI e ReDoc sem código extra
+- **Validação automática**: Integração nativa com Pydantic para validação de requests/responses
+- **Performance**: Um dos frameworks Python mais rápidos (baseado em Starlette)
+- **Type hints**: Suporte completo a type hints modernos do Python 3.11+
+
+**Alternativas consideradas**: Flask (síncrono, mais lento), Django (pesado, não focado em APIs)
+
+### Pydantic v2
+
+**Por que Pydantic?**
+- **Validação de dados**: Garante que dados de entrada estão corretos antes de processar
+- **Serialização**: Conversão automática entre JSON e objetos Python
+- **Documentação**: Gera schemas OpenAPI automaticamente para o Swagger
+- **Configurações**: `pydantic-settings` para validação de variáveis de ambiente
+- **Performance**: Pydantic v2 é 5-50x mais rápido que v1 (core em Rust)
+
+**Uso no projeto**: Schemas de API (`TextAnalysisRequest`, `AudioAnalysisResponse`), configuração (`Settings`), validação cross-field
+
+### Poetry
+
+**Por que Poetry em vez de requirements.txt?**
+- **Lock file** (`poetry.lock`): Garante versões idênticas em todos os ambientes (dev, CI/CD, produção)
+- **Resolução de conflitos**: Resolve automaticamente dependências conflitantes (SAT solver)
+- **Grupos de dependências**: Separa dependências de produção, desenvolvimento e opcionais
+- **Virtualenv automático**: Cria e gerencia ambiente isolado automaticamente
+- **Build para produção**: Exporta requirements.txt quando necessário
+
+**Alternativas**: pip + requirements.txt (sem lock file, versões flutuantes), conda (mais pesado, para data science)
+
+### Azure AI Services
+
+**Por que Azure?**
+- **Free Tier**: 5.000 requests/mês (Text Analytics), 300 minutos/mês (Speech)
+- **SDK Python oficial**: APIs bem documentadas e mantidas pela Microsoft
+- **Multilíngue**: Suporte nativo a 100+ idiomas (importante para Content Safety)
+- **LGPD compliance**: Azure é certificado para dados de saúde no Brasil
+
+**Serviços utilizados**:
+- **Text Analytics**: Análise de sentimento em prontuários e diários
+- **Speech**: Transcrição de consultas de telemedicina
+- **Content Safety**: Detecção multilíngue de riscos (violência, autoagressão)
+
+**Alternativas**: Google Cloud (custo similar), AWS Comprehend (menos foco em saúde)
+
+### YOLOv8 (Ultralytics)
+
+**Por que YOLOv8?**
+- **Processamento local**: Zero custo de cloud, zero latência de rede
+- **Modelo pequeno**: YOLOv8n (~6MB) roda em CPU sem GPU
+- **Detecção em tempo real**: 10-50ms por frame, suficiente para análise de vídeo
+- **Customizável**: Possibilidade de treinar com dados específicos de saúde
+- **Requisito obrigatório**: Especificação do PDF menciona "YOLOv8 customizado"
+
+**Uso no projeto**: Detecção de instrumentos cirúrgicos, sangramento (análise HSV), postura da paciente
+
+**Por que YOLOv8 e não só Azure AI Vision?**
+- YOLOv8 é **processamento local** (obrigatório no PDF) - zero custo Azure
+- Azure AI Vision é **opcional** para contexto geral da cena (usa quota)
+- YOLOv8 detecta **instrumentos médicos específicos** que Azure Vision não reconhece
+- YOLOv8 é **mais rápido** (10-50ms vs 100-500ms)
+
+**Complementaridade**: Veja seção [Azure AI Vision vs YOLOv8](#azure-ai-vision-vs-yolov8-por-que-ambos)
+
+**Alternativas**: TensorFlow Object Detection (mais complexo), Detectron2 (Facebook - overkill)
+
+### Librosa + SoundFile
+
+**Por que Librosa?**
+- **Padrão em análise de áudio**: Biblioteca mais usada para processamento de sinais de áudio em Python
+- **Prosódia**: Extrai pitch, energia, pausas (features relevantes para detectar voz tremida)
+- **Integração com scikit-learn**: Pipelines de ML para análise de emoção na voz
+
+**Uso no projeto**: Análise prosódica após transcrição Azure (pitch analysis, detecção de pausas suspeitas)
+
+### OpenCV
+
+**Por que OpenCV?**
+- **Extração de frames**: De vídeos MP4/AVI/MOV para análise YOLOv8
+- **Processamento de imagem**: Operações básicas (resize, convert, HSV color space)
+- **Padrão da indústria**: Estável, bem documentado, bindings Python oficiais
+
+**Uso no projeto**: Extração de frames, conversão de color space para detecção de sangue
+
+### Ruff + mypy
+
+**Por que ambos?**
+
+**Ruff**:
+- **Linter + Formatter**: Substitui flake8, black, isort em uma ferramenta só
+- **Performance**: 10-100x mais rápido que alternativas (Rust core)
+- **Formato consistente**: Line length 88 (padrão Black), imports organizados
+
+**mypy**:
+- **Type checking**: Verifica se tipos estão corretos antes de runtime
+- **Strict mode**: Modo rigoroso para código crítico de saúde
+- **Catching bugs**: Detecta `None` onde deveria ter `dict`, `str` onde deveria ter `int`
+
+**Por que os dois**: Ruff cuida de estilo/código; mypy cuida de lógica/tipos
+
+### SQLAlchemy + aiosqlite
+
+**Por que SQLAlchemy?**
+- **Async**: `aiosqlite` permite queries SQLite sem bloquear a API
+- **ORM**: Abstração para modelo de dados (AuditLog)
+- **Migrations**: Estrutura para evolução do schema
+
+**Por que SQLite**: Suficiente para MVP (metadados, audit logs), sem servidor extra, LGPD-friendly (dados locais)
+
+**Alternativas**: PostgreSQL (overkill para escala), Azure SQL (custo, latência)
+
+### structlog
+
+**Por que structlog?**
+- **JSON logging**: Logs estruturados para análise e parsing automatizado
+- **Context binding**: Correlation ID tracking através de toda a requisição
+- **Sanitização**: Integração com `SecretMasker` para não logar PII
+
+**Uso no projeto**: Logs de auditoria LGPD-compliant, tracking de requisições
+
 ## Technology Stack
 
 | Category | Technology | Version |

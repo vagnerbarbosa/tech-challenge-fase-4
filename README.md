@@ -40,11 +40,14 @@ Sistema para identificação precoce de riscos em saúde materna e sinais de vio
 
 ### Endpoints
 
-| Endpoint | URL |
-|----------|-----|
-| Health | `<DEPLOY_URL>/health` |
-| Swagger | `<DEPLOY_URL>/docs` |
-| ReDoc | `<DEPLOY_URL>/redoc` |
+| Endpoint | URL | Ambiente |
+|----------|-----|----------|
+| Health | `<DEPLOY_URL>/health` | Todos |
+| OpenAPI | `<DEPLOY_URL>/openapi.json` | Todos |
+| Swagger UI | `http://localhost:8000/docs` | Apenas local |
+| ReDoc | `http://localhost:8000/redoc` | Apenas local |
+
+**Nota:** Swagger UI e ReDoc estão desabilitados em produção (HTTP sem HTTPS causa Mixed Content errors). Use `openapi.json` com Postman/Insomnia.
 
 ---
 

@@ -1,8 +1,9 @@
 # Security Audit
 
-**Audit Date:** 2026-04-21  
+**Audit Date:** 2026-05-01 (Updated from 2026-04-21)  
 **Auditor:** Claude Code (Automated Analysis)  
 **Scope:** Full codebase - API, services, infrastructure, data handling  
+**Version:** v0.8.0  
 
 ---
 
@@ -10,9 +11,9 @@
 
 This security audit covers the Tech Challenge Fase 4 multimodal health analysis API. The system processes sensitive health data (text, audio, video) and requires strict security measures for LGPD compliance and patient data protection.
 
-**Overall Risk Level:** MEDIUM  
+**Overall Risk Level:** LOW  
 **Critical Issues:** 0  
-**High Priority:** 2  
+**High Priority:** 0 (2 resolved)  
 **Medium Priority:** 3  
 **Low Priority:** 2  
 
@@ -23,50 +24,71 @@ This security audit covers the Tech Challenge Fase 4 multimodal health analysis 
 ### HIGH-1: CORS Configuration Too Permissive in Development
 
 **Severity:** HIGH  
-**Status:** ⚠️ OPEN  
-**Location:** `src/api/main.py:55`
+**Status:** ✅ **CLOSED** (Mitigado em 2026-04-25)  
+**Location:** `src/api/main.py:40-70`
 
-**Issue:**
+**Issue Original:**
+Configuração CORS permitia `*` em modo debug, criando risco se debug fosse acidentalmente ativado em produção.
+
+**Mitigação Implementada:**
 ```python
-allow_origins=["*"] if settings.debug else []
+def get_cors_origins() -> list[str]:
+    cors_origins = security_config.cors_origins_list
+
+    # Warning se CORS * em não-local
+    if "*" in cors_origins and settings.environment != "development":
+        logger.warning("CORS configurado com '*' em ambiente nao-local")
+
+    # Em produção, remove * automaticamente
+    if security_config.is_production and "*" in cors_origins:
+        logger.error("Configuracao CORS insegura em producao")
+        cors_origins = ["https://localhost:3000"]  # Fallback seguro
 ```
 
-In debug mode, CORS allows all origins (`*`). While acceptable for local development, this is risky if debug mode is accidentally enabled in production.
-
-**Recommendation:**
-- Add explicit origin whitelist even in debug mode
-- Log warning if `*` origins enabled in non-local environments
-- Add pre-deployment check to verify CORS configuration
-
-**Remediation:**
-```python
-# Recommended approach
-allow_origins=[
-    "http://localhost:3000",
-    "http://localhost:8000",
-] if settings.debug else settings.allowed_origins.split(",")
-
-# Log warning
-if settings.debug and "*" in allow_origins:
-    logger.warning("CORS allowing all origins - development only!")
-```
+**Evidência:**
+- ✅ CORSValidation middleware implementado
+- ✅ Produção automaticamente remove `*` das origens permitidas
+- ✅ Logs de alerta em caso de configuração insegura
+- ✅ Origens configuráveis via `SECURITY_CORS_ORIGINS`
 
 ---
 
-### HIGH-2: API Key Not Required in Development
+### HIGH-2: API Key Required in All Environments
 
 **Severity:** HIGH  
-**Status:** ⚠️ OPEN  
-**Location:** Authentication middleware (if implemented)
+**Status:** ✅ **CLOSED** (Implementado em 2026-04-28)  
+**Location:** `src/api/routes/dependencies.py:125-170`, `src/core/security/auth.py`
 
-**Issue:** API key authentication is optional in development mode. This could lead to:
-- Unintentional exposure of dev instances
-- Testing credentials being used in staging/production
+**Issue Original:**
+API key authentication era opcional em modo desenvolvimento, podendo levar a exposição de instâncias dev.
 
-**Recommendation:**
-- Require API key in all environments except explicit "local" mode
-- Use different API keys per environment
-- Log all authentication failures
+**Implementação:**
+```python
+async def require_api_key(
+    request: Request,
+    x_api_key: Annotated[str | None, Header()] = None,
+) -> SecurityContext:
+    validator = get_api_key_validator()
+    try:
+        ctx = validator.get_security_context(
+            api_key=x_api_key,
+            request_id=request_id,
+            ip_address=ip_address,
+        )
+        return ctx
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key inválida ou ausente",
+        ) from e
+```
+
+**Evidência:**
+- ✅ Todos os endpoints protegidos usam `require_api_key` exceto `/health` e `/docs`
+- ✅ Master key configurável via `SECURITY_API_KEY`
+- ✅ Geração dinâmica de API keys via `/admin/api-keys`
+- ✅ Hash SHA256 com PBKDF2 para armazenamento seguro
+- ✅ Logging de todas as tentativas de autenticação
 
 ---
 
@@ -258,19 +280,17 @@ def get_cache_key(file_path: Path) -> str:
 
 ## Remediation Plan
 
-### Immediate (This Sprint)
-1. [ ] HIGH-1: Restrict CORS origins in debug mode
-2. [ ] HIGH-2: Require API key in staging
+### ✅ Resolved (v0.8.0)
+1. [x] HIGH-1: Restrict CORS origins in debug mode - **Implementado CORSValidation middleware**
+2. [x] HIGH-2: Require API key in all environments - **Implementado auth.py com PBKDF2 hashing**
+3. [x] Security headers (CSP, HSTS, etc.) - **Implementado em SecurityConfig**
 
-### Short Term (Next 2 Sprints)
-3. [ ] MED-2: Add CI/CD credential validation check
-4. [ ] LOW-2: Use content hash for cache keys
-5. [ ] MED-1: Add temp directory cleanup job
-
-### Medium Term (Next Month)
-6. [ ] MED-3: Configure web server upload limits
-7. [ ] Implement Azure Key Vault integration
-8. [ ] Add security headers (CSP, HSTS, etc.)
+### Open (Backlog)
+4. [ ] MED-2: Add CI/CD credential validation check
+5. [ ] MED-1: Add temp directory cleanup job (mitigated via `finally` blocks)
+6. [ ] MED-3: Configure web server upload limits (nginx/Azure Front Door)
+7. [ ] LOW-2: Use content hash for cache keys (vs file path)
+8. [ ] Future: Azure Key Vault integration (recomendado para produção)
 
 ---
 
@@ -303,5 +323,6 @@ poetry run ruff check . --select S  # flake8-bandit
 
 ---
 
-**Next Review:** 2026-05-21 (Monthly)  
-**Review Trigger:** Any major deployment or security incident
+**Next Review:** 2026-06-01 (Monthly)  
+**Review Trigger:** Any major deployment or security incident  
+**Last Updated:** 2026-05-01 - HIGH issues resolved, overall risk reduced to LOW
