@@ -78,8 +78,6 @@ API com hardening completo (OWASP API Top 10 + LGPD):
 
 ## 📡 Endpoints da API
 
-📖 **Documentação completa**: [docs/api-contracts.md](docs/api-contracts.md)
-
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
 | `/health` | GET | Health check com quotas Azure |
@@ -89,17 +87,19 @@ API com hardening completo (OWASP API Top 10 + LGPD):
 | `/analyze/multimodal` | POST | Fusão de modalidades |
 | `/docs` | GET | Swagger UI |
 
+📖 **Documentação completa**: [docs/api-contracts.md](docs/api-contracts.md)
+
 ---
 
 ## 🎥 Vídeo de Demonstração
-
-📹 **Link do vídeo**: [YouTube - Tech Challenge Fase 4](https://www.youtube.com/watch?v=PLACEHOLDER)
 
 O vídeo demonstra:
 - Arquitetura multimodal
 - Análise de texto, áudio e vídeo
 - Identificação de sinais de alerta
 - Deploy na Azure
+
+📹 **Link do vídeo**: [YouTube - Tech Challenge Fase 4](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 ---
 
