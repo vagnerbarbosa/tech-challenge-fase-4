@@ -13,6 +13,15 @@ Multimodal health analysis API for women's health:
 - **Multimodal**: Fusion endpoint (late fusion)
 - **Security**: OWASP + LGPD compliance (API Key, rate limiting, audit)
 
+### Specification Driven Development (SDD)
+
+Este projeto segue a metodologia **Spec Kit** ([github/spec-kit](https://github.com/github/spec-kit)):
+
+- **specs/**: Especificações detalhadas para cada feature
+- **Fases**: Especificar → Planejar → Taskificar → Implementar → Validar
+- **Rastreabilidade**: Cada feature tem ID (001-011) e spec documentada
+- **Constitution**: Regras em `.specify/memory/constitution.md`
+
 ## Stack
 
 - **Runtime**: Python 3.11+, FastAPI, Pydantic v2

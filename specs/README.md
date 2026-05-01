@@ -5,6 +5,35 @@
 
 ---
 
+## 📋 Sobre Este Projeto
+
+Este projeto utiliza **Specification Driven Development (SDD)** com o **[Spec Kit](https://github.com/github/spec-kit)** do GitHub.
+
+### O que é Spec Kit?
+
+O Spec Kit é uma metodologia de desenvolvimento baseada em especificações que garante:
+- ✅ **Clareza** - Cada feature é documentada antes da implementação
+- ✅ **Rastreabilidade** - Todo código tem uma spec associada
+- ✅ **Qualidade** - Testes e documentação são parte do processo
+- ✅ **Colaboração** - Interfaces claras entre desenvolvedores e IA
+
+### Estrutura do Spec Kit
+
+```
+specs/
+├── README.md                 # Este índice
+├── XXX-feature-name/
+│   ├── spec.md              # Especificação da feature
+│   ├── plan.md              # Plano de implementação
+│   ├── tasks.md             # Lista de tarefas
+│   └── data-model.md        # Modelos de dados (opcional)
+└── ...
+```
+
+**Referência**: [github/spec-kit](https://github.com/github/spec-kit)
+
+---
+
 ## Specs Ativas
 
 | ID | Feature | Status | Branch | Prioridade |
