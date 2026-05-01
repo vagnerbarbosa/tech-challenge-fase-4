@@ -3,22 +3,20 @@ name: Deploy Azure
 on:
   push:
     branches: [main, master]
-    # Executar apenas quando houver mudanças relevantes
     paths:
       - 'src/**'
       - 'Dockerfile'
-      - 'docker-compose.yml'
+      - 'entrypoint.sh'
       - 'pyproject.toml'
       - 'poetry.lock'
       - '.github/workflows/deploy-azure.yml'
-  workflow_dispatch:  # Permite execução manual
+  workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write  # Necessário para push no ghcr.io
+  packages: write
 
 env:
-  AZURE_WEBAPP_NAME: tech-challenge-api-grupo-27
   AZURE_RESOURCE_GROUP: rg-tech-challenge-fase4
   REGISTRY: ghcr.io
   IMAGE_NAME: vagnerbarbosa/tech-challenge-fase4
@@ -31,8 +29,6 @@ jobs:
   build:
     name: Build e Push Docker Image
     runs-on: ubuntu-latest
-    needs: [test]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -41,9 +37,6 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
-
-      - name: Configurar QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -61,9 +54,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=,suffix=,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value={{date 'YYYYMMDD-HHmmss'}}
+            type=raw,value=latest
 
       - name: Build e push da imagem Docker
         id: build
@@ -72,16 +63,12 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           platforms: linux/amd64
 
   deploy:
-    name: Deploy para Azure
+    name: Deploy para Azure Container Instances
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
       - name: Login na Azure
@@ -89,107 +76,72 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Configurar imagem no App Service
+      - name: Criar Resource Group
         run: |
-          IMAGE_URL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image_digest }}"
-          echo "🚀 Deploying image: $IMAGE_URL"
-          az webapp config container set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --container-image-name $IMAGE_URL \
-            --container-registry-url https://${{ env.REGISTRY }}
+          az group create \
+            --name ${{ env.AZURE_RESOURCE_GROUP }} \
+            --location brazilsouth \
+            --tags "project=tech-challenge" "environment=production" || true
 
-      - name: Configurar startup command
+      - name: Criar Azure AI Services
         run: |
-          az webapp config set \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --startup-file "uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
-
-      - name: Restart App Service
-        run: |
-          az webapp restart \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
-
-      - name: Aguardar deploy (30s)
-        run: sleep 30
-
-  health-check:
-    name: Health Check e Validação
-    runs-on: ubuntu-latest
-    needs: [deploy]
-
-    steps:
-      - name: Health Check
-        id: health
-        run: |
-          echo "⏳ Aguardando aplicação iniciar..."
-          MAX_RETRIES=10
-          RETRY_COUNT=0
-          APP_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health"
-
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL" || echo "000")
-            if [ "$RESPONSE" = "200" ]; then
-              echo "✅ Health check passou!"
-              exit 0
-            fi
-            echo "⏳ Tentativa $((RETRY_COUNT + 1))/$MAX_RETRIES - Status: $RESPONSE"
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            sleep 15
+          for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+            az cognitiveservices account create \
+              --name $service \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location brazilsouth \
+              --kind $(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi) \
+              --sku F0 || true
           done
 
-          echo "❌ Health check falhou após $MAX_RETRIES tentativas"
-          exit 1
-
-      - name: Testar endpoints principais
+      - name: Obter credenciais
+        id: credentials
         run: |
-          BASE_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
-          echo "🧪 Testando endpoints..."
+          echo "text_endpoint=$(az cognitiveservices account show --name tech-challenge-text --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)" >> $GITHUB_OUTPUT
+          echo "text_key=$(az cognitiveservices account keys list --name tech-challenge-text --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
+          echo "speech_key=$(az cognitiveservices account keys list --name tech-challenge-speech --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
+          echo "vision_endpoint=$(az cognitiveservices account show --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)" >> $GITHUB_OUTPUT
+          echo "vision_key=$(az cognitiveservices account keys list --name tech-challenge-vision --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
 
-          # Testar health endpoint
-          curl -sSf "$BASE_URL/health" > /dev/null && echo "✅ /health OK" || echo "⚠️ /health não responde"
-
-          # Testar docs endpoint
-          curl -sSf "$BASE_URL/docs" > /dev/null && echo "✅ /docs OK" || echo "⚠️ /docs não responde"
-
-          echo "🎉 Deploy validado!"
-
-  rollback:
-    name: Rollback (se necessário)
-    runs-on: ubuntu-latest
-    needs: [health-check]
-    if: failure()
-
-    steps:
-      - name: Login na Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Rollback para versão anterior
+      - name: Deploy Container Instance
         run: |
-          echo "🔄 Iniciando rollback..."
+          az container delete --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name tech-challenge-api --yes 2>/dev/null || true
 
-          # Obter imagem anterior
-          PREVIOUS_IMAGE=$(az webapp config container show \
-            --name ${{ env.AZURE_WEBAPP_NAME }} \
+          az container create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --query '[0].image' -o tsv 2>/dev/null || echo "")
+            --name tech-challenge-api \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --cpu 1 --memory 2 --ports 8000 --ip-address public --os-type Linux --location brazilsouth \
+            --environment-variables \
+              ENVIRONMENT=production \
+              LOG_LEVEL=INFO \
+              AZURE_TEXT_ENDPOINT="${{ steps.credentials.outputs.text_endpoint }}" \
+              AZURE_TEXT_KEY="${{ steps.credentials.outputs.text_key }}" \
+              AZURE_SPEECH_KEY="${{ steps.credentials.outputs.speech_key }}" \
+              AZURE_SPEECH_REGION=brazilsouth \
+              AZURE_VISION_ENDPOINT="${{ steps.credentials.outputs.vision_endpoint }}" \
+              AZURE_VISION_KEY="${{ steps.credentials.outputs.vision_key }}" \
+              DATABASE_URL="sqlite:///tmp/app.db" \
+              REDIS_ENABLED=false \
+              SECURITY_API_KEY="${{ secrets.API_KEY }}" \
+              SECURITY_ADMIN_KEY="${{ secrets.ADMIN_KEY }}" \
+            --restart-policy OnFailure
 
-          if [ -n "$PREVIOUS_IMAGE" ]; then
-            echo "🔄 Revertendo para: $PREVIOUS_IMAGE"
-            az webapp config container set \
-              --name ${{ env.AZURE_WEBAPP_NAME }} \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --container-image-name $PREVIOUS_IMAGE
-          else
-            echo "⚠️ Não foi possível obter imagem anterior"
-          fi
+      - name: Aguardar inicialização
+        run: sleep 60
 
-      - name: Notificar falha
-        if: failure()
+      - name: Health Check
         run: |
-          echo "❌ Deploy falhou e rollback não foi possível"
-          echo "Por favor, verifique manualmente no Azure Portal"
+          IP=$(az container show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name tech-challenge-api --query ipAddress.ip -o tsv)
+          for i in {1..15}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$IP:8000/health" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passou!"
+              echo "🌐 API disponível em: http://$IP:8000"
+              exit 0
+            fi
+            echo "⏳ Tentativa $i/15 - Status: $STATUS"
+            sleep 20
+          done
+          echo "❌ Health check falhou"
+          exit 1
