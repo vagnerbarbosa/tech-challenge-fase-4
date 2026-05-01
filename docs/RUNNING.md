@@ -1,6 +1,6 @@
 # Como Executar a Aplicação Localmente
 
-> **Última Atualização**: 2026-04-23
+> **Última Atualização**: 2026-05-01
 
 Este guia explica como executar a Multimodal Health Analysis API em seu ambiente local.
 
@@ -224,6 +224,90 @@ AZURE_SPEECH_REGION=brazilsouth
 ```bash
 docker-compose up -d
 ```
+
+---
+
+## Azure AI Content Safety (Opcional)
+
+O Azure AI Content Safety fornece detecção multilíngue de riscos em texto, incluindo violência, autoagressão e conteúdo prejudicial em mais de 100 idiomas.
+
+### 1. Como Habilitar
+
+Content Safety é opcional e controlado pela variável `CONTENT_SAFETY_ENABLED`. Quando desabilitado, o campo `content_safety` é omitido das respostas.
+
+### 2. Variáveis de Ambiente Necessárias
+
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
+| `CONTENT_SAFETY_ENABLED` | Ativa a análise de conteúdo (`true`/`false`) | Sim (para usar) |
+| `AZURE_CONTENT_SAFETY_KEY` | Chave do recurso Azure Content Safety | Se habilitado |
+| `AZURE_CONTENT_SAFETY_ENDPOINT` | Endpoint do recurso Azure Content Safety | Se habilitado |
+
+### 3. Exemplo de Configuração no .env
+
+```bash
+# Azure AI Content Safety (Multilingual Risk Detection)
+# Detecta violência, autoagressão e conteúdo prejudicial em 100+ idiomas
+CONTENT_SAFETY_ENABLED=true
+AZURE_CONTENT_SAFETY_KEY=your_content_safety_key_here
+AZURE_CONTENT_SAFETY_ENDPOINT=https://your-resource.cognitiveservices.azure.com/
+```
+
+### 4. Como Verificar se Está Funcionando
+
+Após configurar e reiniciar a API, faça uma requisição de análise de texto:
+
+```bash
+curl -X POST http://localhost:8000/analyze/text \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua-api-key" \
+  -d '{
+    "texto": "Estou com medo e muito ansiosa",
+    "tipo": "diario",
+    "patient_id": "paciente-123"
+  }'
+```
+
+Se Content Safety estiver habilitado e funcionando, a resposta incluirá o campo `content_safety`.
+
+### 5. Exemplo de Resposta da API com Content Safety
+
+```json
+{
+  "sentimento": "negativo",
+  "score": -0.75,
+  "risco_violencia": "medio",
+  "risco_saude_mental": "alto",
+  "palavras_chave": ["medo", "ansiosa"],
+  "indicadores": ["ansiedade", "expressao_medo"],
+  "content_safety": {
+    "self_harm_severity": 0,
+    "violence_severity": 2,
+    "hate_severity": 0,
+    "sexual_severity": 0,
+    "is_harmful": false,
+    "highest_category": "violence",
+    "highest_severity": 2
+  },
+  "metadata": {
+    "correlation_id": "txt-abc-123",
+    "timestamp": "2026-04-23T14:30:00Z",
+    "tempo_processamento_ms": 680
+  }
+}
+```
+
+**Escala de Severidade:**
+- `0` - Nenhum conteúdo detectado
+- `1-2` - Severidade baixa
+- `3-4` - Severidade média
+- `5-6` - Severidade alta
+
+**Categorias Analisadas:**
+- `self_harm_severity` - Autoagressão
+- `violence_severity` - Violência
+- `hate_severity` - Discurso de ódio
+- `sexual_severity` - Conteúdo sexual
 
 ---
 

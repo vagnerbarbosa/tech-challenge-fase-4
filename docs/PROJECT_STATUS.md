@@ -1,6 +1,6 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-04-29  
+**Atualizado**: 2026-05-01  
 **Versão**: 0.7.0  
 **Branch**: `main`
 
@@ -29,6 +29,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ### 2. Análise de Texto (Spec 002) ✅ 100%
 - [x] Endpoint POST `/analyze/text`
 - [x] Integração Azure AI Language
+- [x] Integração Azure AI Content Safety (multilíngue)
 - [x] Detecção de risco (violência/saúde mental)
 - [x] Cache em memória
 - [x] Testes unitários
@@ -145,6 +146,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ### Azure AI Services
 - ✅ Azure AI Language (Text Analytics)
+- ✅ Azure AI Content Safety (Detecção multilíngue de risco)
 - ✅ Azure AI Speech (Speech-to-Text)
 - ✅ Azure AI Vision (Image Analysis) - Fallback para vídeo
 
@@ -248,8 +250,9 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [Especificações](/)
 - [CLAUDE.md](CLAUDE.md) - Contexto técnico completo
 - [Docker Hub](https://hub.docker.com/r/vagnerbarbosa/tech-challenge-fase-4)
+- [Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/)
 
 ---
 
 **Grupo 27 - FIAP/Alura AI para Devs**  
-*Última atualização: 2026-04-25*
+*Última atualização: 2026-05-01*

@@ -21,6 +21,7 @@
 1. ✅ **Detectar precocemente riscos em saúde materna e ginecológica**
 2. ✅ **Identificar sinais de violência doméstica ou abuso**
 3. ✅ **Utilizar serviços em nuvem** (Azure Free Tier)
+4. ✅ **Detecção de risco multilíngue com Azure AI Content Safety**
 
 ### Foco do Projeto: Saúde Mental Feminina
 
@@ -45,6 +46,7 @@ Este projeto integra processamento de **texto, áudio e vídeo** para identifica
 | **Texto** | Azure AI Language (Text Analytics) | `azure-ai-textanalytics` | Análise de sentimento, NLP |
 | **Áudio** | Azure AI Speech | `azure-cognitiveservices-speech` | Transcrição + análise de voz |
 | **Vídeo** | **YOLOv8** (local) | `ultralytics` + `opencv-python` | Detecção instrumentos, sangramento, postura |
+| **Multilíngue** | Azure AI Content Safety | `azure-ai-contentsafety` | Detecção de risco em 100+ idiomas |
 
 > **Nota YOLOv8**: YOLOv8 roda **localmente no container** (custo zero), atendendo requisito obrigatório do PDF de "YOLOv8 customizado para instrumentos cirúrgicos, áreas críticas e sangramento anômalo". Aceita vídeos MP4 e imagens (processadas como vídeo de 1 frame).
 
@@ -147,6 +149,8 @@ curl http://20.226.196.195:8000/health
 |-----------|----------|-----------|--------|
 | **Azure** | `AZURE_TEXT_KEY` / `AZURE_TEXT_ENDPOINT` | Azure AI Language (Text Analytics) | - |
 | **Azure** | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Azure AI Speech Services | `brazilsouth` |
+| **Azure** | `AZURE_CONTENT_SAFETY_KEY` / `AZURE_CONTENT_SAFETY_ENDPOINT` | Azure AI Content Safety | - |
+| **Content Safety** | `CONTENT_SAFETY_ENABLED` | Ativar detecção multilíngue | `true` |
 | **App** | `APP_VERSION` | Versão da API | `0.7.0` |
 | **App** | `DEBUG` | Modo debug (logs/docs) | `true` |
 | **Rate Limit** | `RATE_LIMIT_ENABLED` | Proteção Azure Free Tier | `true` |
@@ -726,6 +730,42 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 - ✅ Fallback para 1 modalidade (retorna resultado direto)
 - ✅ Graceful degradation (continua se uma modalidade falhar)
 
+### Detecção Multilíngue (Content Safety)
+
+Analisa texto em qualquer idioma suportado (PT, EN, +100 idiomas) com detecção de conteúdo violento, depressivo ou de autoagressão.
+
+**Exemplo de Request:**
+```bash
+curl -X POST "http://localhost:8000/analyze/text" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua-api-key" \
+  -d '{
+    "texto": "I am feeling very anxious and scared about what happens at home",
+    "idioma": "auto"
+  }'
+```
+
+**Exemplo de Response:**
+```json
+{
+  "sentimento": "negativo",
+  "score": -0.82,
+  "risco_violencia": "alto",
+  "risco_saude_mental": "alto",
+  "idioma_detectado": "en",
+  "content_safety": {
+    "enabled": true,
+    "violence_level": "medium",
+    "self_harm_detected": false,
+    "hate_detected": false
+  },
+  "palavras_chave": ["anxious", "scared", "home"],
+  "indicadores": ["expressao_medo", "sinalizacao_isolamento"]
+}
+```
+
+> **Nota**: O Content Safety é aplicado automaticamente quando `CONTENT_SAFETY_ENABLED=true`. O idioma é detectado automaticamente se não especificado.
+
 ---
 
 ## Modalidades de Dados
@@ -769,6 +809,36 @@ curl -X POST "http://localhost:8000/analyze/multimodal" \
 **Exemplos de entrada:**
 - Vídeos curtos de atendimento (MP4, max 30s)
 - Fotos de consulta (JPEG, PNG)
+
+---
+
+## Suporte Multilíngue (Azure AI Content Safety)
+
+O sistema oferece **detecção de risco em múltiplos idiomas** através do Azure AI Content Safety:
+
+### Idiomas Suportados
+
+- 🇧🇷 **Português (pt-BR)** - Idioma principal, otimizado
+- 🇺🇸 **Inglês (en-US)** - Suporte nativo completo
+- 🌍 **100+ idiomas** - Cobertura global via Azure AI Content Safety
+
+### Casos de Uso
+
+- **Pacientes estrangeiras** em atendimento de emergência
+- **Telemedicina internacional** com profissionais de outros países
+- **Documentação médica** em múltiplos idiomas
+- **Delegações e eventos** com participantes internacionais
+
+### Configuração
+
+```bash
+# Ativar Content Safety (recomendado)
+CONTENT_SAFETY_ENABLED=true
+AZURE_CONTENT_SAFETY_KEY=sua-chave-aqui
+AZURE_CONTENT_SAFETY_ENDPOINT=https://<resource>.cognitiveservices.azure.com/
+```
+
+> **Nota**: Quando `CONTENT_SAFETY_ENABLED=true`, o sistema automaticamente detecta o idioma do texto e aplica as regras de Content Safety apropriadas para o idioma detectado.
 
 ---
 
