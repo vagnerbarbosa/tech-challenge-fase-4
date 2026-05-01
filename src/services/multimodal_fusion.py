@@ -231,33 +231,29 @@ class FusionService:
         task_names = []
 
         # Preparar tarefas
+        # Nota: Timeout removido das tarefas individuais pois o endpoint multimodal
+        # já possui timeout global de 90s via asyncio.timeout()
         if texto:
             tasks.append(
-                asyncio.wait_for(
-                    self._text_service.analyze(texto, tipo="geral", patient_id=patient_id),
-                    timeout=DEFAULT_TIMEOUT_SECONDS,
-                )
+                self._text_service.analyze(texto, tipo="geral", patient_id=patient_id)
             )
             task_names.append("texto")
 
         # Áudio: aceitar UploadFile (legacy) ou Path (recomendado)
+        # Nota: Removido asyncio.wait_for pois o AudioAnalysisService já usa
+        # asyncio.gather internamente, causando race condition. O timeout global
+        # do endpoint multimodal (90s) é suficiente.
         if audio or audio_path:
             if audio:
                 # Modo legado: salvar UploadFile temporariamente
                 audio_path = Path(f"/tmp/audio_{correlation_id}.wav")
                 tasks.append(
-                    asyncio.wait_for(
-                        self._process_audio(audio, audio_path, patient_id),  # type: ignore[arg-type]
-                        timeout=DEFAULT_TIMEOUT_SECONDS,
-                    )
+                    self._process_audio(audio, audio_path, patient_id)  # type: ignore[arg-type]
                 )
             else:
                 # Modo novo: Path já fornecido
                 tasks.append(
-                    asyncio.wait_for(
-                        self._audio_service.analyze(audio_path, patient_id),  # type: ignore[arg-type]
-                        timeout=DEFAULT_TIMEOUT_SECONDS,
-                    )
+                    self._audio_service.analyze(audio_path, patient_id)  # type: ignore[arg-type]
                 )
             task_names.append("audio")
 
@@ -267,23 +263,17 @@ class FusionService:
                 # Modo legado: salvar UploadFile temporariamente
                 video_path_tmp = Path(f"/tmp/video_{correlation_id}.mp4")
                 tasks.append(
-                    asyncio.wait_for(
-                        self._process_video(video, video_path_tmp),  # type: ignore[arg-type]
-                        timeout=DEFAULT_TIMEOUT_SECONDS,
-                    )
+                    self._process_video(video, video_path_tmp)  # type: ignore[arg-type]
                 )
             else:
                 # Modo novo: Path já fornecido
                 temp_dir = video_path.parent / f"video_tmp_{correlation_id}"  # type: ignore[union-attr]
                 temp_dir.mkdir(exist_ok=True)
                 tasks.append(
-                    asyncio.wait_for(
-                        self._video_service.analyze(
-                            video_path=video_path,  # type: ignore[arg-type]
-                            duration_seconds=0.0,
-                            temp_dir=temp_dir,
-                        ),
-                        timeout=DEFAULT_TIMEOUT_SECONDS,
+                    self._video_service.analyze(
+                        video_path=video_path,  # type: ignore[arg-type]
+                        duration_seconds=0.0,
+                        temp_dir=temp_dir,
                     )
                 )
             task_names.append("video")
