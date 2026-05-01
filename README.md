@@ -78,6 +78,8 @@ API com hardening completo (OWASP API Top 10 + LGPD):
 
 ## 📡 Endpoints da API
 
+📖 **Documentação completa**: [docs/api-contracts.md](docs/api-contracts.md)
+
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
 | `/health` | GET | Health check com quotas Azure |
