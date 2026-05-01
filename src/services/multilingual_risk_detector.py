@@ -10,7 +10,6 @@ from typing import Any
 from src.core.config import settings
 from src.infrastructure.azure_clients import (
     AzureClientError,
-    safe_azure_call,
 )
 from src.infrastructure.content_safety_client import (
     ContentSafetyClient,
@@ -96,7 +95,7 @@ class MultilingualRiskDetector:
     keywords como fallback e para contexto específico.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.content_safety_enabled = settings.content_safety_enabled
         self._cs_client: ContentSafetyClient | None = None
 
@@ -106,8 +105,7 @@ class MultilingualRiskDetector:
                 logger.info("Content Safety client inicializado")
             except Exception as e:
                 logger.warning(
-                    "Falha ao inicializar Content Safety, usando fallback de keywords",
-                    error=str(e),
+                    f"Falha ao inicializar Content Safety: {e}. Usando fallback de keywords",
                 )
                 self.content_safety_enabled = False
 
@@ -141,15 +139,12 @@ class MultilingualRiskDetector:
                 mental_health_risk = cs_result.self_harm_severity / 6.0
 
                 logger.debug(
-                    "Content Safety analysis",
-                    violence_severity=cs_result.violence_severity,
-                    self_harm_severity=cs_result.self_harm_severity,
+                    f"Content Safety: violence={cs_result.violence_severity}, self_harm={cs_result.self_harm_severity}",
                 )
 
             except AzureClientError as e:
                 logger.warning(
-                    "Content Safety analysis failed, falling back to keywords",
-                    error=str(e),
+                    f"Content Safety failed: {e}. Fallback to keywords",
                 )
 
         # 2. Análise por palavras-chave (fallback ou complemento)
@@ -203,9 +198,7 @@ class MultilingualRiskDetector:
             keywords_detected = all_violence + all_mental
 
             logger.debug(
-                "Keywords analysis",
-                violence_matches=len(all_violence),
-                mental_matches=len(all_mental),
+                f"Keywords: violence={len(all_violence)}, mental={len(all_mental)}",
             )
 
         return RiskAssessmentResult(

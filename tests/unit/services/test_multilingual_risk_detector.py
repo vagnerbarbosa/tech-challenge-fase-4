@@ -1,15 +1,13 @@
 """Testes unitários para Multilingual Risk Detector."""
 
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
-import pytest
-
+from src.infrastructure.content_safety_client import ContentSafetyResult
 from src.services.multilingual_risk_detector import (
     MultilingualRiskDetector,
     RiskAssessmentResult,
     get_risk_detector,
 )
-from src.infrastructure.content_safety_client import ContentSafetyResult
 
 
 class TestRiskAssessmentResult:

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any
 
-import requests
+import requests  # type: ignore[import-untyped]
 from azure.core.credentials import AzureKeyCredential
 
 from src.infrastructure.azure_clients import (
@@ -54,13 +54,13 @@ class ContentSafetyResult:
     @property
     def highest_category(self) -> str:
         """Retorna categoria com maior severidade."""
-        severities = {
+        severities: dict[str, int] = {
             "SelfHarm": self.self_harm_severity,
             "Violence": self.violence_severity,
             "Hate": self.hate_severity,
             "Sexual": self.sexual_severity,
         }
-        return max(severities, key=severities.get)
+        return max(severities.items(), key=lambda x: x[1])[0]
 
     @property
     def highest_severity(self) -> int:

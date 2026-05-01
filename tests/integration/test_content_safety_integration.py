@@ -9,7 +9,6 @@ Requisitos:
 """
 
 import os
-from typing import Any
 
 import pytest
 import requests
@@ -22,7 +21,6 @@ from src.services.multilingual_risk_detector import (
     MultilingualRiskDetector,
     get_risk_detector,
 )
-
 
 # Skip se Content Safety não estiver configurado
 pytestmark = pytest.mark.skipif(
@@ -462,8 +460,8 @@ class TestContentSafetyResultSerialization:
 
     def test_risk_assessment_to_dict_structure(self) -> None:
         """Deve retornar dicionário completo do assessment."""
-        from src.services.multilingual_risk_detector import RiskAssessmentResult
         from src.infrastructure.content_safety_client import ContentSafetyResult
+        from src.services.multilingual_risk_detector import RiskAssessmentResult
 
         cs_result = ContentSafetyResult(
             self_harm_severity=3,

@@ -1,21 +1,20 @@
 """Testes unitários para Azure AI Content Safety client."""
 
-import os
 from unittest.mock import Mock, patch
 
 import pytest
 import requests
 
+from src.infrastructure.azure_clients import (
+    AuthenticationError,
+    AzureConfigurationError,
+    AzureConnectionError,
+    QuotaExceededError,
+)
 from src.infrastructure.content_safety_client import (
     ContentSafetyClient,
     ContentSafetyResult,
     get_content_safety_client,
-)
-from src.infrastructure.azure_clients import (
-    AzureConfigurationError,
-    AuthenticationError,
-    QuotaExceededError,
-    AzureConnectionError,
 )
 
 
