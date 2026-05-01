@@ -1,7 +1,7 @@
 # Implementation Plan: Deploy Azure
 
-**Branch**: `011-deploy-azure` | **Date**: 2026-04-29 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/specs/011-deploy-azure/spec.md`
+**Branch**: `009-deploy-azure` | **Date**: 2026-04-29 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/specs/009-deploy-azure/spec.md`
 
 ## Summary
 
@@ -38,7 +38,7 @@ Deploy da API Multimodal Health Analysis em Azure App Service (Free Tier F1). In
 ### Documentation (this feature)
 
 ```text
-specs/011-deploy-azure/
+specs/009-deploy-azure/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output
 ├── data-model.md        # N/A - deploy não altera modelos

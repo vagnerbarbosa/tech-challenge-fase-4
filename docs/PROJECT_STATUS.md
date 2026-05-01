@@ -96,7 +96,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## ⏳ Módulos Pendentes
 
-### 9. Deploy Azure (Spec 011) ✅ 100%
+### 9. Deploy Azure (Spec 009) ✅ 100%
 - [x] Azure AI Services criados (Text, Speech, Vision)
 - [x] Azure Container Instances criado e funcionando
 - [x] CI/CD Pipeline configurado (GitHub Actions)

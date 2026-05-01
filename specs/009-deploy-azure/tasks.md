@@ -1,8 +1,8 @@
 # Tasks: Deploy Azure
 
-**Input**: Design documents from `/specs/011-deploy-azure/`  
+**Input**: Design documents from `/specs/009-deploy-azure/`  
 **Prerequisites**: plan.md, spec.md  
-**Branch**: `011-deploy-azure`  
+**Branch**: `009-deploy-azure`  
 **Status**: ✅ COMPLETED (2026-05-01)  
 **Gerado em**: 2026-04-29  
 **Atualizado em**: 2026-05-01

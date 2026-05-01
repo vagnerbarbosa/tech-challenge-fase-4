@@ -1,7 +1,7 @@
 # Índice de Especificações
 
 **Projeto**: Tech Challenge Fase 4
-**Atualizado**: 2026-04-20
+**Atualizado**: 2026-05-01
 
 ---
 
@@ -17,11 +17,11 @@
 | 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
 | 007 | Security Hardening | ✅ Concluído | `main` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
-| 011 | Deploy Azure | ✅ Concluído | `main` | P1 |
-| 012 | Documentação Final | ✅ Concluído | `main` | P1 |
-| 013 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
+| 009 | Deploy Azure | ✅ Concluído | `main` | P1 |
+| 010 | Documentação Final | ✅ Concluído | `main` | P1 |
+| 011 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
 
-> **Nota**: Todas as specs P0-P1 estão concluídas. As specs 011-013 foram renumeradas (originalmente 009-010 eram drafts, substituídas pelas versões finais 011-012).
+> **Nota**: Todas as specs P0-P1 estão concluídas. Projeto na versão 0.8.0.
 
 ---
 
@@ -44,15 +44,16 @@
 005 (Multimodal) → 008 (Tests)
 002-004 → 006 (Rate Limiting)
 Tudo → 007 (Security)
-Tudo → 011 (Deploy)
-Tudo → 012 (Docs)
+Tudo → 009 (Deploy)
+Tudo → 010 (Docs)
+002 (Texto) → 011 (Content Safety)
 ```
 
 ---
 
 ## Como Usar Este Índice
 
-1. **Para começar uma feature**: 
+1. **Para começar uma feature**:
    - Verifique dependências no diagrama acima
    - Crie branch: `git checkout -b XXX-feature-name`
    - Crie spec.md na pasta specs/XXX-feature/
@@ -73,5 +74,5 @@ Tudo → 012 (Docs)
 ## Links Rápidos
 
 - [Constitution](../.specify/memory/constitution.md) - Regras e princípios do projeto
-- [CLAUDE.md](../.claude/CLAUDE.md) - Contexto técnico completo
+- [CLAUDE.md](../CLAUDE.md) - Contexto técnico completo
 - Especificações detalhadas em cada pasta `XXX-feature/spec.md`

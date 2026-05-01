@@ -1,8 +1,8 @@
 # Tasks: Content Safety Multilingual
 
-**Input**: Design documents from `/specs/013-content-safety-multilingual/`  
+**Input**: Design documents from `/specs/011-content-safety-multilingual/`  
 **Prerequisites**: plan.md, spec.md  
-**Branch**: `013-content-safety-multilingual`  
+**Branch**: `011-content-safety-multilingual`  
 **Status**: ✅ COMPLETED (2026-05-01)  
 **Gerado em**: 2026-05-01  
 **Atualizado em**: 2026-05-01
@@ -185,8 +185,8 @@
 
 **Purpose**: Documentar a feature para desenvolvedores
 
-- [X] T059 [P] Criar `specs/013-content-safety-multilingual/spec.md`
-- [X] T060 [P] Criar `specs/013-content-safety-multilingual/tasks.md`
+- [X] T059 [P] Criar `specs/011-content-safety-multilingual/spec.md`
+- [X] T060 [P] Criar `specs/011-content-safety-multilingual/tasks.md`
 - [X] T061 Documentar variáveis de ambiente necessárias
 - [X] T062 Documentar formato das respostas
 - [X] T063 Documentar categorias de risco
