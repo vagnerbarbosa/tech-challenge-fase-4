@@ -95,4 +95,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE $PORT
 
 # Comando de inicialização via entrypoint script
-CMD ["/bin/sh", "/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
