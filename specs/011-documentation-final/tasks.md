@@ -1,8 +1,8 @@
 # Tasks: Documentação Final
 
-**Input**: Design documents from `/specs/010-documentation-final/`  
+**Input**: Design documents from `/specs/011-documentation-final/`  
 **Prerequisites**: plan.md, spec.md  
-**Branch**: `010-documentation-final`  
+**Branch**: `011-documentation-final`  
 **Gerado em**: 2026-04-29
 
 ---

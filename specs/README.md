@@ -18,8 +18,8 @@
 | 007 | Security Hardening | ✅ Concluído | `main` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
 | 009 | Deploy Azure | ✅ Concluído | `main` | P1 |
-| 010 | Documentação Final | ✅ Concluído | `main` | P1 |
-| 011 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
+| 010 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
+| 011 | Documentação Final | ⏳ Pendente | `main` | P1 |
 
 > **Nota**: Todas as specs P0-P1 estão concluídas. Projeto na versão 0.8.0.
 
@@ -45,8 +45,8 @@
 002-004 → 006 (Rate Limiting)
 Tudo → 007 (Security)
 Tudo → 009 (Deploy)
-Tudo → 010 (Docs)
-002 (Texto) → 011 (Content Safety)
+002 (Texto) → 010 (Content Safety)
+Tudo → 011 (Docs)
 ```
 
 ---

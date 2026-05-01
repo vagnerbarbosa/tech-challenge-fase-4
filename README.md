@@ -1010,8 +1010,9 @@ poetry run locust -f locustfile.py
 | 006 | Rate Limiting | ✅ Concluído | [spec.md](specs/006-rate-limiting/spec.md) |
 | 007 | Security Hardening | 🔄 Parcial | [spec.md](specs/007-security-hardening/spec.md) |
 | 008 | Testes Automatizados | ✅ Concluído | [spec.md](specs/008-tests/spec.md) |
-| 009 | Deploy Azure | ⏳ Pendente | [spec.md](specs/009-deploy-azure/spec.md) |
-| 010 | Documentação Final | ⏳ Pendente | [spec.md](specs/010-documentation/spec.md) |
+| 009 | Deploy Azure | ✅ Concluído | [spec.md](specs/009-deploy-azure/spec.md) |
+| 010 | Content Safety Multilingual | ✅ Concluído | [spec.md](specs/010-content-safety-multilingual/spec.md) |
+| 011 | Documentação Final | ⏳ Pendente | [spec.md](specs/011-documentation-final/spec.md) |
 
 ### Outros Documentos
 - [📋 Índice de Especificações](specs/README.md)
@@ -1138,9 +1139,10 @@ tech-challenge-fase-4/
 │   ├── 005-multimodal-fusion/  # ✅ Concluído
 │   ├── 006-rate-limiting/      # ✅ Concluído
 │   ├── 007-security-hardening/ # 🔄 Parcial
-│   ├── 008-tests/              # ✅ Concluído
-│   ├── 009-deploy-azure/       # ⏳ Pendente
-│   └── 010-documentation/        # ⏳ Pendente
+│   ├── 008-tests/                        # ✅ Concluído
+│   ├── 009-deploy-azure/                 # ✅ Concluído
+│   ├── 010-content-safety-multilingual/  # ✅ Concluído
+│   └── 011-documentation-final/          # ⏳ Pendente
 ├── docs/                     # Documentação
 │   └── technical/
 ├── .claude/                  # Configuração Claude Code

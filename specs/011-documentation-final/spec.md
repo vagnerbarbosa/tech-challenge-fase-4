@@ -1,6 +1,6 @@
 # Feature Specification: Documentação Final
 
-**Feature Branch**: `[010-documentation]`
+**Feature Branch**: `[011-documentation]`
 **Created**: 2026-04-11
 **Status**: Draft
 **Input**: User description: "Completar README e criar vídeo demonstrativo do projeto"

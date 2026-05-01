@@ -1,6 +1,6 @@
 # Feature Specification: Content Safety Multilingual
 
-**Feature Branch**: `[011-content-safety-multilingual]`  
+**Feature Branch**: `[010-content-safety-multilingual]`  
 **Created**: 2026-05-01  
 **Updated**: 2026-05-01  
 **Status**: ✅ COMPLETED  
