@@ -142,13 +142,24 @@ jobs:
 
       - name: Criar Azure AI Services
         run: |
+          # Tentar purgar serviços soft-deleted primeiro
           for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+            echo "Purgando serviço soft-deleted: $service"
+            az cognitiveservices account purge \
+              --name $service \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location brazilsouth 2>/dev/null || true
+          done
+
+          # Criar novos serviços
+          for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
+            echo "Criando serviço: $service"
             az cognitiveservices account create \
               --name $service \
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
               --location brazilsouth \
               --kind $(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi) \
-              --sku F0 || true
+              --sku F0
           done
 
       - name: Obter credenciais
