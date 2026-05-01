@@ -1,8 +1,8 @@
 # Tasks: Documentação Final
 
-**Input**: Design documents from `/specs/012-documentation-final/`  
+**Input**: Design documents from `/specs/011-documentation-final/`  
 **Prerequisites**: plan.md, spec.md  
-**Branch**: `012-documentation-final`  
+**Branch**: `011-documentation-final`  
 **Gerado em**: 2026-04-29
 
 ---
@@ -64,7 +64,7 @@
 - [ ] T019 [P] Escrever seção "Variáveis de Ambiente" com tabela completa
 - [ ] T020 [P] Escrever seção "Docker" com comandos docker-compose
 - [ ] T021 [P] Escrever seção "Testes" com comandos pytest
-- [ ] T022 [P] Escrever seção "Deploy" com link para spec 011
+- [ ] T022 [P] Escrever seção "Deploy" com link para spec 009
 - [ ] T023 [P] Escrever seção "Autores" com nomes e GitHub
 - [ ] T024 [P] Escrever seção "Licença" (MIT)
 - [ ] T025 Adicionar badges (build, coverage, license)

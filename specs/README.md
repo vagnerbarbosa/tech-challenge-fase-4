@@ -1,7 +1,36 @@
 # Índice de Especificações
 
 **Projeto**: Tech Challenge Fase 4
-**Atualizado**: 2026-04-20
+**Atualizado**: 2026-05-01
+
+---
+
+## 📋 Sobre Este Projeto
+
+Este projeto utiliza **Specification Driven Development (SDD)** com o **[Spec Kit](https://github.com/github/spec-kit)** do GitHub.
+
+### O que é Spec Kit?
+
+O Spec Kit é uma metodologia de desenvolvimento baseada em especificações que garante:
+- ✅ **Clareza** - Cada feature é documentada antes da implementação
+- ✅ **Rastreabilidade** - Todo código tem uma spec associada
+- ✅ **Qualidade** - Testes e documentação são parte do processo
+- ✅ **Colaboração** - Interfaces claras entre desenvolvedores e IA
+
+### Estrutura do Spec Kit
+
+```
+specs/
+├── README.md                 # Este índice
+├── XXX-feature-name/
+│   ├── spec.md              # Especificação da feature
+│   ├── plan.md              # Plano de implementação
+│   ├── tasks.md             # Lista de tarefas
+│   └── data-model.md        # Modelos de dados (opcional)
+└── ...
+```
+
+**Referência**: [github/spec-kit](https://github.com/github/spec-kit)
 
 ---
 
@@ -17,10 +46,11 @@
 | 006 | Rate Limiting | ✅ Concluído | `main` | P2 |
 | 007 | Security Hardening | ✅ Concluído | `main` | P1 |
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
-| 009 | Deploy Azure | 📝 Draft | `009-deploy-azure` | P1 |
-| 010 | Documentação Final | 📝 Draft | `010-documentation` | P1 |
+| 009 | Deploy Azure | ✅ Concluído | `main` | P1 |
+| 010 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
+| 011 | Documentação Final | ⏳ Pendente | `main` | P1 |
 
-> **Nota**: Rate Limiting e Testes possuem implementação base (QuotaManager, testes unitários para áudio), mas podem ser expandidos.
+> **Nota**: Todas as specs P0-P1 estão concluídas. Projeto na versão 0.8.0.
 
 ---
 
@@ -44,14 +74,15 @@
 002-004 → 006 (Rate Limiting)
 Tudo → 007 (Security)
 Tudo → 009 (Deploy)
-Tudo → 010 (Docs)
+002 (Texto) → 010 (Content Safety)
+Tudo → 011 (Docs)
 ```
 
 ---
 
 ## Como Usar Este Índice
 
-1. **Para começar uma feature**: 
+1. **Para começar uma feature**:
    - Verifique dependências no diagrama acima
    - Crie branch: `git checkout -b XXX-feature-name`
    - Crie spec.md na pasta specs/XXX-feature/
@@ -72,5 +103,5 @@ Tudo → 010 (Docs)
 ## Links Rápidos
 
 - [Constitution](../.specify/memory/constitution.md) - Regras e princípios do projeto
-- [CLAUDE.md](../.claude/CLAUDE.md) - Contexto técnico completo
+- [CLAUDE.md](../CLAUDE.md) - Contexto técnico completo
 - Especificações detalhadas em cada pasta `XXX-feature/spec.md`

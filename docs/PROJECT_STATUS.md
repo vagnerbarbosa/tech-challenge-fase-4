@@ -96,7 +96,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## ⏳ Módulos Pendentes
 
-### 9. Deploy Azure (Spec 011) ✅ 100%
+### 9. Deploy Azure (Spec 009) ✅ 100%
 - [x] Azure AI Services criados (Text, Speech, Vision)
 - [x] Azure Container Instances criado e funcionando
 - [x] CI/CD Pipeline configurado (GitHub Actions)
@@ -106,7 +106,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 **Status**: ✅ DEPLOY CONCLUÍDO - API online em: <DEPLOY_URL>
 
-### 10. Documentação Final (Spec 010) ⏳ 0%
+### 10. Documentação Final (Spec 011) ⏳ 0%
 - [ ] Vídeo demonstrativo
 - [ ] Documentação técnica completa
 - [ ] API Guide
@@ -201,7 +201,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
    - CI/CD pipeline
    - Domínio customizado
 
-2. **Spec 010 - Documentação Final**
+2. **Spec 011 - Documentação Final**
    - Criar vídeo demonstrativo (YouTube)
    - API Guide completo
 

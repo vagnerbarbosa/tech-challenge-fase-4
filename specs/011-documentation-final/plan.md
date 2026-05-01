@@ -1,7 +1,7 @@
 # Implementation Plan: Documentação Final
 
-**Branch**: `012-documentation-final` | **Date**: 2026-04-29 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/specs/012-documentation-final/spec.md`
+**Branch**: `011-documentation-final` | **Date**: 2026-04-29 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `/specs/011-documentation-final/spec.md`
 
 ## Summary
 
@@ -38,7 +38,7 @@ Completar documentação do projeto para entrega FIAP/Alura Fase 4. Inclui READM
 ### Documentation (this feature)
 
 ```text
-specs/012-documentation-final/
+specs/011-documentation-final/
 ├── plan.md              # This file
 ├── research.md          # N/A
 ├── data-model.md        # N/A
@@ -147,7 +147,7 @@ API para análise de sinais de violência doméstica e riscos à saúde materna 
 [Como rodar testes]
 
 ## Deploy
-[Link para spec 011]
+[Link para spec 009]
 
 ## Autores
 Grupo 27 - FIAP/Alura
