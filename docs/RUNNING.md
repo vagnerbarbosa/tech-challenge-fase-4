@@ -380,7 +380,7 @@ Se a API já estiver hospedada no Azure, siga estas instruções para autenticar
 ### 1. Obter Acesso
 
 Você precisará de:
-- **URL da API**: fornecida pelo administrador (ex: `https://health-api-multimodal.azurewebsites.net`)
+- **URL da API**: fornecida pelo administrador (ex: `<DEPLOY_URL>`)
 - **API Key**: chave de autenticação fornecida separadamente
 
 ### 2. Autenticação
@@ -396,7 +396,7 @@ X-API-Key: sua-api-key-aqui
 
 ```bash
 # Substitua URL e API_KEY pelos valores fornecidos
-API_URL="https://health-api-multimodal.azurewebsites.net"
+API_URL="<DEPLOY_URL>"
 API_KEY="sua-api-key-aqui"
 
 # Health check
@@ -520,7 +520,7 @@ curl -X POST "$API_URL/analyze/multimodal" \
 Acesse a documentação Swagger da API Azure:
 
 ```
-https://health-api-multimodal.azurewebsites.net/docs
+<DEPLOY_URL>/docs
 ```
 
 Clique no botão **Authorize** 🔒 e insira sua API Key para testar os endpoints diretamente pelo navegador.
@@ -559,7 +559,7 @@ Baixe as collections em `docs/collection.json` e `docs/environment.json` para im
 ```python
 import requests
 
-API_URL = "https://health-api-multimodal.azurewebsites.net"
+API_URL = "<DEPLOY_URL>"
 API_KEY = "sua-api-key-aqui"
 
 headers = {
@@ -583,7 +583,7 @@ print(response.json())
 ### 10. Exemplo em JavaScript
 
 ```javascript
-const API_URL = 'https://health-api-multimodal.azurewebsites.net';
+const API_URL = '<DEPLOY_URL>';
 const API_KEY = 'sua-api-key-aqui';
 
 // Análise de texto
