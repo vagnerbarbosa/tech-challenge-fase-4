@@ -94,5 +94,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expor porta
 EXPOSE $PORT
 
-# Comando de inicialização via entrypoint script
-ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
+# Comando de inicialização direto (mais compatível com ACI)
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info", "--proxy-headers", "--forwarded-allow-ips", "*"]
