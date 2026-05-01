@@ -129,7 +129,26 @@
 
 ---
 
-## Phase 7: Testes Unitários ✅ COMPLETED
+## Phase 7: Provisionamento Integrado ✅ COMPLETED
+
+**Purpose**: Integrar Content Safety aos scripts de provisionamento existentes
+
+**Goal**: Content Safety provisionado automaticamente junto com outros serviços
+
+### Scripts de Provisionamento
+- [X] T065 Adicionar Content Safety ao `scripts/check-azure.sh` (verificação)
+- [X] T066 Adicionar Content Safety ao `scripts/check-azure.sh` (deploy)
+- [X] T067 Adicionar Content Safety ao `scripts/check-azure.sh` (credenciais)
+- [X] T068 Adicionar Content Safety ao `.github/workflows/deploy-azure.yml` (CI/CD)
+- [X] T069 Adicionar credenciais Content Safety ao workflow de deploy
+- [X] T070 Adicionar variáveis de ambiente Content Safety ao container
+- [X] T071 Remover script `provision-content-safety.sh` (não necessário separado)
+
+**Checkpoint**: Content Safety provisionado automaticamente ✅
+
+---
+
+## Phase 8: Testes Unitários ✅ COMPLETED
 
 **Purpose**: Cobertura de testes para Content Safety
 
@@ -162,7 +181,7 @@
 
 ---
 
-## Phase 8: Documentação ✅ COMPLETED
+## Phase 9: Documentação ✅ COMPLETED
 
 **Purpose**: Documentar a feature para desenvolvedores
 
@@ -172,6 +191,12 @@
 - [X] T062 Documentar formato das respostas
 - [X] T063 Documentar categorias de risco
 - [X] T064 Documentar estratégia de fallback
+- [X] T072 Documentar provisionamento integrado
+- [X] T073 Documentar no `docs/architecture.md`
+- [X] T074 Documentar no `docs/api-contracts.md`
+- [X] T075 Documentar no `docs/RUNNING.md`
+- [X] T076 Documentar no `README.md`
+- [X] T077 Documentar no `docs/PROJECT_STATUS.md`
 
 **Checkpoint**: Documentação completa ✅
 
@@ -205,7 +230,12 @@
    - `.env.example` atualizado
    - Validação na inicialização
 
-5. **Testes**
+5. **Provisionamento**
+   - Integrado ao `scripts/check-azure.sh`
+   - Integrado ao `.github/workflows/deploy-azure.yml`
+   - Provisionado junto com Text, Speech, Vision
+
+6. **Testes**
    - 249 linhas de testes para Content Safety Client
    - 285 linhas de testes para Multilingual Risk Detector
    - Cobertura de casos de erro e sucesso
@@ -245,6 +275,6 @@
 
 ## Task Count
 
-- **Total**: 64 tasks
-- **Completed**: 64 (100%)
+- **Total**: 77 tasks
+- **Completed**: 77 (100%)
 - **Status**: ✅ Feature Complete
