@@ -78,6 +78,10 @@ Abra no navegador: http://localhost:8000/docs
 docker-compose -f docker-compose.mock.yml down
 ```
 
+> **ℹ️ Nota sobre o Mock Mode**: Ao executar com `./scripts/run-mock.sh` ou `docker-compose.mock.yml`, os serviços Azure são **mockados** (simulados localmente). Isso permite desenvolvimento e testes sem consumir quota do Azure Free Tier e sem necessidade de credenciais reais.
+> 
+> Para usar serviços Azure reais, configure as variáveis no `.env` e execute com `docker-compose.yml`.
+
 ---
 
 ## Opção 2: Docker Manual
