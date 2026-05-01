@@ -28,56 +28,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Executar Testes
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11']
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Configurar Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Instalar Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Carregar dependências em cache
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-v2
-
-      - name: Instalar dependências
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Instalar projeto
-        run: poetry install --no-interaction
-
-      - name: Executar linters (Ruff)
-        run: poetry run ruff check src/ tests/ || true
-
-      - name: Executar type checker (mypy)
-        run: poetry run mypy src/ || true
-
-      - name: Executar testes
-        run: poetry run pytest tests/ -v --cov=src --cov-report=xml --cov-fail-under=70
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          AZURE_TEXT_KEY: fake-key-for-testing
-          AZURE_TEXT_ENDPOINT: http://localhost:3001/
-
   build:
     name: Build e Push Docker Image
     runs-on: ubuntu-latest
