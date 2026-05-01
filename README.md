@@ -108,9 +108,9 @@ Veja o [guia completo](docs/RUNNING.md) para outras opções (Docker manual, Poe
 
 ## 🚀 Deploy em Produção (Azure)
 
-[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](http://20.226.196.195:8000/health)
+[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](<DEPLOY_URL>/health)
 
-✅ **API Online**: http://20.226.196.195:8000
+✅ **API Online**: <DEPLOY_URL>
 
 A aplicação está hospedada em **Azure Container Instances** com CI/CD via GitHub Actions.
 
@@ -118,10 +118,10 @@ A aplicação está hospedada em **Azure Container Instances** com CI/CD via Git
 
 | Endpoint | URL | Descrição |
 |----------|-----|-----------|
-| API Base | http://20.226.196.195:8000 | API principal |
-| Health | http://20.226.196.195:8000/health | Status e quotas |
-| Swagger | http://20.226.196.195:8000/docs | Documentação interativa |
-| ReDoc | http://20.226.196.195:8000/redoc | Documentação alternativa |
+| API Base | <DEPLOY_URL> | API principal |
+| Health | <DEPLOY_URL>/health | Status e quotas |
+| Swagger | <DEPLOY_URL>/docs | Documentação interativa |
+| ReDoc | <DEPLOY_URL>/redoc | Documentação alternativa |
 
 ### CI/CD Pipeline
 
@@ -136,7 +136,7 @@ Deploy automático a cada push na branch `main`:
 
 Importe `docs/collection.json` e use o environment **"Azure Production"**:
 ```bash
-curl http://20.226.196.195:8000/health
+curl <DEPLOY_URL>/health
 ```
 
 ---
