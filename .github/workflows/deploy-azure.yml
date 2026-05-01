@@ -151,16 +151,14 @@ jobs:
               --location brazilsouth 2>/dev/null || true
           done
 
-          # Criar novos serviços
+          # Criar novos serviços usando az resource create com propriedades
           for service in tech-challenge-text tech-challenge-speech tech-challenge-vision; do
             echo "Criando serviço: $service"
-            az cognitiveservices account create \
-              --name $service \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --location brazilsouth \
-              --kind $(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi) \
-              --sku F0 \
-              --yes
+            KIND=$(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi)
+            az resource create \
+              --id "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.CognitiveServices/accounts/$service" \
+              --properties "{ \"kind\": \"$KIND\", \"sku\": { \"name\": \"F0\" }, \"location\": \"brazilsouth\", \"properties\": { \"publicNetworkAccess\": \"Enabled\" } }" \
+              --is-full-object
           done
 
       - name: Obter credenciais
