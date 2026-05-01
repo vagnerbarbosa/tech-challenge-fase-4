@@ -159,7 +159,8 @@ jobs:
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
               --location brazilsouth \
               --kind $(if [ "$service" = "tech-challenge-text" ]; then echo "TextAnalytics"; elif [ "$service" = "tech-challenge-speech" ]; then echo "SpeechServices"; else echo "ComputerVision"; fi) \
-              --sku F0
+              --sku F0 \
+              --public-network-access Enabled
           done
 
       - name: Obter credenciais
