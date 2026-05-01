@@ -1008,7 +1008,7 @@ poetry run locust -f locustfile.py
 | 004 | Análise de Vídeo (YOLOv8) | ✅ Concluído | [spec.md](specs/004-video-analysis/spec.md) |
 | 005 | Fusão Multimodal | ✅ Concluído | [spec.md](specs/005-multimodal-fusion/spec.md) |
 | 006 | Rate Limiting | ✅ Concluído | [spec.md](specs/006-rate-limiting/spec.md) |
-| 007 | Security Hardening | 🔄 Parcial | [spec.md](specs/007-security-hardening/spec.md) |
+| 007 | Security Hardening | ✅ Concluído | [spec.md](specs/007-security-hardening/spec.md) |
 | 008 | Testes Automatizados | ✅ Concluído | [spec.md](specs/008-tests/spec.md) |
 | 009 | Deploy Azure | ✅ Concluído | [spec.md](specs/009-deploy-azure/spec.md) |
 | 010 | Content Safety Multilingual | ✅ Concluído | [spec.md](specs/010-content-safety-multilingual/spec.md) |
@@ -1138,7 +1138,7 @@ tech-challenge-fase-4/
 │   ├── 004-video-analysis/     # ✅ Concluído
 │   ├── 005-multimodal-fusion/  # ✅ Concluído
 │   ├── 006-rate-limiting/      # ✅ Concluído
-│   ├── 007-security-hardening/ # 🔄 Parcial
+│   ├── 007-security-hardening/         # ✅ Concluído
 │   ├── 008-tests/                        # ✅ Concluído
 │   ├── 009-deploy-azure/                 # ✅ Concluído
 │   ├── 010-content-safety-multilingual/  # ✅ Concluído
