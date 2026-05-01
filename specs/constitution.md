@@ -166,6 +166,7 @@ Esta Constitution é a fonte da verdade para decisões arquiteturais do projeto.
 2. Alterações requerem documentação e aprovação
 3. Novos princípios são adicionados via PR com justificativa
 
-**Version**: 1.1  
-**Ratified**: 2026-04-12  
+**Version**: 1.1
+**Ratified**: 2026-04-12
 **Last Amended**: 2026-04-12
+**Location**: `specs/constitution.md` (conforme Spec Kit)

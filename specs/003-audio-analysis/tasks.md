@@ -287,7 +287,7 @@ Auditoria realizada contra Spec original e Constitution. Foram encontradas **4 d
 
 **Solução**: Preenchido com 7 princípios do projeto (LGPD, Azure, Tests, Container, PT docs, Security, Multimodal).
 
-- [X] T055 Preencher `.specify/memory/constitution.md` com princípios do projeto
+- [X] T055 Preencher `specs/constitution.md` com princípios do projeto (conforme Spec Kit)
 
 ---
 
