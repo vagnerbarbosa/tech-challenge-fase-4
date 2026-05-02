@@ -207,6 +207,7 @@ async def analyze_multimodal(
                 audio_path=audio_path,
                 video_path=video_path,
                 patient_id=patient_id,
+                temp_base_dir=temp_dir,  # Passar diretório temporário para cópia do áudio
             )
 
         # Atualizar correlation_id no metadata
