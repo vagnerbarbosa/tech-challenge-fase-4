@@ -150,13 +150,34 @@ class AudioAnalysisService:
 
         try:
             # 1. Extrai features prosódicas e transcrição em paralelo
+            step_start = perf_counter()
             prosodic_task = self.prosodic_extractor.extract(audio_path)
+            prosodic_init_time = perf_counter() - step_start
+
+            step_start = perf_counter()
             transcribe_task = self.speech_client.transcribe_with_retry(audio_path)
+            transcribe_init_time = perf_counter() - step_start
+
+            logger.info(
+                "audio_analysis_tasks_created",
+                prosodic_init_ms=int(prosodic_init_time * 1000),
+                transcribe_init_ms=int(transcribe_init_time * 1000),
+            )
 
             # Executa em paralelo
+            step_start = perf_counter()
             prosodic_features, transcribe_result = await asyncio.gather(
                 prosodic_task,
                 transcribe_task,
+            )
+            parallel_time = perf_counter() - step_start
+
+            logger.info(
+                "audio_analysis_parallel_complete",
+                prosodic_duration=prosodic_features.duracao_segundos,
+                transcricao_presente=bool(transcribe_result.get("transcricao")),
+                transcricao_mock=transcribe_result.get("mock", False),
+                parallel_time_ms=int(parallel_time * 1000),
             )
 
             transcricao = transcribe_result.get("transcricao", "")

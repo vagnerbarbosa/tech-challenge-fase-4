@@ -70,6 +70,8 @@ class AzureSpeechClient:
         Returns:
             Path para arquivo WAV temporário
         """
+        import time
+
         suffix = audio_path.suffix.lower()
 
         # Se já for WAV, retorna o mesmo arquivo
@@ -79,8 +81,11 @@ class AzureSpeechClient:
         # Para MP3 e OGG, converte para WAV
         if suffix in (".mp3", ".ogg"):
             try:
+                start_time = time.perf_counter()
+
                 # Carrega com librosa (suporta MP3 e OGG)
                 y, sr = librosa.load(str(audio_path), sr=16000, mono=True)
+                load_time = time.perf_counter() - start_time
 
                 # Cria arquivo WAV temporário
                 with tempfile.NamedTemporaryFile(
@@ -90,11 +95,15 @@ class AzureSpeechClient:
                     sf.write(temp_wav.name, y, sr, subtype="PCM_16")
                     wav_path = temp_wav.name
 
+                total_time = time.perf_counter() - start_time
+
                 logger.info(
                     "audio_converted_to_wav",
                     original=str(audio_path),
                     wav_file=wav_path,
                     duration=len(y) / sr,
+                    load_time_ms=int(load_time * 1000),
+                    total_time_ms=int(total_time * 1000),
                 )
 
                 return Path(wav_path)
@@ -115,7 +124,7 @@ class AzureSpeechClient:
         self,
         audio_path: Path,
         language: str = "pt-BR",
-        timeout_secs: int = 30,
+        timeout_secs: int = 60,  # Aumentado de 30s para 60s (Azure Speech pode demorar em produção)
     ) -> dict[str, Any]:
         """Transcreve arquivo de áudio usando Azure Speech.
 
