@@ -90,8 +90,18 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] CORS restritivo com whitelist
 - [x] 87 tasks implementadas, testadas e mergeadas
 
-### 9. Deploy Azure (Spec 009) ✅ 100%
-- [x] Azure AI Services criados (Text, Speech, Vision)
+### 9. Azure AI Content Safety (Spec 010) ✅ 100%
+- [x] Integração Azure AI Content Safety API
+- [x] Detecção de 4 categorias: SelfHarm, Violence, Hate, Sexual
+- [x] Suporte a 100+ idiomas automaticamente
+- [x] Fallback para keywords PT/EN quando CS indisponível
+- [x] MultilingualRiskDetector (combina CS + keywords)
+- [x] Mock server para desenvolvimento (porta 3004)
+- [x] Testes unitários (client + detector)
+- [x] Configuração via variáveis de ambiente
+
+### 10. Deploy Azure (Spec 009) ✅ 100%
+- [x] Azure AI Services criados (Text, Speech, Vision, Content Safety)
 - [x] Azure Container Instances criado e funcionando
 - [x] CI/CD Pipeline configurado (GitHub Actions)
 - [x] Health check passando
@@ -106,7 +116,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## ⏳ Módulos Pendentes
 
-### 10. Documentação Final (Spec 011) ⏳ 0%
+### 11. Documentação Final (Spec 011) ⏳ 0%
 - [ ] Vídeo demonstrativo
 - [ ] Documentação técnica completa
 - [ ] API Guide
