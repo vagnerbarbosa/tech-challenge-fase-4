@@ -9,7 +9,12 @@ from typing import Any
 import azure.cognitiveservices.speech as speechsdk
 import librosa
 import soundfile as sf
-from azure.cognitiveservices.speech import ResultReason, SpeechConfig, SpeechRecognizer
+from azure.cognitiveservices.speech import (
+    PropertyId,
+    ResultReason,
+    SpeechConfig,
+    SpeechRecognizer,
+)
 from structlog import get_logger
 
 from src.core.config import get_settings
@@ -20,6 +25,9 @@ from src.core.exceptions import (
 )
 
 logger = get_logger()
+
+# Idiomas suportados para auto-detecção
+DEFAULT_SUPPORTED_LANGUAGES = ["pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT"]
 
 
 @lru_cache
@@ -123,15 +131,18 @@ class AzureSpeechClient:
     async def transcribe(
         self,
         audio_path: Path,
-        language: str = "pt-BR",
-        timeout_secs: int = 60,  # Aumentado de 30s para 60s (Azure Speech pode demorar em produção)
+        language: str | None = None,
+        timeout_secs: int = 60,
+        auto_detect_languages: list[str] | None = None,
     ) -> dict[str, Any]:
         """Transcreve arquivo de áudio usando Azure Speech.
 
         Args:
             audio_path: Caminho para o arquivo de áudio
-            language: Código do idioma (pt-BR por padrão)
+            language: Código do idioma (deprecated, use auto_detect_languages)
             timeout_secs: Timeout em segundos
+            auto_detect_languages: Lista de idiomas candidatos para auto-detecção.
+                Se None, usa DEFAULT_SUPPORTED_LANGUAGES.
 
         Returns:
             Dict com transcricao, confiança, idioma_detectado
@@ -140,16 +151,16 @@ class AzureSpeechClient:
             AzureAuthenticationError: Se credenciais inválidas
             AzureQuotaExceededError: Se quota excedida
             AzureServiceError: Se erro no serviço Azure
-            AzureConnectionError: Se falha de conexão
             TimeoutError: Se timeout excedido
         """
         # Mock mode: retorna transcrição simulada
         if self.mock_mode:
             logger.info("azure_speech_mock_mode", audio_file=str(audio_path))
+            detected_lang = language if language else auto_detect_languages[0] if auto_detect_languages else "pt-BR"
             return {
                 "transcricao": "[MOCK] Transcrição simulada para desenvolvimento",
                 "confianca": 0.85,
-                "idioma_detectado": language,
+                "idioma_detectado": detected_lang,
                 "sucesso": True,
                 "mock": True,
             }
@@ -157,56 +168,115 @@ class AzureSpeechClient:
         # Converte para WAV se necessário (MP3/OGG)
         wav_path = self._convert_to_wav(audio_path)
         temp_wav_created = wav_path != audio_path
+        recognizer: SpeechRecognizer | None = None
 
         try:
             # Configura idioma (self.config não é None aqui pois mock_mode é False)
             assert self.config is not None  # noqa: S101
-            self.config.speech_recognition_language = language
 
             # Cria audio config
             audio_config = speechsdk.audio.AudioConfig(filename=str(wav_path))
 
-            # Cria recognizer
-            recognizer = SpeechRecognizer(speech_config=self.config, audio_config=audio_config)
+            # Determina modo: idioma fixo ou auto-detecção
+            use_auto_detect = language is None
+            detected_language: str = "pt-BR"  # default
 
-            logger.info(
-                "azure_speech_transcribe_started",
-                audio_file=str(audio_path),
-                language=language,
-            )
+            if use_auto_detect:
+                # Usa auto-detecção de idioma com SpeechRecognizer + auto_detect_config
+                languages = auto_detect_languages or DEFAULT_SUPPORTED_LANGUAGES
+                auto_detect_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
+                    languages=languages
+                )
 
-            # Executa reconhecimento com timeout
-            # recognize_once_async retorna ResultFuture, precisamos chamar get()
-            def _recognize() -> speechsdk.SpeechRecognitionResult:
-                future: speechsdk.ResultFuture = recognizer.recognize_once_async()
-                result: speechsdk.SpeechRecognitionResult = future.get()
-                return result  # Bloqueia até ter resultado
+                # SpeechRecognizer com auto-detecção
+                recognizer = SpeechRecognizer(
+                    speech_config=self.config,
+                    audio_config=audio_config,
+                    auto_detect_source_language_config=auto_detect_config,
+                )
 
-            result = await asyncio.wait_for(
-                asyncio.to_thread(_recognize),
-                timeout=timeout_secs,
-            )
+                logger.info(
+                    "azure_speech_transcribe_auto_detect_started",
+                    audio_file=str(audio_path),
+                    candidate_languages=languages,
+                )
 
-            # Processa resultado
+                def _recognize_auto() -> speechsdk.SpeechRecognitionResult:
+                    assert recognizer is not None  # noqa: S101
+                    future: speechsdk.ResultFuture = recognizer.recognize_once_async()
+                    result: speechsdk.SpeechRecognitionResult = future.get()
+                    return result
+
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(_recognize_auto),
+                    timeout=timeout_secs,
+                )
+
+                # Extrai idioma detectado das propriedades do resultado
+                if result.reason == ResultReason.RecognizedSpeech:
+                    detected_language = result.properties.get(
+                        PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult,
+                        "pt-BR"
+                    )
+                    logger.info(
+                        "azure_speech_auto_detect_success",
+                        detected_language=detected_language,
+                        text_length=len(result.text),
+                    )
+
+            else:
+                # Modo legado: idioma fixo (para compatibilidade)
+                # language não é None aqui pois use_auto_detect = (language is None)
+                assert language is not None  # noqa: S101
+                self.config.speech_recognition_language = language
+                detected_language = language
+
+                recognizer = SpeechRecognizer(
+                    speech_config=self.config,
+                    audio_config=audio_config,
+                )
+
+                logger.info(
+                    "azure_speech_transcribe_started",
+                    audio_file=str(audio_path),
+                    language=language,
+                )
+
+                def _recognize() -> speechsdk.SpeechRecognitionResult:
+                    assert recognizer is not None  # noqa: S101
+                    future: speechsdk.ResultFuture = recognizer.recognize_once_async()
+                    result: speechsdk.SpeechRecognitionResult = future.get()
+                    return result
+
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(_recognize),
+                    timeout=timeout_secs,
+                )
+
+            # Processa resultado (comum para ambos os modos)
             if result.reason == ResultReason.RecognizedSpeech:
                 logger.info(
                     "azure_speech_transcribe_success",
                     text_length=len(result.text),
                     confidence=result.confidence,
+                    detected_language=detected_language,
                 )
                 return {
                     "transcricao": result.text,
                     "confianca": result.confidence,
-                    "idioma_detectado": language,
+                    "idioma_detectado": detected_language,
                     "sucesso": True,
                 }
 
             elif result.reason == ResultReason.NoMatch:
-                logger.warning("azure_speech_no_match")
+                logger.warning(
+                    "azure_speech_no_match",
+                    detected_language=detected_language,
+                )
                 return {
                     "transcricao": "",
                     "confianca": 0.0,
-                    "idioma_detectado": language,
+                    "idioma_detectado": detected_language,
                     "sucesso": False,
                     "erro": "Nenhuma fala detectada no áudio",
                 }
@@ -220,7 +290,6 @@ class AzureSpeechClient:
                     error_details=cancellation_details.error_details,
                 )
 
-                # Verifica se é erro de autenticação
                 if "Authentication" in str(cancellation_details.error_details):
                     raise AzureAuthenticationError("Credenciais Azure Speech inválidas")
 
@@ -240,7 +309,8 @@ class AzureSpeechClient:
 
         finally:
             # Cleanup
-            recognizer = None
+            if recognizer is not None:
+                recognizer = None
 
             # Remove arquivo WAV temporário se foi criado
             if temp_wav_created and wav_path.exists():
@@ -253,22 +323,28 @@ class AzureSpeechClient:
     async def transcribe_with_retry(
         self,
         audio_path: Path,
-        language: str = "pt-BR",
+        language: str | None = None,
         max_retries: int = 2,
+        auto_detect_languages: list[str] | None = None,
     ) -> dict[str, Any]:
         """Transcreve com retry automático em caso de falha.
 
         Args:
             audio_path: Caminho para o arquivo de áudio
-            language: Código do idioma
+            language: Código do idioma (None para auto-detect)
             max_retries: Número máximo de tentativas
+            auto_detect_languages: Lista de idiomas candidatos para auto-detecção
 
         Returns:
             Resultado da transcrição
         """
         for attempt in range(max_retries + 1):
             try:
-                return await self.transcribe(audio_path, language)
+                return await self.transcribe(
+                    audio_path,
+                    language=language,
+                    auto_detect_languages=auto_detect_languages,
+                )
             except AzureQuotaExceededError:
                 raise  # Não retry em quota excedida
             except AzureAuthenticationError:

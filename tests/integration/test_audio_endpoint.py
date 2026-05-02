@@ -23,12 +23,17 @@ class TestAudioEndpointSuccess:
             b"RIFF" + b"\x00\x00\x00\x00" + b"WAVEfmt " + b"\x00" * 20
         )
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ), open(test_audio, "rb") as f:
+        with (
+            patch("src.utils.file_validation.magic.from_buffer", return_value="audio/wav"),
+            patch(
+                "src.infrastructure.azure_speech_client.get_speech_config",
+                return_value=None,
+            ),
+            open(test_audio, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.wav", f, "audio/wav")},
+                files={"audio": ("test.wav", f, "audio/wav")},
                 data={"patient_id": "patient-123"},
             )
 
@@ -51,12 +56,17 @@ class TestAudioEndpointSuccess:
             b"RIFF" + b"\x00\x00\x00\x00" + b"WAVEfmt " + b"\x00" * 20
         )
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ), open(test_audio, "rb") as f:
+        with (
+            patch("src.utils.file_validation.magic.from_buffer", return_value="audio/wav"),
+            patch(
+                "src.infrastructure.azure_speech_client.get_speech_config",
+                return_value=None,
+            ),
+            open(test_audio, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.wav", f, "audio/wav")},
+                files={"audio": ("test.wav", f, "audio/wav")},
             )
 
         # Assert
@@ -76,7 +86,7 @@ class TestAudioEndpointValidation:
         with open(test_file, "rb") as f:
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.txt", f, "text/plain")},
+                files={"audio": ("test.txt", f, "text/plain")},
             )
 
         # Assert
@@ -90,13 +100,20 @@ class TestAudioEndpointValidation:
         test_audio = tmp_path / "test.wav"
         test_audio.write_bytes(b"fake wav content")
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer",
-            return_value="application/octet-stream",
-        ), open(test_audio, "rb") as f:
+        with (
+            patch(
+                "src.utils.file_validation.magic.from_buffer",
+                return_value="application/octet-stream",
+            ),
+            patch(
+                "src.infrastructure.azure_speech_client.get_speech_config",
+                return_value=None,
+            ),
+            open(test_audio, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.wav", f, "audio/wav")},
+                files={"audio": ("test.wav", f, "audio/wav")},
             )
 
         # Assert
@@ -109,12 +126,17 @@ class TestAudioEndpointValidation:
         test_audio = tmp_path / "test.wav"
         test_audio.write_bytes(b"RIFF" + b"WAVE" + b"\x00" * (15 * 1024 * 1024))
 
-        with patch(
-            "src.utils.file_validation.magic.from_buffer", return_value="audio/wav"
-        ), open(test_audio, "rb") as f:
+        with (
+            patch("src.utils.file_validation.magic.from_buffer", return_value="audio/wav"),
+            patch(
+                "src.infrastructure.azure_speech_client.get_speech_config",
+                return_value=None,
+            ),
+            open(test_audio, "rb") as f,
+        ):
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.wav", f, "audio/wav")},
+                files={"audio": ("test.wav", f, "audio/wav")},
             )
 
         # Assert - middleware retorna 413 (Payload Too Large)
@@ -158,7 +180,7 @@ class TestAudioAzureErrors:
         ), open(test_audio, "rb") as f:
             response = await async_client.post(
                 "/analyze/audio",
-                files={"file": ("test.wav", f, "audio/wav")},
+                files={"audio": ("test.wav", f, "audio/wav")},
             )
 
         # Assert - deve retornar 500 (erro interno) ou 429 dependendo do tratamento

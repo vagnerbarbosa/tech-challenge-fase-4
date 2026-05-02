@@ -18,12 +18,19 @@ class TestGetSpeechConfig:
         """Testa retorno None quando chave não configurada."""
         # Arrange
         mock_settings.return_value.azure_speech_key = None
+        mock_settings.return_value.azure_speech_region = "brazilsouth"
+
+        # Limpa cache para garantir nova execução
+        get_speech_config.cache_clear()
 
         # Act
         result = get_speech_config()
 
         # Assert
         assert result is None
+
+        # Limpa cache após teste
+        get_speech_config.cache_clear()
 
     @patch("src.infrastructure.azure_speech_client.get_settings")
     def test_returns_config_when_key_present(self, mock_settings):
@@ -292,3 +299,129 @@ class TestAzureSpeechClientErrors:
             ):
                 # Act & Assert
                 await client.transcribe(test_file, timeout_secs=1)
+
+
+class TestAutoDetectLanguage:
+    """Testes para auto-detecção de idioma."""
+
+    @pytest.fixture
+    def client(self):
+        """Fixture para AzureSpeechClient com config mock."""
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+        ) as mock_get_config:
+            mock_config = Mock()
+            mock_get_config.return_value = mock_config
+            yield AzureSpeechClient()
+
+    @pytest.mark.asyncio
+    async def test_transcribe_with_auto_detect_language(self, client, tmp_path):
+        """Testa transcrição com auto-detecção de idioma (language=None)."""
+        from azure.cognitiveservices.speech import PropertyId, ResultReason
+
+        # Arrange
+        mock_result = Mock()
+        mock_result.reason = ResultReason.RecognizedSpeech
+        mock_result.text = "Hello world"
+        mock_result.confidence = 0.92
+        mock_result.properties = {PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult: "en-US"}
+
+        test_file = tmp_path / "test.wav"
+        test_file.write_text("fake")
+
+        with (
+            patch("src.infrastructure.azure_speech_client.SpeechRecognizer") as mock_recognizer,
+            patch("src.infrastructure.azure_speech_client.speechsdk.languageconfig.AutoDetectSourceLanguageConfig") as mock_auto_config,
+        ):
+            _ = mock_auto_config  # Used implicitly via SpeechRecognizer call
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
+
+            # Act - language=None deve ativar auto-detect
+            result = await client.transcribe(test_file, language=None)
+
+            # Assert
+            assert result["sucesso"] is True
+            assert result["transcricao"] == "Hello world"
+            assert result["idioma_detectado"] == "en-US"
+            assert result["confianca"] == 0.92
+
+            # Verifica que SpeechRecognizer foi criado com auto_detect_config
+            assert mock_recognizer.called
+            call_kwargs = mock_recognizer.call_args.kwargs
+            assert "auto_detect_source_language_config" in call_kwargs
+
+    @pytest.mark.asyncio
+    async def test_transcribe_with_fixed_language(self, client, tmp_path):
+        """Testa transcrição com idioma fixo (comportamento legado)."""
+        from azure.cognitiveservices.speech import ResultReason
+
+        # Arrange
+        mock_result = Mock()
+        mock_result.reason = ResultReason.RecognizedSpeech
+        mock_result.text = "Olá mundo"
+        mock_result.confidence = 0.95
+
+        test_file = tmp_path / "test.wav"
+        test_file.write_text("fake")
+
+        with patch(
+            "src.infrastructure.azure_speech_client.SpeechRecognizer"
+        ) as mock_recognizer:
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
+
+            # Act - language especificado deve usar modo fixo
+            result = await client.transcribe(test_file, language="pt-BR")
+
+            # Assert
+            assert result["sucesso"] is True
+            assert result["transcricao"] == "Olá mundo"
+            assert result["idioma_detectado"] == "pt-BR"
+
+            # Verifica que não usou auto_detect
+            call_kwargs = mock_recognizer.call_args.kwargs
+            assert "auto_detect_source_language_config" not in call_kwargs
+
+    @pytest.mark.asyncio
+    async def test_transcribe_with_custom_languages(self, client, tmp_path):
+        """Testa auto-detecção com lista de idiomas customizada."""
+        from azure.cognitiveservices.speech import PropertyId, ResultReason
+
+        # Arrange
+        mock_result = Mock()
+        mock_result.reason = ResultReason.RecognizedSpeech
+        mock_result.text = "Hola mundo"
+        mock_result.confidence = 0.88
+        mock_result.properties = {PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult: "es-ES"}
+
+        test_file = tmp_path / "test.wav"
+        test_file.write_text("fake")
+
+        custom_languages = ["pt-BR", "es-ES", "fr-FR"]
+
+        with (
+            patch("src.infrastructure.azure_speech_client.SpeechRecognizer") as mock_recognizer,
+            patch("src.infrastructure.azure_speech_client.speechsdk.languageconfig.AutoDetectSourceLanguageConfig") as mock_auto_config,
+        ):
+            mock_future = Mock()
+            mock_future.get.return_value = mock_result
+            mock_recognizer.return_value.recognize_once_async.return_value = mock_future
+            mock_auto_config_instance = Mock()
+            mock_auto_config.return_value = mock_auto_config_instance
+
+            # Act
+            result = await client.transcribe(
+                test_file,
+                language=None,
+                auto_detect_languages=custom_languages,
+            )
+
+            # Assert
+            assert result["sucesso"] is True
+            assert result["idioma_detectado"] == "es-ES"
+
+            # Verifica que AutoDetectSourceLanguageConfig foi chamado com idiomas customizados
+            mock_auto_config.assert_called_once_with(languages=custom_languages)

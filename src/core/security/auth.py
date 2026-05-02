@@ -97,7 +97,7 @@ class GeneratedAPIKeyStore:
         """Carrega as chaves do arquivo."""
         try:
             return json.loads(self._storage_path.read_text())
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, PermissionError, json.JSONDecodeError):
             return {}
 
     def _save_keys(self, keys: dict[str, Any]) -> None:

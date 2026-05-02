@@ -155,7 +155,10 @@ class AudioAnalysisService:
             prosodic_init_time = perf_counter() - step_start
 
             step_start = perf_counter()
-            transcribe_task = self.speech_client.transcribe_with_retry(audio_path)
+            # Usa auto-detecção de idioma (language=None) para suportar múltiplos idiomas
+            transcribe_task = self.speech_client.transcribe_with_retry(
+                audio_path, language=None
+            )
             transcribe_init_time = perf_counter() - step_start
 
             logger.info(
