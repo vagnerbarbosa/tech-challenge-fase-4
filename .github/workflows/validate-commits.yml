@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   validate-commits:
-    name: Validar mensagens de commit
+    name: Validar Conventional Commits
     runs-on: ubuntu-latest
     permissions:
       contents: read

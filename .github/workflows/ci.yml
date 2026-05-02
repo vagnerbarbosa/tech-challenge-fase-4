@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test:
-    name: Testes e Qualidade
+    name: Testes
     runs-on: ubuntu-latest
     strategy:
       matrix:
