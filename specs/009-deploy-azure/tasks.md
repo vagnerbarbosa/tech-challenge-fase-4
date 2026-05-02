@@ -12,9 +12,9 @@
 ## Summary
 
 ✅ Todas as tasks foram concluídas com sucesso. A aplicação está online em:
-- **URL**: <DEPLOY_URL>
-- **Health**: <DEPLOY_URL>/health
-- **Docs**: <DEPLOY_URL>/docs
+- **URL**: http://20.201.42.143:8000
+- **Health**: http://20.201.42.143:8000/health
+- **Docs**: http://20.201.42.143:8000/docs
 
 ---
 
@@ -86,7 +86,7 @@
 - [X] T026 Configurar IP público no Container Instance
 - [X] T027 Configurar health check no workflow (endpoint `/health`)
 
-**Checkpoint**: US1 funcional - URL `<DEPLOY_URL>` retorna health check 200 ✅
+**Checkpoint**: US1 funcional - URL `http://20.201.42.143:8000` retorna health check 200 ✅
 
 ---
 

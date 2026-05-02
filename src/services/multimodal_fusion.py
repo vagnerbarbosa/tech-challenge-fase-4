@@ -245,24 +245,39 @@ class FusionService:
         # Nota: Removido asyncio.wait_for pois o AudioAnalysisService já usa
         # asyncio.gather internamente, causando race condition. O timeout global
         # do endpoint multimodal (90s) é suficiente.
+        audio_temp_path: Path | None = None
         if audio or audio_path:
             if audio:
                 # Modo legado: salvar UploadFile temporariamente
-                audio_path = Path(f"/tmp/audio_{correlation_id}.wav")
+                audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
                 tasks.append(
-                    self._process_audio(audio, audio_path, patient_id)  # type: ignore[arg-type]
+                    self._process_audio(audio, audio_temp_path, patient_id)  # type: ignore[arg-type]
                 )
             else:
-                # Modo novo: Path já fornecido
-                logger.info(
-                    "multimodal_audio_path_provided",
-                    correlation_id=correlation_id,
-                    audio_path=str(audio_path),
-                    audio_path_exists=audio_path.exists() if audio_path else None,
-                    audio_path_size=audio_path.stat().st_size if audio_path and audio_path.exists() else None,
-                )
+                # Modo novo: Path já fornecido - copiar para /tmp para evitar
+                # que o arquivo seja deletado pelo endpoint antes do processamento
+                audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
+                if audio_path:
+                    try:
+                        import shutil
+                        shutil.copy2(audio_path, audio_temp_path)
+                        logger.info(
+                            "multimodal_audio_copied_to_temp",
+                            correlation_id=correlation_id,
+                            original_path=str(audio_path),
+                            temp_path=str(audio_temp_path),
+                            size_bytes=audio_temp_path.stat().st_size,
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "multimodal_audio_copy_failed",
+                            correlation_id=correlation_id,
+                            error=str(e),
+                        )
+                        # Fallback: tentar usar o path original mesmo assim
+                        audio_temp_path = audio_path
                 tasks.append(
-                    self._audio_service.analyze(audio_path, patient_id)  # type: ignore[arg-type]
+                    self._audio_service.analyze(audio_temp_path, patient_id)  # type: ignore[arg-type]
                 )
             task_names.append("audio")
 
@@ -313,6 +328,23 @@ class FusionService:
                         modalidade=name,
                         result_type=type(result).__name__,
                     )
+
+        # Limpar arquivo temporário de áudio (LGPD)
+        if audio_temp_path and audio_temp_path.exists():
+            try:
+                audio_temp_path.unlink()
+                logger.debug(
+                    "multimodal_audio_temp_cleaned",
+                    correlation_id=correlation_id,
+                    temp_path=str(audio_temp_path),
+                )
+            except Exception as e:
+                logger.warning(
+                    "multimodal_audio_temp_cleanup_failed",
+                    correlation_id=correlation_id,
+                    temp_path=str(audio_temp_path),
+                    error=str(e),
+                )
 
         # Montar resultados individuais
         text_result: TextAnalysisResponse | None = None
