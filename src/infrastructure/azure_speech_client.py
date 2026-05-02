@@ -26,8 +26,8 @@ from src.core.exceptions import (
 
 logger = get_logger()
 
-# Idiomas suportados para auto-detecção
-DEFAULT_SUPPORTED_LANGUAGES = ["pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT"]
+# Idiomas suportados para auto-detecção (máximo 4 idiomas no modo DetectAudioAtStart)
+DEFAULT_SUPPORTED_LANGUAGES = ["pt-BR", "en-US", "es-ES", "fr-FR"]
 
 
 @lru_cache
