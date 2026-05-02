@@ -26,8 +26,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-skip:
+    name: Verificar se deve pular
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Verificar autor do commit
+        id: check
+        run: |
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          MESSAGE=$(git log -1 --pretty=format:'%s')
+          echo "Autor: $AUTHOR"
+          echo "Mensagem: $MESSAGE"
+
+          # Pular se for commit do bot de deploy ou tiver [skip ci]
+          if [[ "$AUTHOR" == "github-actions[bot]" ]] || [[ "$MESSAGE" == *"[skip ci]"* ]]; then
+            echo "🚫 Pulando deploy - commit de documentação automática"
+            echo "should_skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Executando deploy normalmente"
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+
   check-image:
     name: Verificar Imagem Existente
+    needs: [check-skip]
+    if: needs.check-skip.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     outputs:
       needs_build: ${{ steps.check.outputs.needs_build }}
