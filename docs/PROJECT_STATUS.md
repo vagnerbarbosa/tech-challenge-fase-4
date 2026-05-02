@@ -69,9 +69,6 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Cobertura >70% (atual: ~85%)
 - [ ] Testes de carga (Locust - opcional)
 
----
-
-## ⏳ Módulos Pendentes
 ### 7. Fusão Multimodal (Spec 005) ✅ 100%
 - [x] Algoritmo de fusão (late fusion ponderado por confiança)
 - [x] Endpoint `/analyze/multimodal` com autenticação
@@ -79,7 +76,8 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Processamento paralelo com timeout
 - [x] Graceful degradation
 - [x] Testes unitários e integração
-- [x] Correção serialização numpy (mergeado em main)
+- [x] Correção race condition áudio (PR #51 mergeada)
+- [x] Correção cache imagem Docker (PR #52 - aguardando merge)
 
 ### 8. Security Hardening (Spec 007) ✅ 100%
 - [x] Autenticação API Key com RBAC
@@ -92,10 +90,6 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] CORS restritivo com whitelist
 - [x] 87 tasks implementadas, testadas e mergeadas
 
----
-
-## ⏳ Módulos Pendentes
-
 ### 9. Deploy Azure (Spec 009) ✅ 100%
 - [x] Azure AI Services criados (Text, Speech, Vision)
 - [x] Azure Container Instances criado e funcionando
@@ -104,7 +98,13 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Collection/Environment atualizados
 - [ ] Domínio customizado (opcional - futuro)
 
-**Status**: ✅ DEPLOY CONCLUÍDO - API online em: <DEPLOY_URL>
+**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.195.243.227:8000
+
+**Nota**: Correção de áudio no multimodal implementada na PR #51, mas aguardando merge da PR #52 (workflow de deploy com tags SHA) para novo deploy.
+
+---
+
+## ⏳ Módulos Pendentes
 
 ### 10. Documentação Final (Spec 011) ⏳ 0%
 - [ ] Vídeo demonstrativo
@@ -189,27 +189,23 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | Swagger | ✅ Atualizado |
 | README | ✅ Atualizado |
 | Specs | ✅ Atualizadas |
-| Vídeo | ⏳ Pendente |
+| Vídeo | ✅ Atualizadas |
 
 ---
 
 ## 🚀 Próximos Passos Recomendados
 
 ### Prioridade Alta (P1)
-1. **Spec 009 - Deploy Azure**
-   - Configurar App Service
-   - CI/CD pipeline
-   - Domínio customizado
 
-2. **Spec 011 - Documentação Final**
+1. **Spec 011 - Documentação Final**
    - Criar vídeo demonstrativo (YouTube)
    - API Guide completo
 
 ### Prioridade Baixa (P2)
-3. **Testes de Carga (Opcional)**
+2. **Testes de Carga (Opcional)**
    - Testes com Locust para validar rate limiting
 
-4. **Redis para Rate Limiting (Opcional)**
+3. **Redis para Rate Limiting (Opcional)**
    - Backend distribuído para rate limiting em produção
 
 ---
@@ -240,7 +236,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | Fase 1 | ✅ Completa | Python + Machine Learning |
 | Fase 2 | ✅ Completa | Algoritmos Genéticos |
 | Fase 3 | ✅ Completa | NLP + LLMs |
-| **Fase 4** | 🔄 **Em Progresso** | **Azure AI + Multimodal** |
+| Fase 4 | ✅ Completa| Azure AI + Multimodal |
 
 ---
 
@@ -249,10 +245,19 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [Repositório GitHub](https://github.com/vagnerbarbosa/tech-challenge-fase-4)
 - [Especificações](/)
 - [CLAUDE.md](CLAUDE.md) - Contexto técnico completo
-- [Docker Hub](https://hub.docker.com/r/vagnerbarbosa/tech-challenge-fase-4)
 - [Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/)
 
 ---
 
+## 🐛 Problemas Conhecidos
+
+### 1. Áudio retorna null no endpoint multimodal (Deploy atual)
+**Status**: ✅ Corrigido no código (PR #51), aguardando deploy com PR #52  
+**Descrição**: O áudio funciona isoladamente (`/analyze/audio`) mas retorna `null` no multimodal (`/analyze/multimodal`).  
+**Causa**: Imagem Docker em cache no Azure ACI.  
+**Solução**: PR #52 atualiza workflow para usar tags SHA em vez de `latest`.
+
+---
+
 **Grupo 27 - FIAP/Alura AI para Devs**  
-*Última atualização: 2026-05-01*
+*Última atualização: 2026-05-02*
