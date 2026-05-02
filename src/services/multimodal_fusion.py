@@ -210,21 +210,23 @@ class FusionService:
         logger.info(
             "multimodal_analysis_started",
             correlation_id=correlation_id,
-            has_text=texto is not None,
-            has_audio=audio is not None,
-            has_video=video is not None,
+            has_text=bool(texto),
+            has_audio=bool(audio),
+            has_audio_path=bool(audio_path),
+            has_video=bool(video),
+            has_video_path=bool(video_path),
             patient_id=PatientIdHasher.hash(patient_id),
         )
 
         # Validar que pelo menos uma modalidade foi fornecida
-        if texto is None and audio is None and video is None:
+        if not texto and not audio and not audio_path and not video and not video_path:
             logger.warning(
                 "multimodal_no_modality",
                 correlation_id=correlation_id,
             )
             raise HTTPException(
                 status_code=400,
-                detail="Pelo menos uma modalidade deve ser fornecida",
+                detail="Pelo menos uma modalidade deve ser fornecida (texto, áudio ou vídeo)",
             )
 
         tasks = []
