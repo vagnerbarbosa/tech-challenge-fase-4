@@ -34,16 +34,16 @@ Sistema para identificação precoce de riscos em saúde materna e sinais de vio
 
 ## 🚀 Deploy
 
-[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](<DEPLOY_URL>/health)
+[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](http://20.201.82.8:8000/health)
 
-✅ **API Online**: <DEPLOY_URL>
+✅ **API Online**: http://20.201.82.8:8000
 
 ### Endpoints
 
 | Endpoint | URL | Ambiente |
 |----------|-----|----------|
-| Health | `<DEPLOY_URL>/health` | Todos |
-| OpenAPI | `<DEPLOY_URL>/openapi.json` | Todos |
+| Health | `http://20.201.82.8:8000/health` | Todos |
+| OpenAPI | `http://20.201.82.8:8000/openapi.json` | Todos |
 | Swagger UI | `http://localhost:8000/docs` | Apenas local |
 | ReDoc | `http://localhost:8000/redoc` | Apenas local |
 

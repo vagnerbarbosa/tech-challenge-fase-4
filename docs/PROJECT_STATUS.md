@@ -108,9 +108,9 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Collection/Environment atualizados
 - [ ] Domínio customizado (opcional - futuro)
 
-**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.195.243.227:8000
+**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.201.82.8:8000
 
-**Nota**: Correção de áudio no multimodal implementada na PR #51, mas aguardando merge da PR #52 (workflow de deploy com tags SHA) para novo deploy.
+**Nota**: Deploy realizado com correções das PRs #51 (race condition áudio) e #52 (tags SHA).
 
 ---
 
