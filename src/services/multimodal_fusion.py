@@ -447,3 +447,5 @@ def get_fusion_service() -> FusionService:
     if _fusion_service is None:
         _fusion_service = FusionService()
     return _fusion_service
+
+# Deploy trigger: Fri May  1 22:57:15 -03 2026
