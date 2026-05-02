@@ -247,6 +247,13 @@ class FusionService:
         # do endpoint multimodal (90s) é suficiente.
         audio_temp_path: Path | None = None
         if audio or audio_path:
+            logger.info(
+                "multimodal_audio_input_received",
+                correlation_id=correlation_id,
+                has_upload_file=bool(audio),
+                has_path=bool(audio_path),
+                audio_path_str=str(audio_path) if audio_path else None,
+            )
             if audio:
                 # Modo legado: salvar UploadFile temporariamente
                 audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
@@ -258,24 +265,37 @@ class FusionService:
                 # que o arquivo seja deletado pelo endpoint antes do processamento
                 audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
                 if audio_path:
-                    try:
-                        import shutil
-                        shutil.copy2(audio_path, audio_temp_path)
-                        logger.info(
-                            "multimodal_audio_copied_to_temp",
-                            correlation_id=correlation_id,
-                            original_path=str(audio_path),
-                            temp_path=str(audio_temp_path),
-                            size_bytes=audio_temp_path.stat().st_size,
-                        )
-                    except Exception as e:
+                    # Verificar se arquivo existe antes de copiar
+                    if not audio_path.exists():
                         logger.error(
-                            "multimodal_audio_copy_failed",
+                            "multimodal_audio_source_not_found",
                             correlation_id=correlation_id,
-                            error=str(e),
+                            audio_path=str(audio_path),
                         )
-                        # Fallback: tentar usar o path original mesmo assim
-                        audio_temp_path = audio_path
+                    else:
+                        try:
+                            import shutil
+                            size_before = audio_path.stat().st_size
+                            shutil.copy2(audio_path, audio_temp_path)
+                            size_after = audio_temp_path.stat().st_size
+                            logger.info(
+                                "multimodal_audio_copied_to_temp",
+                                correlation_id=correlation_id,
+                                original_path=str(audio_path),
+                                temp_path=str(audio_temp_path),
+                                size_before=size_before,
+                                size_after=size_after,
+                                copy_success=size_after > 0,
+                            )
+                        except Exception as e:
+                            logger.error(
+                                "multimodal_audio_copy_failed",
+                                correlation_id=correlation_id,
+                                error=str(e),
+                                error_type=type(e).__name__,
+                            )
+                            # Fallback: tentar usar o path original mesmo assim
+                            audio_temp_path = audio_path
                 tasks.append(
                     self._audio_service.analyze(audio_temp_path, patient_id)  # type: ignore[arg-type]
                 )
@@ -354,6 +374,15 @@ class FusionService:
         modalidade_results: dict[str, ModalidadeResult] = {}
 
         for name, raw in zip(task_names, results_raw, strict=True):
+            logger.info(
+                "multimodal_processing_result",
+                correlation_id=correlation_id,
+                modalidade=name,
+                raw_is_none=raw is None,
+                raw_type=type(raw).__name__ if raw is not None else None,
+                raw_is_dict=isinstance(raw, dict) if raw is not None else False,
+                raw_is_exception=isinstance(raw, BaseException) if raw is not None else False,
+            )
             if raw is None:
                 continue
 
@@ -375,6 +404,12 @@ class FusionService:
                     risco_saude_mental=raw.get("risco_saude_mental", "baixo"),
                     confiança=confiança_audio,
                     raw=raw,
+                )
+                logger.info(
+                    "multimodal_audio_result_parsed",
+                    correlation_id=correlation_id,
+                    risco_violencia=raw.get("risco_violencia"),
+                    risco_saude_mental=raw.get("risco_saude_mental"),
                 )
             elif name == "video" and isinstance(raw, dict):
                 video_result = raw
