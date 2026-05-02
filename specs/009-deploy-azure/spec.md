@@ -18,7 +18,7 @@
 - **Q**: Qual banco de dados será usado em produção?  
   **A**: SQLite em disco temporário (/tmp) - adequado para Azure Container Instances (ACI)
 - **Q**: Qual será a URL do serviço?  
-  **A**: IP público atribuído dinamicamente pelo Azure Container Instances: `<DEPLOY_URL>`
+  **A**: IP público atribuído dinamicamente pelo Azure Container Instances: `http://20.201.42.143:8000`
 - **Q**: Qual nível de integração com Azure Monitor será implementado?  
   **A**: Logs via Azure CLI `az container logs` e health check no workflow
 
@@ -102,9 +102,9 @@ Como operador, quero configurações otimizadas para ambiente de produção.
 ## Success Criteria ✅ ALL ACHIEVED
 
 - **SC-001**: Aplicação acessível via IP público ✅
-  - URL: <DEPLOY_URL>
+  - URL: http://20.201.42.143:8000
 - **SC-002**: Swagger disponível em /docs ✅
-  - <DEPLOY_URL>/docs
+  - http://20.201.42.143:8000/docs
 - **SC-003**: Health check retorna healthy ✅
   - Response: `{"status": "healthy", ...}`
 - **SC-004**: Azure AI Services integrados ✅
@@ -242,10 +242,10 @@ SECRET_KEY=<from secrets>
 
 | Endpoint | URL |
 |----------|-----|
-| API Base | <DEPLOY_URL> |
-| Health | <DEPLOY_URL>/health |
-| Swagger | <DEPLOY_URL>/docs |
-| ReDoc | <DEPLOY_URL>/redoc |
+| API Base | http://20.201.42.143:8000 |
+| Health | http://20.201.42.143:8000/health |
+| Swagger | http://20.201.42.143:8000/docs |
+| ReDoc | http://20.201.42.143:8000/redoc |
 
 ---
 
