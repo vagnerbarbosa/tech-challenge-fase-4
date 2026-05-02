@@ -261,7 +261,9 @@ class FusionService:
 
             if audio:
                 # Modo legado: salvar UploadFile temporariamente
-                audio_temp_path = temp_root / f"audio_{correlation_id}.wav"
+                # Preservar extensão original para conversão correta (MP3 vs WAV)
+                original_ext = Path(audio.filename).suffix if audio.filename else ".wav"
+                audio_temp_path = temp_root / f"audio_{correlation_id}{original_ext}"
                 tasks.append(
                     self._process_audio(audio, audio_temp_path, patient_id)  # type: ignore[arg-type]
                 )
