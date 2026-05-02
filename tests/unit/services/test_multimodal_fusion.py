@@ -209,8 +209,10 @@ class TestFusionService:
         # Criar mocks de UploadFile
         audio_file = MagicMock(spec=UploadFile)
         audio_file.read = AsyncMock(return_value=b"audio_data")
+        audio_file.filename = "test.wav"
         video_file = MagicMock(spec=UploadFile)
         video_file.read = AsyncMock(return_value=b"video_data")
+        video_file.filename = "test.mp4"
 
         result = await service.analyze(
             texto="texto de teste",
@@ -244,6 +246,7 @@ class TestFusionService:
 
         audio_file = MagicMock(spec=UploadFile)
         audio_file.read = AsyncMock(return_value=b"audio_data")
+        audio_file.filename = "test.wav"
 
         result = await service.analyze(
             texto="texto",
@@ -278,6 +281,7 @@ class TestFusionService:
 
         audio_file = MagicMock(spec=UploadFile)
         audio_file.read = AsyncMock(return_value=b"audio_data")
+        audio_file.filename = "test.wav"
 
         result = await service.analyze(
             texto="texto",
@@ -301,6 +305,7 @@ class TestFusionService:
 
         audio_file = MagicMock(spec=UploadFile)
         audio_file.read = AsyncMock(return_value=b"audio_data")
+        audio_file.filename = "test.wav"
 
         with pytest.raises(HTTPException) as exc_info:
             await service.analyze(

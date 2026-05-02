@@ -64,7 +64,7 @@ AUDIO_MONTHLY_LIMIT = 300  # minutos por mês
     },
 )
 async def analyze_audio(
-    file: UploadFile = File(..., description="Arquivo de áudio (WAV, MP3, OGG)"),
+    audio: UploadFile = File(..., description="Arquivo de áudio (WAV, MP3, OGG)"),
     patient_id: str | None = Form(
         default=None,
         description="ID anônimo do paciente (UUID recomendado, opcional)",
@@ -73,7 +73,7 @@ async def analyze_audio(
     """Analisa arquivo de áudio para transcrição e riscos.
 
     Args:
-        file: Arquivo de áudio para análise
+        audio: Arquivo de áudio para análise
         patient_id: ID anônimo opcional do paciente
 
     Returns:
@@ -92,13 +92,13 @@ async def analyze_audio(
     logger.info(
         "audio_analysis_request",
         correlation_id=correlation_id,
-        filename=file.filename,
+        filename=audio.filename,
         patient_id=patient_id,
     )
 
     # Validação do arquivo (segurança: filename, magic bytes, tamanho)
     try:
-        await validate_audio_upload(file)
+        await validate_audio_upload(audio)
     except HTTPException as e:
         logger.warning(
             "audio_validation_failed",
@@ -136,7 +136,7 @@ async def analyze_audio(
 
     try:
         # Salva arquivo temporariamente (com hash do patient_id no nome - LGPD)
-        temp_path = await temp_manager.save_temp(file, patient_id)
+        temp_path = await temp_manager.save_temp(audio, patient_id)
         logger.debug(
             "audio_file_saved",
             correlation_id=correlation_id,

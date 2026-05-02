@@ -460,7 +460,7 @@ Resposta:
 # Upload de arquivo de áudio
 curl -X POST "$API_URL/analyze/audio" \
   -H "X-API-Key: $API_KEY" \
-  -F "file=@/caminho/para/audio.wav" \
+  -F "audio=@/caminho/para/audio.wav" \
   -F "patient_id=uuid-do-paciente-123"
 ```
 

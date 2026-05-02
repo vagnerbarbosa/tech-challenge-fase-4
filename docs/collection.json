@@ -169,7 +169,7 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "audio",
                   "type": "file",
                   "src": "/path/to/audio.wav"
                 },

@@ -9,6 +9,7 @@ Tests end-to-end upload security including:
 """
 
 import io
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -43,10 +44,14 @@ class TestUploadSecurity:
         exe_content = b"MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff"
         file_obj, filename = self.create_test_file(exe_content, "malicious.mp3")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/mpeg")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/mpeg")},
+            )
 
         # Should be rejected as invalid
         assert response.status_code == 400
@@ -56,10 +61,14 @@ class TestUploadSecurity:
         exe_content = b"MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff"
         file_obj, filename = self.create_test_file(exe_content, "virus.wav")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         assert response.status_code == 400
 
@@ -84,10 +93,14 @@ class TestUploadSecurity:
             wav_content, "../../../etc/passwd.wav"
         )
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Should be rejected
         assert response.status_code == 400
@@ -97,10 +110,14 @@ class TestUploadSecurity:
         wav_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, filename = self.create_test_file(wav_content, "/etc/shadow.wav")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Should be rejected
         assert response.status_code == 400
@@ -110,10 +127,14 @@ class TestUploadSecurity:
         wav_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, filename = self.create_test_file(wav_content, "file\x00.mp3")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Should be rejected
         assert response.status_code == 400
@@ -123,10 +144,14 @@ class TestUploadSecurity:
         file_content = b"Some content"
         file_obj, filename = self.create_test_file(file_content, "script.py")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "text/plain")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "text/plain")},
+            )
 
         # Should be rejected for invalid extension
         assert response.status_code == 400
@@ -136,10 +161,14 @@ class TestUploadSecurity:
         file_content = b"<?php echo 'shell'; ?>"
         file_obj, filename = self.create_test_file(file_content, "shell.php")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "text/plain")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "text/plain")},
+            )
 
         assert response.status_code == 400
 
@@ -148,10 +177,14 @@ class TestUploadSecurity:
         file_content = b"#!/bin/bash\necho 'hello'"
         file_obj, filename = self.create_test_file(file_content, "script.sh")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "text/plain")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "text/plain")},
+            )
 
         assert response.status_code == 400
 
@@ -161,10 +194,14 @@ class TestUploadSecurity:
         file_obj, filename = self.create_test_file(wav_content, "CON.wav")
 
         # This might be accepted with sanitization or rejected
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Should not be accepted as-is (either rejected or sanitized)
         if response.status_code == 200:
@@ -182,10 +219,14 @@ class TestUploadSecurity:
 
         # The validation may pass or fail based on content check
         # This test mainly verifies the extension check doesn't crash
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Response should be valid HTTP (not 500)
         assert response.status_code in [200, 400, 422]
@@ -195,10 +236,14 @@ class TestUploadSecurity:
         file_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, filename = self.create_test_file(file_content, "shell.php.mp3")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/mpeg")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/mpeg")},
+            )
 
         # Should be rejected based on final extension or content
         # (the .mp3 extension is valid but content might not match)
@@ -209,10 +254,14 @@ class TestUploadSecurity:
         wav_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, filename = self.create_test_file(wav_content, "file\x01\x02.mp3")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/mpeg")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/mpeg")},
+            )
 
         # Control characters should be sanitized or rejected
         assert response.status_code in [200, 400, 422]
@@ -222,10 +271,14 @@ class TestUploadSecurity:
         wav_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, _ = self.create_test_file(wav_content, "")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": ("", file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": ("", file_obj, "audio/wav")},
+            )
 
         # Should be rejected
         assert response.status_code in [400, 422]
@@ -236,10 +289,14 @@ class TestUploadSecurity:
         long_name = "a" * 300 + ".wav"
         file_obj, filename = self.create_test_file(wav_content, long_name)
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Should handle gracefully (truncate or reject)
         assert response.status_code in [200, 400, 422]
@@ -249,10 +306,14 @@ class TestUploadSecurity:
         wav_content = b"RIFF\x00\x00\x00\x00WAVEfmt \x00\x00\x00\x00\x00\x00\x00\x00"
         file_obj, filename = self.create_test_file(wav_content, "file<>:|.wav")
 
-        response = client.post(
-            "/analyze/audio",
-            files={"file": (filename, file_obj, "audio/wav")},
-        )
+        with patch(
+            "src.infrastructure.azure_speech_client.get_speech_config",
+            return_value=None,
+        ):
+            response = client.post(
+                "/analyze/audio",
+                files={"audio": (filename, file_obj, "audio/wav")},
+            )
 
         # Special characters should be sanitized
         assert response.status_code in [200, 400, 422]
