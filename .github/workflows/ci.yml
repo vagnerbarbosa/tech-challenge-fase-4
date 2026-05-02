@@ -10,20 +10,17 @@ permissions:
 
 jobs:
   test:
-    name: Testes e Qualidade
+    name: Testes
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11']
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar Python ${{ matrix.python-version }}
+      - name: Configurar Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.11'
 
       - name: Instalar Poetry
         uses: snok/install-poetry@v1
@@ -37,7 +34,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-v2
+          key: venv-${{ runner.os }}-3.11-${{ hashFiles('**/poetry.lock') }}-v2
 
       - name: Instalar dependências
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -63,4 +60,5 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
