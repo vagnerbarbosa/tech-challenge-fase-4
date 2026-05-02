@@ -34,16 +34,16 @@ Sistema para identificação precoce de riscos em saúde materna e sinais de vio
 
 ## 🚀 Deploy
 
-[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](http://20.201.82.8:8000/health)
+[![Deploy Status](https://img.shields.io/badge/Deploy-Azure%20Container%20Instances-0089D6?style=flat-square&logo=microsoft-azure)](<DEPLOY_URL>/health)
 
-✅ **API Online**: http://20.201.82.8:8000
+✅ **API Online**: <DEPLOY_URL>
 
 ### Endpoints
 
 | Endpoint | URL | Ambiente |
 |----------|-----|----------|
-| Health | `http://20.201.82.8:8000/health` | Todos |
-| OpenAPI | `http://20.201.82.8:8000/openapi.json` | Todos |
+| Health | `<DEPLOY_URL>/health` | Todos |
+| OpenAPI | `<DEPLOY_URL>/openapi.json` | Todos |
 | Swagger UI | `http://localhost:8000/docs` | Apenas local |
 | ReDoc | `http://localhost:8000/redoc` | Apenas local |
 
@@ -117,7 +117,6 @@ O vídeo demonstra:
 | `./scripts/test-docker.sh` | Executa testes via Docker |
 | `./scripts/lint.sh` | Verifica código (Ruff + mypy) |
 | `./scripts/check-azure.sh` | Verifica credenciais Azure |
-| `./scripts/update-deploy-docs.sh` | Atualiza documentação com IP de deploy |
 
 ---
 
