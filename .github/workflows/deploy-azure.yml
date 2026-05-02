@@ -294,17 +294,6 @@ jobs:
           echo "❌ Health check falhou"
           exit 1
 
-      - name: Atualizar documentação com IP do Deploy
-        if: steps.deploy.outputs.ip != ''
-        continue-on-error: true  # Não falha o deploy se update de docs falhar
-        id: update-docs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          IP="${{ steps.deploy.outputs.ip }}"
-          NEW_URL="http://$IP:8000"
-          echo "📝 Atualizando documentação com IP: $NEW_URL"
-
           # Lista de arquivos que podem conter o placeholder
           FILES=(
             "README.md"
