@@ -188,6 +188,7 @@ class FusionService:
         audio_path: Path | None = None,
         video_path: Path | None = None,
         patient_id: str | None = None,
+        temp_base_dir: Path | None = None,
     ) -> MultimodalResponse:
         """Processa múltiplas modalidades em paralelo e retorna fusão.
 
@@ -254,16 +255,20 @@ class FusionService:
                 has_path=bool(audio_path),
                 audio_path_str=str(audio_path) if audio_path else None,
             )
+            # Determinar diretório temporário: usar temp_base_dir se fornecido (Azure ACI),
+            # senão usar /tmp para compatibilidade retroativa
+            temp_root = temp_base_dir if temp_base_dir else Path("/tmp")
+
             if audio:
                 # Modo legado: salvar UploadFile temporariamente
-                audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
+                audio_temp_path = temp_root / f"audio_{correlation_id}.wav"
                 tasks.append(
                     self._process_audio(audio, audio_temp_path, patient_id)  # type: ignore[arg-type]
                 )
             else:
-                # Modo novo: Path já fornecido - copiar para /tmp para evitar
+                # Modo novo: Path já fornecido - copiar para temp_root para evitar
                 # que o arquivo seja deletado pelo endpoint antes do processamento
-                audio_temp_path = Path(f"/tmp/audio_{correlation_id}.wav")
+                audio_temp_path = temp_root / f"audio_{correlation_id}.wav"
                 if audio_path:
                     # Verificar se arquivo existe antes de copiar
                     if not audio_path.exists():
