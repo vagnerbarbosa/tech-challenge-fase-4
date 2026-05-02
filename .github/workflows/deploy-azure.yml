@@ -127,7 +127,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-image, build]
     if: always() && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    outputs:
+      container_ip: ${{ steps.deploy.outputs.ip }}
     steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
       - name: Login na Azure
         uses: azure/login@v2
         with:
@@ -176,14 +181,41 @@ jobs:
           echo "content_safety_endpoint=$(az cognitiveservices account show --name tech-challenge-content-safety --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.endpoint -o tsv)" >> $GITHUB_OUTPUT
           echo "content_safety_key=$(az cognitiveservices account keys list --name tech-challenge-content-safety --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query key1 -o tsv)" >> $GITHUB_OUTPUT
 
-      - name: Deploy Container Instance
+      - name: Determinar tag da imagem
+        id: image-tag
         run: |
+          if [ "${{ needs.build.result }}" == "skipped" ]; then
+            # Se o build foi skipped, usar o hash dos arquivos
+            BUILD_HASH=$(echo "${{ hashFiles('Dockerfile', 'pyproject.toml', 'poetry.lock', 'entrypoint.sh') }}" | cut -c1-12)
+            echo "tag=$BUILD_HASH" >> $GITHUB_OUTPUT
+            echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$BUILD_HASH" >> $GITHUB_OUTPUT
+            echo "✅ Usando imagem existente com hash: $BUILD_HASH"
+          else
+            # Se o build foi executado, usar o SHA do commit
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            echo "tag=$SHORT_SHA" >> $GITHUB_OUTPUT
+            echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$SHORT_SHA" >> $GITHUB_OUTPUT
+            echo "✅ Usando imagem nova com SHA: $SHORT_SHA"
+          fi
+
+      - name: Deploy Container Instance
+        id: deploy
+        run: |
+          # Garantir que não há container anterior
+          echo "🗑️  Deletando container existente..."
           az container delete --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name tech-challenge-api --yes 2>/dev/null || true
 
+          # Aguardar para garantir deleção
+          sleep 10
+
+          IMAGE="${{ steps.image-tag.outputs.image }}"
+          echo "🚀 Criando container com imagem: $IMAGE"
+
+          # Criar novo container com tag específica (não usa cache)
           az container create \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --name tech-challenge-api \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --image "$IMAGE" \
             --cpu 1 --memory 2 --ports 8000 --ip-address public --os-type Linux --location brazilsouth \
             --environment-variables \
               ENVIRONMENT=production \
@@ -204,19 +236,26 @@ jobs:
               SECRET_KEY="${{ secrets.SECRET_KEY }}" \
             --restart-policy OnFailure
 
+          echo "✅ Container criado com sucesso!"
+
+          # Salvar IP para o próximo step
+          IP=$(az container show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name tech-challenge-api --query ipAddress.ip -o tsv)
+          echo "ip=$IP" >> $GITHUB_OUTPUT
+
       - name: Aguardar inicialização
         run: sleep 60
 
       - name: Health Check
         id: health
         run: |
-          IP=$(az container show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name tech-challenge-api --query ipAddress.ip -o tsv)
+          IP="${{ steps.deploy.outputs.ip }}"
+          echo "🔄 Aguardando health check em: http://$IP:8000/health"
+
           for i in {1..15}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://$IP:8000/health" || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "✅ Health check passou!"
               echo "🌐 API disponível em: http://$IP:8000"
-              echo "ip=$IP" >> $GITHUB_OUTPUT
               exit 0
             fi
             echo "⏳ Tentativa $i/15 - Status: $STATUS"
@@ -226,11 +265,11 @@ jobs:
           exit 1
 
       - name: Atualizar documentação com IP do Deploy
-        if: steps.health.outputs.ip != ''
+        if: steps.deploy.outputs.ip != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IP="${{ steps.health.outputs.ip }}"
+          IP="${{ steps.deploy.outputs.ip }}"
           NEW_URL="http://$IP:8000"
           echo "📝 Atualizando documentação com IP: $NEW_URL"
 
