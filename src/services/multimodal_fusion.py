@@ -254,6 +254,13 @@ class FusionService:
                 )
             else:
                 # Modo novo: Path já fornecido
+                logger.info(
+                    "multimodal_audio_path_provided",
+                    correlation_id=correlation_id,
+                    audio_path=str(audio_path),
+                    audio_path_exists=audio_path.exists() if audio_path else None,
+                    audio_path_size=audio_path.stat().st_size if audio_path and audio_path.exists() else None,
+                )
                 tasks.append(
                     self._audio_service.analyze(audio_path, patient_id)  # type: ignore[arg-type]
                 )
@@ -294,11 +301,18 @@ class FusionService:
                         correlation_id=correlation_id,
                         modalidade=name,
                         error=str(result),
+                        error_type=type(result).__name__,
                     )
                     results_raw.append(None)
                 else:
                     results_raw.append(result)
                     modalidades_processadas.append(name)
+                    logger.info(
+                        "multimodal_modality_success",
+                        correlation_id=correlation_id,
+                        modalidade=name,
+                        result_type=type(result).__name__,
+                    )
 
         # Montar resultados individuais
         text_result: TextAnalysisResponse | None = None
