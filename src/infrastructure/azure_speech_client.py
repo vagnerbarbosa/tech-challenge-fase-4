@@ -153,6 +153,16 @@ class AzureSpeechClient:
             AzureServiceError: Se erro no serviço Azure
             TimeoutError: Se timeout excedido
         """
+        # Log config status para debug
+        logger.info(
+            "azure_speech_transcribe_start",
+            audio_file=str(audio_path),
+            mock_mode=self.mock_mode,
+            config_exists=self.config is not None,
+            region=self.settings.azure_speech_region if self.settings else None,
+            key_configured=bool(self.settings.azure_speech_key) if self.settings else False,
+        )
+
         # Mock mode: retorna transcrição simulada
         if self.mock_mode:
             logger.info("azure_speech_mock_mode", audio_file=str(audio_path))
