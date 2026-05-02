@@ -492,13 +492,43 @@ class FusionService:
         patient_id: str | None,
     ) -> dict[str, Any]:
         """Salva áudio temporário e delega para AudioAnalysisService."""
+        logger.info(
+            "multimodal_process_audio_started",
+            filename=audio.filename,
+            temp_path=str(audio_path),
+            extension=audio_path.suffix,
+        )
+
         content = await audio.read()
         audio_path.write_bytes(content)
+
+        file_size = audio_path.stat().st_size if audio_path.exists() else 0
+        logger.info(
+            "multimodal_audio_saved",
+            temp_path=str(audio_path),
+            size_bytes=file_size,
+        )
+
         try:
-            return await self._audio_service.analyze(audio_path, patient_id)
+            result = await self._audio_service.analyze(audio_path, patient_id)
+            logger.info(
+                "multimodal_audio_analyzed",
+                temp_path=str(audio_path),
+                result_type=type(result).__name__ if result else "None",
+            )
+            return result
+        except Exception as e:
+            logger.error(
+                "multimodal_audio_analysis_failed",
+                temp_path=str(audio_path),
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
         finally:
             if audio_path.exists():
                 audio_path.unlink()
+                logger.debug("multimodal_audio_temp_unlinked", temp_path=str(audio_path))
 
     async def _process_video(
         self,
