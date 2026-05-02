@@ -243,6 +243,18 @@ async def analyze_multimodal(
             ip_address=None,
         )
 
+        # Limpeza de arquivos temporários APÓS processamento completo (LGPD)
+        # Nota: deve ser feito antes do return para garantir que os arquivos
+        # temporários do áudio não sejam deletados durante o processamento
+        import shutil
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            logger.debug(
+                "temp_files_cleaned_after_processing",
+                correlation_id=correlation_id,
+                temp_dir=str(temp_dir),
+            )
+
         return response
 
     except HTTPException:
@@ -326,13 +338,3 @@ async def analyze_multimodal(
             status_code=500,
             detail=f"Erro ao processar análise multimodal: {str(e)}",
         ) from None
-    finally:
-        # Cleanup de arquivos temporários (LGPD)
-        import shutil
-        if temp_dir.exists():
-            shutil.rmtree(temp_dir, ignore_errors=True)
-            logger.debug(
-                "temp_files_cleaned",
-                correlation_id=correlation_id,
-                temp_dir=str(temp_dir),
-            )
