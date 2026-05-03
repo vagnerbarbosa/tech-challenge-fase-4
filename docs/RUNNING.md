@@ -599,24 +599,81 @@ response = requests.post(
 print(response.json())
 ```
 
-### 10. Exemplo em JavaScript
+### 10. Exemplo em Go
 
-```javascript
-const API_URL = 'http://<your-azure-ip>:8000';
-const API_KEY = 'sua-api-key-aqui';
+```go
+package main
 
-// Análise de texto
-fetch(`${API_URL}/analyze/text`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Key': API_KEY
-  },
-  body: JSON.stringify({
-    texto: 'Estou me sentindo ansiosa',
-    tipo: 'diario'
-  })
-})
-.then(response => response.json())
-.then(data => console.log(data));
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+const API_URL = "http://<your-azure-ip>:8000"
+const API_KEY = "sua-api-key-aqui"
+
+type AnalysisRequest struct {
+	Texto string `json:"texto"`
+	Tipo  string `json:"tipo"`
+}
+
+type AnalysisResponse struct {
+	Sentimento       string                 `json:"sentimento"`
+	Score            float64                `json:"score"`
+	RiscoViolencia   string                 `json:"risco_violencia"`
+	RiscoSaudeMental string                 `json:"risco_saude_mental"`
+	Metadata         map[string]interface{} `json:"metadata"`
+}
+
+func main() {
+	// Prepara o payload
+	payload := AnalysisRequest{
+		Texto: "Estou me sentindo ansiosa",
+		Tipo:  "diario",
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Printf("Erro ao serializar JSON: %v\n", err)
+		return
+	}
+
+	// Cria a requisição
+	req, err := http.NewRequest(
+		"POST",
+		API_URL+"/analyze/text",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		fmt.Printf("Erro ao criar requisição: %v\n", err)
+		return
+	}
+
+	// Configura os headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-API-Key", API_KEY)
+
+	// Executa a requisição
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Erro na requisição: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Processa a resposta
+	var result AnalysisResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		fmt.Printf("Erro ao decodificar resposta: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Sentimento: %s\n", result.Sentimento)
+	fmt.Printf("Score: %.2f\n", result.Score)
+	fmt.Printf("Risco Violência: %s\n", result.RiscoViolencia)
+	fmt.Printf("Risco Saúde Mental: %s\n", result.RiscoSaudeMental)
+}
 ```
