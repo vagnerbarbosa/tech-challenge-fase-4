@@ -687,7 +687,7 @@ class MultimodalAnalysisSaga:
 | Desenvolvimento | R$ 5.000 | R$ 4.000 (-20%) |
 | **Total** | **R$ 8.000** | **R$ 9.500** (+19%) |
 
-> Nota: Custo adicional compensado pela redução de incidentes e maior velocity.
+> Nota: Custo adicional compensado pela redução de incidentes, maior velocity e capacidade de escalar serviços pesados (áudio/vídeo com GPU) independentemente dos serviços leves (texto).
 
 ---
 
