@@ -226,3 +226,9 @@ PRN
 *.onnx
 *.tflite
 models/*.pt
+
+# Test reports gerados
+**/coverage-report.txt
+**/gap-report.md
+**/coverage-*.txt
+**/report-*.md
