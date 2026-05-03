@@ -11,7 +11,7 @@
 
 **Análise multimodal de saúde da mulher usando Azure AI Services e YOLOv8 local**
 
-> **📅 Atualizado**: 2026-05-01 | **Versão**: 0.8.0 | **Status**: Produção
+> **📅 Atualizado**: 2026-05-02 | **Versão**: 0.9.0 | **Status**: Produção
 
 ---
 

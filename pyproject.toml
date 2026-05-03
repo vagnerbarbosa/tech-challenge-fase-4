@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "multimodal-health-analysis"
-version = "0.8.0"
+version = "0.9.0"
 description = "Tech Challenge Fase 4 - Sistema multimodal de análise de saúde da mulher usando Azure AI Services"
 authors = [
     "Adriel Felipe Cândido Santos <12.adriel@gmail.com>",

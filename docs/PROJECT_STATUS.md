@@ -1,7 +1,7 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-05-01  
-**Versão**: 0.8.0  
+**Atualizado**: 2026-05-02  
+**Versão**: 0.9.0  
 **Branch**: `main`
 
 ---
@@ -37,6 +37,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 ### 3. Análise de Áudio (Spec 003) ✅ 100%
 - [x] Endpoint POST `/analyze/audio`
 - [x] Integração Azure AI Speech
+- [x] **Auto-detecção de idioma** (pt-BR, en-US, es-ES, fr-FR)
 - [x] Análise prosódica (librosa)
   - [x] Pitch extraction
   - [x] Energy analysis
@@ -261,11 +262,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 ## 🐛 Problemas Conhecidos
 
-### 1. Áudio retorna null no endpoint multimodal (Deploy atual)
-**Status**: ✅ Corrigido no código (PR #51), aguardando deploy com PR #52  
-**Descrição**: O áudio funciona isoladamente (`/analyze/audio`) mas retorna `null` no multimodal (`/analyze/multimodal`).  
-**Causa**: Imagem Docker em cache no Azure ACI.  
-**Solução**: PR #52 atualiza workflow para usar tags SHA em vez de `latest`.
+Nenhum problema conhecido no momento. Todas as funcionalidades estão operacionais.
 
 ---
 

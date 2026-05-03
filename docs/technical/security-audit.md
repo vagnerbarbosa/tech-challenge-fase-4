@@ -1,9 +1,9 @@
 # Security Audit
 
-**Audit Date:** 2026-05-01 (Updated from 2026-04-21)  
+**Audit Date:** 2026-05-02 (Updated from 2026-04-21)  
 **Auditor:** Claude Code (Automated Analysis)  
 **Scope:** Full codebase - API, services, infrastructure, data handling  
-**Version:** v0.8.0  
+**Version:** v0.9.0  
 
 ---
 
@@ -280,7 +280,7 @@ def get_cache_key(file_path: Path) -> str:
 
 ## Remediation Plan
 
-### ✅ Resolved (v0.8.0)
+### ✅ Resolved (v0.9.0)
 1. [x] HIGH-1: Restrict CORS origins in debug mode - **Implementado CORSValidation middleware**
 2. [x] HIGH-2: Require API key in all environments - **Implementado auth.py com PBKDF2 hashing**
 3. [x] Security headers (CSP, HSTS, etc.) - **Implementado em SecurityConfig**
