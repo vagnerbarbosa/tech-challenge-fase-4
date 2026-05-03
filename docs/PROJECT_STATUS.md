@@ -113,10 +113,6 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 **Nota**: Deploy realizado com correções das PRs #51 (race condition áudio) e #52 (tags SHA).
 
----
-
-## ⏳ Módulos Pendentes
-
 ### 11. Testing Strategy E2E (Spec 011) ✅ 90%
 - [x] Unit tests para rotas (multimodal 86%, audio 80%, video 100%)
 - [x] Testes E2E com Docker (10 fluxos implementados)
@@ -125,6 +121,10 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
   - [x] Multimodal: fusão texto+áudio
   - [x] Segurança: auth, LGPD patient_id hash, rate limiting
 - [x] Cobertura: 85% (meta: 90%)
+
+---
+
+## ⏳ Módulos Pendentes
 
 ### 12. Documentação Final (Spec 012) ⏳ 0%
 - [ ] Vídeo demonstrativo
