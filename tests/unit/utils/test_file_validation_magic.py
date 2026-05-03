@@ -57,10 +57,12 @@ class TestFileValidationMagic:
         upload = self._create_mock_upload("test.wav", wav_header)
 
         # Simula python-magic nao disponivel (MAGIC_AVAILABLE=False)
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                # Nao deve lancar excecao - usa validacao por assinatura
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            # Nao deve lancar excecao - usa validacao por assinatura
+            await validate_audio_file(upload)
 
         upload.seek.assert_called_with(0)
 
@@ -103,9 +105,11 @@ class TestFileValidationMagic:
         mp3_content = bytes([0xFF, 0xFB, 0x00, 0x00])  # MPEG sync
         upload = self._create_mock_upload("test.mp3", mp3_content)
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            await validate_audio_file(upload)
 
         upload.seek.assert_called_with(0)
 
@@ -135,9 +139,11 @@ class TestFileValidationMagic:
         mp4_header = bytes([0x00, 0x00, 0x00, 0x18]) + b"ftypmp41"
         upload = self._create_mock_upload("test.mp4", mp4_header)
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                await validate_video_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            await validate_video_file(upload)
 
         upload.seek.assert_called_with(0)
 
@@ -168,10 +174,12 @@ class TestFileValidationMagic:
         invalid_content = b"FAKEWAVC"
         upload = self._create_mock_upload("test.wav", invalid_content)
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                with pytest.raises(HTTPException) as exc_info:
-                    await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            await validate_audio_file(upload)
 
         assert exc_info.value.status_code == 400
         assert "assinatura" in exc_info.value.detail.lower()
@@ -220,9 +228,11 @@ class TestFileValidationMagic:
         upload.read = AsyncMock(side_effect=OSError("Erro de leitura"))
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.magic", self._mock_magic_module("audio/wav")):
-            with pytest.raises(IOError) as exc_info:
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.magic", self._mock_magic_module("audio/wav")),
+            pytest.raises(IOError) as exc_info,
+        ):
+            await validate_audio_file(upload)
 
         assert "leitura" in str(exc_info.value).lower() or "Erro" in str(exc_info.value)
 
@@ -235,9 +245,11 @@ class TestFileValidationMagic:
         upload.read = AsyncMock(return_value=wav_header)
         upload.seek = AsyncMock(side_effect=OSError("Erro de seek"))
 
-        with patch("src.utils.file_validation.magic", self._mock_magic_module("audio/wav")):
-            with pytest.raises(IOError) as exc_info:
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.magic", self._mock_magic_module("audio/wav")),
+            pytest.raises(IOError) as exc_info,
+        ):
+            await validate_audio_file(upload)
 
         assert "seek" in str(exc_info.value).lower() or "Erro" in str(exc_info.value)
 
@@ -250,10 +262,12 @@ class TestFileValidationMagic:
         """
         upload = self._create_mock_upload("test.wav", b"")
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                # Com conteudo vazio, nao levanta excecao (is_valid=False mas len=0)
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            # Com conteudo vazio, nao levanta excecao (is_valid=False mas len=0)
+            await validate_audio_file(upload)
 
         # Verifica que seek foi chamado
         upload.seek.assert_called_with(0)
@@ -300,9 +314,11 @@ class TestFileValidationMagicExtended:
         upload.read = AsyncMock(return_value=avi_header)
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                await validate_video_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            await validate_video_file(upload)
 
     @pytest.mark.asyncio
     async def test_mov_validation_fallback(self):
@@ -314,9 +330,11 @@ class TestFileValidationMagicExtended:
         upload.read = AsyncMock(return_value=mov_header)
         upload.seek = AsyncMock()
 
-        with patch("src.utils.file_validation.MAGIC_AVAILABLE", False):
-            with patch("src.utils.file_validation.magic", None):
-                await validate_video_file(upload)
+        with (
+            patch("src.utils.file_validation.MAGIC_AVAILABLE", False),
+            patch("src.utils.file_validation.magic", None),
+        ):
+            await validate_video_file(upload)
 
     @pytest.mark.asyncio
     async def test_extension_mime_mismatch_logged(self):
@@ -331,8 +349,10 @@ class TestFileValidationMagicExtended:
         mock_magic = Mock()
         mock_magic.from_buffer = Mock(return_value="text/plain")
 
-        with patch("src.utils.file_validation.magic", mock_magic):
-            with pytest.raises(HTTPException) as exc_info:
-                await validate_audio_file(upload)
+        with (
+            patch("src.utils.file_validation.magic", mock_magic),
+            pytest.raises(HTTPException) as exc_info,
+        ):
+            await validate_audio_file(upload)
 
         assert exc_info.value.status_code == 400

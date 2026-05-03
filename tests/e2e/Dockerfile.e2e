@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -------------------------------------------
 # Copiar arquivos de dependencias
 # -------------------------------------------
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
+# poetry.lock pode nao existir - poetry install funciona sem ele
 
 # -------------------------------------------
 # Instalar Poetry e dependencias (sem torch/yolo)
