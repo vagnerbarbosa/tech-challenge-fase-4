@@ -60,14 +60,14 @@ class TestE2EMultimodal:
         fusao = result["fusao"]
         assert "risco_violencia" in fusao, "Campo 'risco_violencia' não encontrado na fusão"
         assert "risco_saude_mental" in fusao, "Campo 'risco_saude_mental' não encontrado na fusão"
-        assert "confianca" in fusao, "Campo 'confianca' não encontrado na fusão"
+        assert "confiança" in fusao, "Campo 'confiança' não encontrado na fusão"
         assert "alerta" in fusao, "Campo 'alerta' não encontrado na fusão"
 
         # Assert: Valores da fusão são válidos
         assert fusao["risco_violencia"] in ["baixo", "medio", "alto"]
         assert fusao["risco_saude_mental"] in ["baixo", "medio", "alto"]
-        assert 0.0 <= fusao["confianca"] <= 1.0, (
-            f"Confiança deve estar entre 0.0 e 1.0, got {fusao['confianca']}"
+        assert 0.0 <= fusao["confiança"] <= 1.0, (
+            f"Confiança deve estar entre 0.0 e 1.0, got {fusao['confiança']}"
         )
         assert isinstance(fusao["alerta"], bool)
 
