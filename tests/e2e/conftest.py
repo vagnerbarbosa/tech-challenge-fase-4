@@ -3,6 +3,7 @@ Fixtures para testes E2E com Docker.
 """
 import subprocess
 import time
+from pathlib import Path
 
 import pytest
 import requests
@@ -12,17 +13,31 @@ E2E_API_URL = "http://localhost:9000"
 MOCK_SERVER_URL = "http://localhost:3004"
 ADMIN_API_KEY = "test-admin-key"
 
+# Diretório base do arquivo conftest.py
+E2E_DIR = Path(__file__).parent
+
 
 @pytest.fixture(scope="session")
 def docker_services():
     """
     Fixture que gerencia os serviços Docker para E2E.
+    Opcional - os testes também funcionam com serviços já em execução.
     """
-    compose_file = "/home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/e2e/fixtures/docker-compose.e2e.yml"
+    compose_file = E2E_DIR / "fixtures" / "docker-compose.e2e.yml"
+
+    # Verificar se os serviços já estão rodando
+    try:
+        response = requests.get(f"{E2E_API_URL}/health", timeout=5)
+        if response.status_code == 200:
+            # Serviços já estão prontos, não precisamos gerenciar
+            yield
+            return
+    except requests.exceptions.ConnectionError:
+        pass  # Serviços não estão rodando, vamos subir
 
     # Subir serviços
     subprocess.run(
-        ["docker-compose", "-f", compose_file, "up", "-d", "--build"],
+        ["docker-compose", "-f", str(compose_file), "up", "-d", "--build"],
         check=True,
         capture_output=True
     )
@@ -40,7 +55,7 @@ def docker_services():
     else:
         # Derrubar serviços se não conseguir conectar
         subprocess.run(
-            ["docker-compose", "-f", compose_file, "down", "-v"],
+            ["docker-compose", "-f", str(compose_file), "down", "-v"],
             capture_output=True
         )
         pytest.fail("Não foi possível conectar à API E2E")
@@ -49,7 +64,7 @@ def docker_services():
 
     # Derrubar serviços no teardown
     subprocess.run(
-        ["docker-compose", "-f", compose_file, "down", "-v"],
+        ["docker-compose", "-f", str(compose_file), "down", "-v"],
         capture_output=True
     )
 
@@ -99,8 +114,10 @@ def e2e_client():
 def sample_audio_path() -> str:
     """
     Path para o arquivo de áudio de exemplo.
+    Usa caminho relativo a partir do diretório do arquivo conftest.py.
     """
-    return "/home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/e2e/fixtures/sample_files/sample.wav"
+    path = E2E_DIR / "fixtures" / "sample_files" / "sample.wav"
+    return str(path.resolve())
 
 
 @pytest.fixture

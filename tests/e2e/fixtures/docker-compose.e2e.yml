@@ -29,7 +29,7 @@ services:
       - AZURE_CONTENT_SAFETY_KEY=mock
       - AZURE_CONTENT_SAFETY_ENDPOINT=http://localhost:3000
       # Security (Spec 007)
-      - API_KEY_ADMIN=test-admin-key
+      - SECURITY_API_KEY=test-admin-key
       - RATE_LIMIT_ENABLED=false
       # Mock Mode - essencial para rodar sem Azure
       - MOCK_MODE=true

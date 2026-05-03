@@ -53,16 +53,39 @@ jobs:
         cd tests/e2e/fixtures
         docker compose -f docker-compose.e2e.yml up --build -d
 
-        # Aguardar serviços ficarem saudáveis
+        # Aguardar serviços ficarem saudáveis com healthcheck
         echo "Aguardando API ficar pronta..."
-        for i in {1..30}; do
-          if curl -s http://localhost:9000/health > /dev/null 2>&1; then
-            echo "API pronta!"
+        max_attempts=30
+        for i in $(seq 1 $max_attempts); do
+          # Verificar health endpoint com timeout
+          response=$(curl -s -w "\n%{http_code}" --max-time 10 http://localhost:9000/health 2>/dev/null || echo "\n000")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          if [ "$http_code" = "200" ]; then
+            echo "API pronta! Response: $body"
             break
           fi
-          echo "Tentativa $i/30 - aguardando..."
+
+          echo "Tentativa $i/$max_attempts - HTTP $http_code - aguardando..."
+
+          # Mostrar logs se falhou muitas vezes
+          if [ $i -eq 15 ]; then
+            echo "--- Logs do container API (tentativa 15) ---"
+            docker compose -f docker-compose.e2e.yml logs api-e2e --tail 50 || true
+          fi
+
           sleep 5
         done
+
+        # Verificação final
+        final_check=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://localhost:9000/health 2>/dev/null || echo "000")
+        if [ "$final_check" != "200" ]; then
+          echo "ERRO: API não respondeu com 200 após $max_attempts tentativas"
+          echo "--- Logs finais do container ---"
+          docker compose -f docker-compose.e2e.yml logs api-e2e --tail 100 || true
+          exit 1
+        fi
 
     - name: Executar testes E2E
       run: |
