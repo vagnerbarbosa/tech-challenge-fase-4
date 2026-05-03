@@ -408,6 +408,36 @@ GET /v1/auth/me             # Info da API Key
 - Redis (sessões)
 - PostgreSQL (API Keys persistentes)
 
+**Alternativa: Gateway com Auth Integrado**
+
+| Aspecto | Gateway + Auth Integrado | Identity Service Separado |
+|---------|---------------------------|----------------------------|
+| **Latência** | ✅ Menor (sem network hop) | ❌ +1-5ms (chamada interna) |
+| **Complexidade** | ✅ Menor (um serviço a menos) | ❌ Maior (mais um serviço) |
+| **Acoplamento** | ❌ Gateway "gordo" | ✅ Separação de concerns |
+| **Escalabilidade** | ⚠️ Gateway precisa escalar junto com auth | ✅ Auth escala independente |
+| **Reutilização** | ❌ Só funciona com esse Gateway | ✅ Múltiplos gateways podem usar |
+| **LGPD/Audit** | ⚠️ Mesmo serviço faz tudo | ✅ Identity focado, Audit separado |
+| **Hot reload config** | ❌ Requer restart do Gateway | ✅ Config muda sem afetar routing |
+| **Testabilidade** | ⚠️ Mais difícil testar isolado | ✅ Fácil testar auth separado |
+
+**Quando usar Gateway com Auth:**
+- Time pequeno (3-5 devs)
+- Só existe um gateway
+- Auth simples (só API Keys, sem RBAC complexo)
+- Latência é crítica (sub-10ms)
+
+**Quando usar Identity Service separado:**
+- Multi-tenancy ou múltiplos gateways
+- Auth complexo (OAuth2, OIDC, RBAC)
+- Need de evoluir auth sem tocar no gateway
+- Compliance requer isolamento de responsabilidades
+
+> **Recomendação para este projeto**: Gateway com auth integrado é suficiente. Identity Service só vale a pena se:
+> 1. Surge necessidade de múltiplos gateways (mobile, web, partner)
+> 2. Auth evolui para OAuth2/SSO
+> 3. Time cresce e precisa de especialização
+
 ---
 
 #### Serviço 6: Audit Service (`audit-service`)
