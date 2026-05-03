@@ -9,6 +9,7 @@ version: '3.8'
 services:
   # -------------------------------------------
   # API E2E (imagem slim sem YOLO/PyTorch)
+  # Mock mode ativado - nao precisa de servicos Azure externos
   # -------------------------------------------
   api-e2e:
     build:
@@ -19,42 +20,28 @@ services:
       - "9000:8000"
     environment:
       # Azure Speech (mock para E2E)
-      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY:-mock}
-      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION:-brazilsouth}
+      - AZURE_SPEECH_KEY=mock
+      - AZURE_SPEECH_REGION=brazilsouth
       # Azure Language (mock para E2E)
-      - AZURE_LANGUAGE_KEY=${AZURE_LANGUAGE_KEY:-mock}
-      - AZURE_LANGUAGE_ENDPOINT=${AZURE_LANGUAGE_ENDPOINT:-http://mock-server:3000}
+      - AZURE_LANGUAGE_KEY=mock
+      - AZURE_LANGUAGE_ENDPOINT=http://localhost:3000
       # Azure Content Safety (mock para E2E)
-      - AZURE_CONTENT_SAFETY_KEY=${AZURE_CONTENT_SAFETY_KEY:-mock}
-      - AZURE_CONTENT_SAFETY_ENDPOINT=${AZURE_CONTENT_SAFETY_ENDPOINT:-http://mock-server:3000}
+      - AZURE_CONTENT_SAFETY_KEY=mock
+      - AZURE_CONTENT_SAFETY_ENDPOINT=http://localhost:3000
       # Security (Spec 007)
       - API_KEY_ADMIN=test-admin-key
       - RATE_LIMIT_ENABLED=false
-      # Mock Mode
+      # Mock Mode - essencial para rodar sem Azure
       - MOCK_MODE=true
       - LOG_LEVEL=INFO
     volumes:
       - ../../../tests/e2e/fixtures/sample_files:/app/fixtures:ro
-    depends_on:
-      - mock-server
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
-
-  # -------------------------------------------
-  # Mock Server (Wiremock para APIs Azure)
-  # -------------------------------------------
-  mock-server:
-    image: wiremock/wiremock:3.3.1
-    container_name: mock-server-e2e
-    ports:
-      - "3004:8080"
-    volumes:
-      - ../../../tests/e2e/fixtures/wiremock:/home/wiremock:ro
-    command: --verbose
 
 networks:
   default:
