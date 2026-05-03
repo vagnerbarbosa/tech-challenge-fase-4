@@ -677,3 +677,13 @@ func main() {
 	fmt.Printf("Risco Saúde Mental: %s\n", result.RiscoSaudeMental)
 }
 ```
+
+---
+
+## Referências
+
+- [Testing Guide](testing.md) - Como executar testes unitários, de integração e E2E
+- [Architecture](architecture.md) - Arquitetura do sistema
+- [API Contracts](api-contracts.md) - Contratos da API
+- [Security Guide](technical/security-guide.md) - Guia de segurança
+```

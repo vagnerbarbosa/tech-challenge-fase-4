@@ -605,6 +605,8 @@ poetry run uvicorn src.api.main:app --reload
 
 ## References
 
+- [Testing Guide](testing.md) - Estratégia de testes unitários, integração e E2E
+- [Running Guide](RUNNING.md) - Como executar a aplicação
 - Azure AI Services: https://azure.microsoft.com/services/cognitive-services/
 - YOLOv8: https://docs.ultralytics.com/
 - FastAPI: https://fastapi.tiangolo.com/

@@ -152,7 +152,7 @@ tech-challenge-fase-4/
 │   ├── core/              # Config, security
 │   ├── services/          # Lógica de negócio
 │   └── infrastructure/    # Clientes Azure
-├── tests/                 # Testes
+├── tests/                 # Testes ([guia](docs/testing.md))
 ├── docs/                  # Documentação
 ├── specs/                 # Especificações
 ├── scripts/               # Utilitários
