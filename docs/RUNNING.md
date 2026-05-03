@@ -206,7 +206,7 @@ curl -X POST http://localhost:8000/analyze/text \
 
 **Produção (Azure):**
 - Swagger UI e ReDoc estão **desabilitados** (HTTP sem HTTPS causa erros de Mixed Content)
-- Use o OpenAPI JSON: `http://20.201.42.143:8000/openapi.json`
+- Use o OpenAPI JSON: `http://<your-azure-ip>:8000/openapi.json`
 - Importe em Postman/Insomnia para interface visual
 
 ---
@@ -389,7 +389,7 @@ Se a API já estiver hospedada no Azure, siga estas instruções para autenticar
 ### 1. Obter Acesso
 
 Você precisará de:
-- **URL da API**: fornecida pelo administrador (ex: `http://20.201.42.143:8000`)
+- **URL da API**: fornecida pelo administrador (ex: `http://<your-azure-ip>:8000`)
 - **API Key**: chave de autenticação fornecida separadamente
 
 ### 2. Autenticação
@@ -405,7 +405,7 @@ X-API-Key: sua-api-key-aqui
 
 ```bash
 # Substitua URL e API_KEY pelos valores fornecidos
-API_URL="http://20.201.42.143:8000"
+API_URL="http://<your-azure-ip>:8000"
 API_KEY="sua-api-key-aqui"
 
 # Health check
@@ -533,7 +533,7 @@ Para acessar a documentação em produção:
 1. **Baixe o OpenAPI JSON:**
 ```bash
 curl -H "X-API-Key: sua-api-key" \
-  "http://20.201.42.143:8000/openapi.json" > openapi.json
+  "http://<your-azure-ip>:8000/openapi.json" > openapi.json
 ```
 
 2. **Importe em Postman/Insomnia:**
@@ -541,7 +541,7 @@ curl -H "X-API-Key: sua-api-key" \
    - Insomnia: Workspace → Import/Export → Import Data → From File
 
 3. **Configure o Environment:**
-   - `base_url`: http://20.201.42.143:8000
+   - `base_url`: `http://<your-azure-ip>:8000`
    - `api_key`: sua-api-key
 
 ### 7. Limites e Rate Limiting
@@ -578,7 +578,7 @@ Baixe as collections em `docs/collection.json` e `docs/environment.json` para im
 ```python
 import requests
 
-API_URL = "http://20.201.42.143:8000"
+API_URL = "http://<your-azure-ip>:8000"
 API_KEY = "sua-api-key-aqui"
 
 headers = {
@@ -602,7 +602,7 @@ print(response.json())
 ### 10. Exemplo em JavaScript
 
 ```javascript
-const API_URL = 'http://20.201.42.143:8000';
+const API_URL = 'http://<your-azure-ip>:8000';
 const API_KEY = 'sua-api-key-aqui';
 
 // Análise de texto
