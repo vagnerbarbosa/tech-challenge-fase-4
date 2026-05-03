@@ -46,7 +46,6 @@ jobs:
     - name: Instalar dependências
       run: |
         poetry install --no-interaction --no-root
-        poetry run pip install pytest requests httpx
 
     - name: Iniciar ambiente E2E
       run: |
