@@ -705,16 +705,118 @@ class MultimodalAnalysisSaga:
 | Testing | Unit/Integration | + Contract Tests | Pact |
 | Transações | ACID | Saga/Eventual | Idempotência |
 
-### Custos
+### Análise de Custos: MVP vs Produção Real em Saúde
+
+#### Cenário MVP (Tech Challenge)
 
 | Item | Monolito (mensal) | Microserviços (mensal) |
 |------|-------------------|------------------------|
-| Infraestrutura | R$ 2.000 | R$ 3.500 (+75%) |
-| Operação | R$ 1.000 | R$ 2.000 (+100%) |
-| Desenvolvimento | R$ 5.000 | R$ 4.000 (-20%) |
-| **Total** | **R$ 8.000** | **R$ 9.500** (+19%) |
+| Infraestrutura | R$ 500 | R$ 800 (+60%) |
+| Operação | R$ 200 | R$ 400 (+100%) |
+| **Total** | **R$ 700** | **R$ 1.200** (+71%) |
 
-> Nota: Custo adicional compensado pela redução de incidentes, maior velocity e capacidade de escalar serviços pesados (áudio/vídeo com GPU) independentemente dos serviços leves (texto).
+#### Cenário Produção: Hospital de Médio Porte
+
+Baseado em dados reais do [Hospital da UEM](https://www.parana.pr.gov.br/aen/Noticia/100-SUS-Hospital-da-UEM-alcanca-60-mil-atendimentos-de-urgencia-em-2025) (60K atendimentos/ano = ~5K/mês):
+
+**Volume de Análises de Vídeo Estimado:**
+- 50 leitos UTI × 24h × 30 dias × 6 análises/hora (10min intervalo) = **216.000 análises/mês**
+
+##### Opção 1: Azure Computer Vision (HIPAA-Compliant)
+
+| Componente | Custo Mensal (USD) | Custo Mensal (R$) |
+|------------|-------------------|-------------------|
+| 216K inferências × $0.002 | $432 | R$ 2.160 |
+| Azure Health Data Services | $200 | R$ 1.000 |
+| Storage LGPD (7 anos) | $150 | R$ 750 |
+| Security Center, Monitor | $100 | R$ 500 |
+| **Data transfer** (10TB/mês - esquecido!) | $200 | R$ 1.000 |
+| **Subtotal Azure** | **$1.082** | **R$ 5.410** |
+
+##### Opção 2: YOLOv8 Local (Self-Hosted)
+
+| Componente | Custo (USD) | Custo (R$) |
+|------------|-------------|------------|
+| **Hardware inicial** (2x RTX 4090) | $8.000 | R$ 40.000 |
+| Energia/mês (400W × 24h) | $40 | R$ 200 |
+| Cooling/datacenter | $200 | R$ 1.000 |
+| DevOps/SRE (20h/mês) | $1.600 | R$ 8.000 |
+| **Subtotal Local (amortizado 3 anos)** | **$1.840/mês** | **R$ 9.200/mês** |
+
+##### Break-Even Analysis
+
+| Volume Mensal | Azure | Local | Vencedor |
+|---------------|-------|-------|----------|
+| 50K análises | R$ 1.600 | R$ 9.200 | **Azure** (82% mais barato) |
+| 200K análises | R$ 5.400 | R$ 9.200 | **Azure** (41% mais barato) |
+| **500K análises** | **R$ 11.500** | **R$ 9.500** | **Local** (17% mais barato) |
+| 1M análises | R$ 22.000 | R$ 10.000 | **Local** (55% mais barato) |
+
+##### TCO 3 Anos (Cenário Hospital 216K análises/mês)
+
+| Aspecto | Azure | Local |
+|---------|-------|-------|
+| Infraestrutura (3 anos) | R$ 194.760 | R$ 40.000 (hw) |
+| Rede/Transferência | R$ 36.000 | R$ 0 |
+| Compliance/LGPD | R$ 25.000 | R$ 15.000 |
+| Mão de obra DevOps | R$ 180.000 | R$ 288.000 |
+| **TCO Total 3 anos** | **R$ 435.760** | **R$ 343.000** |
+
+**Local é 21% mais barato em 3 anos**, mas com:
+- Riscos operacionais maiores (sem SLA de cloud)
+- Necessidade de equipe especializada
+- Menor elasticidade (não escala "para cima" rapidamente)
+
+##### Recomendação para Produção Real: Arquitetura Híbrida
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              Hospital (Edge/On-Prem)                   │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  YOLOv8 Lite (RTX 4060 Ti - R$ 2.000)          │   │
+│  │  - Detecção em tempo real (<50ms)              │   │
+│  │  - Processamento de frames (deduplicação)      │   │
+│  │  - Alertas críticos offline                    │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+│                         ▼                               │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  Gateway Local (filtragem + anonimização)      │   │
+│  │  - Envia apenas eventos/metadados              │   │
+│  │  - Dados brutos NÃO saem do hospital             │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+└─────────────────────────┼───────────────────────────────┘
+                          │ Internet (apenas eventos)
+                          ▼
+              ┌──────────────────────────┐
+              │      Azure Cloud         │
+              │  - Dashboard/Analytics   │
+              │  - Armazenamento LGPD    │
+              │  - Audit trails          │
+              └──────────────────────────┘
+```
+
+**Custos Híbrido (mensal):**
+| Componente | Custo (R$) |
+|------------|-----------|
+| Edge GPU (RTX 4060 Ti amortizado) | R$ 80 |
+| Energia/Cooling | R$ 250 |
+| Azure (eventos + storage) | R$ 800 |
+| **Total Híbrido** | **R$ 1.130** |
+
+vs **R$ 5.410** do Azure puro = **Economia de 79%**
+
+#### Conclusão
+
+| Cenário | Recomendação | Justificativa |
+|---------|--------------|---------------|
+| **MVP/Tech Challenge** | Azure puro | Não há volume para justificar GPU |
+| **Produção Pequena** (<100K/mês) | Azure puro | Cloud é mais barato e simples |
+| **Produção Média** (100-500K/mês) | **Híbrida** | Melhor custo-benefício + LGPD |
+| **Produção Grande** (>500K/mês) | Local puro | Economia escala justifica investimento |
+
+> **Nota LGPD**: Videocâmeras de UTIs são dados sensíveis (saúde + localização). A arquitetura híbrida garante que imagens brutas NUNCA saiam do hospital, apenas metadados anonimizados vão para nuvem.
 
 ---
 
