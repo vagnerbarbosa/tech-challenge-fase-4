@@ -63,7 +63,7 @@ curl http://localhost:8000/health
 
 Resposta esperada:
 ```json
-{"status": "healthy", "version": "0.8.0"}
+{"status": "healthy", "version": "0.9.0"}
 ```
 
 ### Passo 4: Acesse a documentação
@@ -417,7 +417,7 @@ Resposta esperada:
 ```json
 {
   "status": "healthy",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "environment": "production"
 }
 ```

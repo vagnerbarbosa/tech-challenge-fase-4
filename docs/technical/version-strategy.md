@@ -17,7 +17,7 @@ A versão da aplicação está espalhada em múltiplos arquivos:
 ### 1. Fonte Única de Verdade: `pyproject.toml`
 ```toml
 [tool.poetry]
-version = "0.8.0"  # ← Único lugar para definir a versão
+version = "0.9.0"  # ← Único lugar para definir a versão
 ```
 
 ### 2. Código Python: Ler dinamicamente de pyproject.toml
@@ -40,9 +40,9 @@ services:
   app:
     build:
       args:
-        - APP_VERSION=${APP_VERSION:-0.8.0}
+        - APP_VERSION=${APP_VERSION:-0.9.0}
     environment:
-      - APP_VERSION=${APP_VERSION:-0.8.0}
+      - APP_VERSION=${APP_VERSION:-0.9.0}
 ```
 
 Ou usar um script de build que lê do pyproject.toml:

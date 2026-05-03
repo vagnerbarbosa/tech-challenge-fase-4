@@ -2,7 +2,7 @@
 
 **Versão:** 2.0
 **Data:** 2026-05-01
-**Status:** Projeto Concluído - v0.8.0
+**Status:** Projeto Concluído - v0.9.0
 
 ---
 
@@ -196,7 +196,7 @@
 | Tecnologias multimodais | ✅ Completo | YOLOv8 + Azure Vision listados |
 | Stack tecnológico | ✅ Completo | ultralytics, opencv incluídos |
 | Como executar | ✅ Completo | Docker, local, mocks documentados |
-| Versão atual | ✅ Completo | v0.8.0 refletida em todos os exemplos |
+| Versão atual | ✅ Completo | v0.9.0 refletida em todos os exemplos |
 
 ### CLAUDE.md
 
@@ -257,7 +257,7 @@
 
 ```
 Data de Conclusão: 2026-05-01
-Versão Final: 0.8.0
+Versão Final: 0.9.0
 Status: Produção
 
 Resumo da Entrega:
@@ -279,7 +279,7 @@ Links:
 
 ## 7. Recomendações
 
-### ✅ Entregues em v0.8.0
+### ✅ Entregues em v0.9.0
 
 1. ✅ **YOLOv8 Service** - Implementado segundo spec 004a
 2. ✅ **Endpoint `/analyze/audio`** - Com transcrição e prosódia

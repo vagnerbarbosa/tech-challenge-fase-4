@@ -50,7 +50,7 @@ specs/
 | 010 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
 | 011 | Documentação Final | ⏳ Pendente | `main` | P1 |
 
-> **Nota**: Todas as specs P0-P1 estão concluídas. Projeto na versão 0.8.0.
+> **Nota**: Todas as specs P0-P1 estão concluídas. Projeto na versão 0.9.0.
 
 ---
 
