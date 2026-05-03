@@ -100,11 +100,19 @@ Baseado na análise do domínio, identificamos **5 Bounded Contexts**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              API Gateway                                      │
+│                           API Gateway + Auth                                 │
 │  (Kong / Nginx / AWS API Gateway)                                           │
-│  - Roteamento                                                                │
+│                                                                              │
+│  Responsabilidades:                                                          │
+│  - Roteamento para serviços                                                  │
+│  - Autenticação (API Keys) - INTEGRADO                                       │
 │  - Rate Limiting global                                                      │
-│  - Autenticação inicial (JWT validation)                                     │
+│  - SSL/TLS termination                                                       │
+│                                                                              │
+│  Por que auth integrado?                                                     │
+│  - Latência: sem network hop extra                                           │
+│  - Simplicidade: um serviço a menos                                          │
+│  - Suficiente para API Keys simples                                          │
 └─────────────────────────────────────────────────────────────────────────────┘
                                        │
            ┌───────────────────────────┼───────────────────────────┐
@@ -114,7 +122,7 @@ Baseado na análise do domínio, identificamos **5 Bounded Contexts**:
 │   Text Service      │  │   Audio Service     │  │   Video Service     │
 │   (text-service)    │  │   (audio-service)   │  │   (video-service)   │
 │                     │  │                     │  │                     │
-│  Python + FastAPI   │  │  Python + FastAPI │  │  Python + FastAPI   │
+│  Python + FastAPI   │  │  Python + FastAPI   │  │  Python + FastAPI   │
 │  Azure Text         │  │  Azure Speech       │  │  YOLOv8 + OpenCV    │
 │  Redis Cache        │  │  Librosa            │  │  Redis Cache        │
 │                     │  │  Redis Cache        │  │                     │
@@ -135,17 +143,16 @@ Baseado na análise do domínio, identificamos **5 Bounded Contexts**:
                   │                                     │
                   └──────────────┬──────────────────────┘
                                  │
-           ┌──────────────────────┼──────────────────────┐
-           │                      │                      │
-           ▼                      ▼                      ▼
-┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
-│   Identity Service  │  │   Audit Service     │  │   Gateway Config    │
-│   (identity-svc)    │  │   (audit-svc)       │  │   (kong/nginx)      │
-│                     │  │                     │  │                     │
-│  - JWT/OAuth2       │  │  - Event sourcing   │  │  - Rate limiting    │
-│  - API Keys         │  │  - LGPD compliance  │  │  - SSL/TLS          │
-│  - RBAC             │  │  - Retenção 5 anos  │  │  - Routing          │
-└─────────────────────┘  └─────────────────────┘  └─────────────────────┘
+                                 ▼
+                  ┌─────────────────────────────────────┐
+                  │      Audit Service                  │
+                  │      (audit-svc)                    │
+                  │                                     │
+                  │  - Event sourcing                   │
+                  │  - LGPD compliance                  │
+                  │  - Retenção 5 anos                  │
+                  │                                     │
+                  └─────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            Message Broker                                     │
@@ -371,16 +378,20 @@ async def analyze_multimodal(request):
 
 ---
 
-#### Serviço 5: Identity & Access Service (`identity-service`)
+#### Componente 5: API Gateway com Auth Integrado (`api-gateway`)
 
-**Responsabilidade**: Autenticação e autorização
+**Responsabilidade**: Roteamento, autenticação, rate limiting e segurança
+
+Por que auth no Gateway e não serviço separado?
+- **Latência**: Sem network hop extra (+1-5ms evitados)
+- **Simplicidade**: Um serviço a menos para operar
+- **Suficiente**: Para API Keys simples, não precisa de Identity Service
 
 **Entidades (DDD)**:
 ```python
 class ApiKey:
     key_id: str
     key_hash: str
-    tenant_id: str
     roles: List[str]
     permissions: List[str]
     created_at: datetime
@@ -394,53 +405,39 @@ class Session:
     last_activity: datetime
 ```
 
-**API REST**:
+**Funcionalidades**:
 ```yaml
+# Auth & Routing
 POST /v1/auth/keys          # Criar API Key (admin)
 DELETE /v1/auth/keys/{id}   # Revogar (admin)
-POST /v1/auth/verify        # Verificar token (internal)
 GET /v1/auth/me             # Info da API Key
+
+# Proxy para serviços (com auth)
+/analyze/text/*     → text-service
+/analyze/audio/*    → audio-service
+/analyze/video/*    → video-service
+/analyze/multimodal/* → fusion-service
 ```
 
 **Tecnologia**:
-- Python + FastAPI
-- JWT (para tokens temporários)
-- Redis (sessões)
-- PostgreSQL (API Keys persistentes)
+- Kong / Nginx / Traefik ( Gateway )
+- Lua plugins (Kong) ou Nginx modules para auth
+- Redis (cache de API Keys para performance)
+- PostgreSQL (persistência de API Keys)
 
-**Alternativa: Gateway com Auth Integrado**
+**Escalabilidade**:
+- Stateless (horizontal)
+- 2-3 réplicas
+- Sticky sessions (opcional, para rate limiting local)
 
-| Aspecto | Gateway + Auth Integrado | Identity Service Separado |
-|---------|---------------------------|----------------------------|
-| **Latência** | ✅ Menor (sem network hop) | ❌ +1-5ms (chamada interna) |
-| **Complexidade** | ✅ Menor (um serviço a menos) | ❌ Maior (mais um serviço) |
-| **Acoplamento** | ❌ Gateway "gordo" | ✅ Separação de concerns |
-| **Escalabilidade** | ⚠️ Gateway precisa escalar junto com auth | ✅ Auth escala independente |
-| **Reutilização** | ❌ Só funciona com esse Gateway | ✅ Múltiplos gateways podem usar |
-| **LGPD/Audit** | ⚠️ Mesmo serviço faz tudo | ✅ Identity focado, Audit separado |
-| **Hot reload config** | ❌ Requer restart do Gateway | ✅ Config muda sem afetar routing |
-| **Testabilidade** | ⚠️ Mais difícil testar isolado | ✅ Fácil testar auth separado |
-
-**Quando usar Gateway com Auth:**
-- Time pequeno (3-5 devs)
-- Só existe um gateway
-- Auth simples (só API Keys, sem RBAC complexo)
-- Latência é crítica (sub-10ms)
-
-**Quando usar Identity Service separado:**
-- Multi-tenancy ou múltiplos gateways
-- Auth complexo (OAuth2, OIDC, RBAC)
-- Need de evoluir auth sem tocar no gateway
-- Compliance requer isolamento de responsabilidades
-
-> **Recomendação para este projeto**: Gateway com auth integrado é suficiente. Identity Service só vale a pena se:
-> 1. Surge necessidade de múltiplos gateways (mobile, web, partner)
-> 2. Auth evolui para OAuth2/SSO
-> 3. Time cresce e precisa de especialização
+**Nota**: Identity Service separado só valeria a pena se:
+- Múltiplos gateways fossem necessários (mobile, web, partner)
+- Auth evoluísse para OAuth2/OIDC complexo
+- Time crescesse muito (>10 devs)
 
 ---
 
-#### Serviço 6: Audit Service (`audit-service`)
+#### Serviço 5: Audit Service (`audit-service`)
 
 **Responsabilidade**: Auditoria LGPD
 
