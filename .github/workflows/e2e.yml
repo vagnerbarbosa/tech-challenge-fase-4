@@ -51,7 +51,7 @@ jobs:
     - name: Iniciar ambiente E2E
       run: |
         cd tests/e2e/fixtures
-        docker-compose -f docker-compose.e2e.yml up --build -d
+        docker compose -f docker-compose.e2e.yml up --build -d
 
         # Aguardar serviços ficarem saudáveis
         echo "Aguardando API ficar pronta..."
@@ -72,7 +72,7 @@ jobs:
       if: always()
       run: |
         cd tests/e2e/fixtures
-        docker-compose -f docker-compose.e2e.yml down -v
+        docker compose -f docker-compose.e2e.yml down -v
 
     - name: Upload de logs em caso de falha
       if: failure()
