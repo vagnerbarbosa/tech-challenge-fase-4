@@ -603,10 +603,32 @@ poetry install
 poetry run uvicorn src.api.main:app --reload
 ```
 
+## Future Architecture (Post-MVP)
+
+### Microservices Migration
+
+Para escala futura, a arquitetura monolítica atual pode evoluir para microserviços seguindo Domain-Driven Design (DDD).
+
+| Status | Serviço | Motivação |
+|--------|---------|-----------|
+| 🔄 MVP | **Monolito** | Simplicidade inicial, validação do produto |
+| 📋 Future | **text-service** | Escalar análise de texto independente |
+| 📋 Future | **audio-service** | Isolar processamento pesado (Speech) |
+| 📋 Future | **video-service** | Usar GPU dedicada, deploy independente |
+| 📋 Future | **fusion-service** | Orquestração Saga para multimodal |
+| 📋 Future | **audit-service** | Event Sourcing para LGPD compliance |
+
+📖 **Análise completa**: [Microservices DDD Analysis](microservices-ddd-analysis.md)
+
+> **Nota**: Migração planejada para pós-MVP. Strangler Fig Pattern recomendado para transição gradual.
+
+---
+
 ## References
 
 - [Testing Guide](testing.md) - Estratégia de testes unitários, integração e E2E
 - [Running Guide](RUNNING.md) - Como executar a aplicação
+- [Microservices DDD Analysis](microservices-ddd-analysis.md) - Decomposição em microserviços
 - Azure AI Services: https://azure.microsoft.com/services/cognitive-services/
 - YOLOv8: https://docs.ultralytics.com/
 - FastAPI: https://fastapi.tiangolo.com/
