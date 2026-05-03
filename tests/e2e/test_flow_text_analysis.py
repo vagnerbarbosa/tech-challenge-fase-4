@@ -94,10 +94,10 @@ class TestE2ETextAnalysis:
         assert "indicadores" in data, "Campo indicadores ausente"
         assert isinstance(data["indicadores"], list)
 
-        # Valida content_safety
-        assert "content_safety" in data, "Campo content_safety ausente"
-        content_safety = data["content_safety"]
-        assert isinstance(content_safety, dict)
+        # Valida content_safety (opcional - só presente quando Azure Content Safety configurado)
+        if "content_safety" in data:
+            content_safety = data["content_safety"]
+            assert isinstance(content_safety, dict)
 
         # Valida metadata com rastreabilidade (LGPD)
         assert "metadata" in data, "Campo metadata ausente"
