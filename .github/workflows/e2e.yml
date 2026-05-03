@@ -1,9 +1,19 @@
 name: E2E Tests
 
 on:
-  workflow_dispatch:  # Apenas manual - requer ambiente Docker completo
-  schedule:
-    - cron: '0 0 * * 0'  # Semanal aos domingos
+  push:
+    branches: [ main, develop, '011-testing-strategy' ]
+    paths:
+      - 'src/**'
+      - 'tests/e2e/**'
+      - 'pyproject.toml'
+      - 'tests/e2e/Dockerfile.e2e'
+      - 'tests/e2e/fixtures/docker-compose.e2e.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/e2e/**'
 
 permissions:
   contents: read
