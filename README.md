@@ -102,8 +102,8 @@ API com hardening completo (OWASP API Top 10 + LGPD):
 ## 🎥 Vídeo de Demonstração
 
 O vídeo demonstra:
-- Arquitetura multimodal
 - Análise de texto, áudio e vídeo
+- Análise multimodal
 - Identificação de sinais de alerta
 - Deploy na Azure
 
