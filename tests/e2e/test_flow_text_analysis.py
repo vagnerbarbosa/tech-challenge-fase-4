@@ -47,7 +47,7 @@ class TestE2ETextAnalysis:
         # Arrange: Payload com texto indicando ansiedade (risco de saúde mental)
         payload: dict[str, object] = {
             "texto": "Estou me sentindo muito ansiosa e preocupada com a gravidez.",
-            "tipo": "diario",
+            "tipo": "geral",
             "patient_id": "E2E-001-TEST",
         }
 
@@ -56,6 +56,7 @@ class TestE2ETextAnalysis:
         response: Response = e2e_client.post(
             f"{api_url}/analyze/text",
             json=payload,
+            headers={"Content-Type": "application/json"},
             timeout=30,
         )
         duration = time.time() - start_time
@@ -150,7 +151,7 @@ class TestE2ETextAnalysis:
         # Arrange: Texto em espanhol indicando ansiedade
         payload: dict[str, object] = {
             "texto": "Tengo mucho miedo y estoy muy ansiosa con todo esto",
-            "tipo": "consulta",
+            "tipo": "relato",
             "patient_id": "E2E-002-SPANISH",
         }
 
@@ -158,6 +159,7 @@ class TestE2ETextAnalysis:
         response: Response = e2e_client.post(
             f"{api_url}/analyze/text",
             json=payload,
+            headers={"Content-Type": "application/json"},
             timeout=30,
         )
 
@@ -207,7 +209,7 @@ class TestE2ETextAnalysis:
         """
         # Arrange: Payload simples para múltiplas requisições
         payload: dict[str, object] = {
-            "texto": "Texto de teste para rate limit",
+            "texto": "Texto de teste para rate limit com conteudo suficiente",
             "tipo": "geral",
         }
 
@@ -218,7 +220,8 @@ class TestE2ETextAnalysis:
         for i in range(65):
             response: Response = e2e_client.post(
                 f"{api_url}/analyze/text",
-                json={**payload, "texto": f"Texto {i}"},
+                json={**payload, "texto": f"Texto {i} com conteudo suficiente para analise"},
+                headers={"Content-Type": "application/json"},
                 timeout=10,
             )
             responses.append(response.status_code)

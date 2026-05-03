@@ -76,10 +76,10 @@ class TestE2ESecurity:
         response = e2e_client.post(
             f"{api_url}/analyze/text",
             json={
-                "texto": "Estou me sentindo muito ansiosa e preocupada.",
+                "texto": "Estou me sentindo muito ansiosa e preocupada com a situacao.",
                 "patient_id": patient_id,
             },
-            headers={"X-Request-ID": correlation_id},
+            headers={"X-Request-ID": correlation_id, "Content-Type": "application/json"},
             timeout=30,
         )
         assert response.status_code == 200, f"Request falhou: {response.text}"
@@ -141,8 +141,8 @@ class TestE2ESecurity:
         # Faz uma requisicao valida para verificar headers
         response = requests.post(
             f"{api_url}/analyze/text",
-            json={"texto": "Teste de rate limit.", "patient_id": "RATE-TEST-001"},
-            headers={"X-API-Key": api_key},
+            json={"texto": "Teste de rate limit com conteudo suficiente.", "patient_id": "RATE-TEST-001"},
+            headers={"X-API-Key": api_key, "Content-Type": "application/json"},
             timeout=10,
         )
 
@@ -169,10 +169,10 @@ class TestE2ESecurity:
                 r = requests.post(
                     f"{api_url}/analyze/text",
                     json={
-                        "texto": f"Burst request {i}.",
+                        "texto": f"Burst request {i} com texto suficiente para analise completa.",
                         "patient_id": f"BURST-{i}",
                     },
-                    headers={"X-API-Key": api_key},
+                    headers={"X-API-Key": api_key, "Content-Type": "application/json"},
                     timeout=5,
                 )
                 responses.append(r)

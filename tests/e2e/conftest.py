@@ -104,7 +104,6 @@ def e2e_client():
     session = requests.Session()
     session.headers.update({
         "X-API-Key": ADMIN_API_KEY,
-        "Content-Type": "application/json"
     })
     yield session
     session.close()
