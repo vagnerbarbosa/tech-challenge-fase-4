@@ -620,7 +620,7 @@ Para escala futura, a arquitetura monolítica atual pode evoluir para microservi
 
 📖 **Análise completa**: [Microservices DDD Analysis](microservices-ddd-analysis.md)
 
-> **Nota**: Migração planejada para pós-MVP. Strangler Fig Pattern recomendado para transição gradual.
+> **Nota**: Sugestão de evolução caso surja a oportunidade de escala. Strangler Fig Pattern recomendado para transição gradual, se necessário.
 
 ---
 
