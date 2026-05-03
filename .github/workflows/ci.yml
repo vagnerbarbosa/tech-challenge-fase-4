@@ -50,7 +50,7 @@ jobs:
         run: poetry run mypy src/
 
       - name: Executar testes
-        run: poetry run pytest tests/ -v --cov=src --cov-report=xml --cov-fail-under=70
+        run: poetry run pytest tests/ -v --ignore=tests/e2e/ --cov=src --cov-report=xml --cov-fail-under=70
         env:
           PYTHONPATH: ${{ github.workspace }}
           AZURE_TEXT_KEY: fake-key-for-testing

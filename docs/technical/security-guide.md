@@ -654,6 +654,8 @@ curl -X OPTIONS \
 
 Esta seção explica **como testar** se a segurança está funcionando corretamente. Você não precisa entender todos os detalhes - siga os passos de acordo com seu nível.
 
+> **📋 Para uma visão completa da estratégia de testes**, incluindo E2E e testes de integração, consulte o [Guia de Testes](../testing.md).
+
 ### 4.1 Tipos de Testes de Segurança
 
 | Tipo | O que verifica | Importância |

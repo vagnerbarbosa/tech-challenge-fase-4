@@ -1,0 +1,48 @@
+# ===========================================
+# Docker Compose para Testes E2E
+# Infraestrutura slim (~3GB) sem YOLO/PyTorch
+# Spec 011 - Testing Strategy E2E
+# ===========================================
+
+version: '3.8'
+
+services:
+  # -------------------------------------------
+  # API E2E (imagem slim sem YOLO/PyTorch)
+  # Mock mode ativado - nao precisa de servicos Azure externos
+  # -------------------------------------------
+  api-e2e:
+    build:
+      context: ../../..
+      dockerfile: tests/e2e/Dockerfile.e2e
+    container_name: api-e2e
+    ports:
+      - "9000:8000"
+    environment:
+      # Azure Speech (mock para E2E)
+      - AZURE_SPEECH_KEY=mock
+      - AZURE_SPEECH_REGION=brazilsouth
+      # Azure Language (mock para E2E)
+      - AZURE_LANGUAGE_KEY=mock
+      - AZURE_LANGUAGE_ENDPOINT=http://localhost:3000
+      # Azure Content Safety (mock para E2E)
+      - AZURE_CONTENT_SAFETY_KEY=mock
+      - AZURE_CONTENT_SAFETY_ENDPOINT=http://localhost:3000
+      # Security (Spec 007)
+      - SECURITY_API_KEY=test-admin-key
+      - RATE_LIMIT_ENABLED=false
+      # Mock Mode - essencial para rodar sem Azure
+      - MOCK_MODE=true
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../../../tests/e2e/fixtures/sample_files:/app/fixtures:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  default:
+    name: e2e-network

@@ -105,10 +105,10 @@ class TextAnalysisService:
                     status_code=400
                 )
 
-            # Análise Azure
-            _ = self._get_client()  # Garante que o cliente está inicializado
+            # Análise Azure (com fallback para modo sem credenciais)
             sentiment_result = self._analyze_sentiment(sanitized_text)
-            azure_calls += 1
+            if sentiment_result.get("_azure_used", True):
+                azure_calls += 1
 
             # Extrai informações do resultado Azure
             sentiment = sentiment_result.get("sentiment", "neutro")
@@ -186,13 +186,17 @@ class TextAnalysisService:
             client = self._get_client()
         except TextAnalysisError:
             # Sem credenciais Azure, retorna análise baseada apenas em palavras-chave
+            # Detecta sentimento baseado em palavras de risco
+            risk_result = calculate_risk(text, "neutro", {})
+            sentiment = "negativo" if risk_result["indicadores"] else "neutro"
             return {
-                "sentiment": "neutro",
+                "sentiment": sentiment,
                 "confidence_scores": {
                     "positive": 0.0,
-                    "negative": 0.0,
-                    "neutral": 1.0,
+                    "negative": 0.7 if risk_result["indicadores"] else 0.0,
+                    "neutral": 0.3 if risk_result["indicadores"] else 1.0,
                 },
+                "_azure_used": False,
             }
 
         try:
@@ -225,6 +229,7 @@ class TextAnalysisService:
                 return {
                     "sentiment": sentiment,
                     "confidence_scores": confidence_scores,
+                    "_azure_used": True,
                 }
 
             return {
@@ -234,6 +239,7 @@ class TextAnalysisService:
                     "negative": 0.0,
                     "neutral": 1.0,
                 },
+                "_azure_used": True,
             }
 
         except Exception:
@@ -245,6 +251,7 @@ class TextAnalysisService:
                     "negative": 0.0,
                     "neutral": 1.0,
                 },
+                "_azure_used": False,
             }
 
     def _calculate_sentiment_score(

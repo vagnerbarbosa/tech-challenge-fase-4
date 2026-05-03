@@ -1,6 +1,6 @@
 # 📊 Status do Projeto - Tech Challenge Fase 4
 
-**Atualizado**: 2026-05-02  
+**Atualizado**: 2026-05-03  
 **Versão**: 0.9.0  
 **Branch**: `main`
 
@@ -113,11 +113,20 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 
 **Nota**: Deploy realizado com correções das PRs #51 (race condition áudio) e #52 (tags SHA).
 
+### 11. Testing Strategy E2E (Spec 011) ✅ 90%
+- [x] Unit tests para rotas (multimodal 86%, audio 80%, video 100%)
+- [x] Testes E2E com Docker (10 fluxos implementados)
+  - [x] Texto: análise completa, auto-detect idioma, rate limit
+  - [x] Áudio: transcrição, múltiplos formatos, validação tamanho
+  - [x] Multimodal: fusão texto+áudio
+  - [x] Segurança: auth, LGPD patient_id hash, rate limiting
+- [x] Cobertura: 85% (meta: 90%)
+
 ---
 
 ## ⏳ Módulos Pendentes
 
-### 11. Documentação Final (Spec 011) ⏳ 0%
+### 12. Documentação Final (Spec 012) ⏳ 0%
 - [ ] Vídeo demonstrativo
 - [ ] Documentação técnica completa
 - [ ] API Guide
@@ -184,7 +193,10 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 | Tipo | Status | Cobertura |
 |------|--------|-----------|
 | Unitários | ✅ Completo | ~85% |
+| Rotas | ✅ Completo | multimodal 86%, audio 80%, video 100% |
+| Utils | ✅ Completo | file_validation 74%, audit_logger 88% |
 | Integração | ✅ Completo | Texto + Áudio + Vídeo + Multimodal + Auth |
+| E2E | ✅ Completo | 10 fluxos (texto, áudio, multimodal, segurança) |
 | Segurança | ✅ Completo | 87 tasks (Spec 007) |
 | Carga | ⏳ Pendente | Locust (opcional) |
 

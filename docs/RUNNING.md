@@ -365,6 +365,7 @@ export PATH="$HOME/.local/bin:$PATH"
 | `./scripts/run-mock.sh` | Inicia com Docker + mocks |
 | `./scripts/stop-mock.sh` | Para todos os containers |
 | `./scripts/test-docker.sh` | Executa testes em Docker |
+| `./scripts/run-e2e.sh` | Executa testes E2E (end-to-end) |
 | `./scripts/setup.sh` | Configuração inicial |
 
 ---
@@ -676,4 +677,14 @@ func main() {
 	fmt.Printf("Risco Violência: %s\n", result.RiscoViolencia)
 	fmt.Printf("Risco Saúde Mental: %s\n", result.RiscoSaudeMental)
 }
+```
+
+---
+
+## Referências
+
+- [Testing Guide](testing.md) - Como executar testes unitários, de integração e E2E
+- [Architecture](architecture.md) - Arquitetura do sistema
+- [API Contracts](api-contracts.md) - Contratos da API
+- [Security Guide](technical/security-guide.md) - Guia de segurança
 ```

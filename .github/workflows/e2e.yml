@@ -1,0 +1,133 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop, '011-testing-strategy' ]
+    paths:
+      - 'src/**'
+      - 'tests/e2e/**'
+      - 'pyproject.toml'
+      - 'tests/e2e/Dockerfile.e2e'
+      - 'tests/e2e/fixtures/docker-compose.e2e.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/e2e/**'
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  e2e-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Instalar Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Instalar dependências
+      run: |
+        poetry install --no-interaction --no-root
+
+    - name: Iniciar ambiente E2E
+      run: |
+        cd tests/e2e/fixtures
+        docker compose -f docker-compose.e2e.yml up --build -d
+
+        # Aguardar serviços ficarem saudáveis com healthcheck
+        echo "Aguardando API ficar pronta..."
+        max_attempts=30
+        for i in $(seq 1 $max_attempts); do
+          # Verificar health endpoint com timeout
+          response=$(curl -s -w "\n%{http_code}" --max-time 10 http://localhost:9000/health 2>/dev/null || echo "\n000")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          if [ "$http_code" = "200" ]; then
+            echo "API pronta! Response: $body"
+            break
+          fi
+
+          echo "Tentativa $i/$max_attempts - HTTP $http_code - aguardando..."
+
+          # Mostrar logs se falhou muitas vezes
+          if [ $i -eq 15 ]; then
+            echo "--- Logs do container API (tentativa 15) ---"
+            docker compose -f docker-compose.e2e.yml logs api-e2e --tail 50 || true
+          fi
+
+          sleep 5
+        done
+
+        # Verificação final
+        final_check=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://localhost:9000/health 2>/dev/null || echo "000")
+        if [ "$final_check" != "200" ]; then
+          echo "ERRO: API não respondeu com 200 após $max_attempts tentativas"
+          echo "--- Logs finais do container ---"
+          docker compose -f docker-compose.e2e.yml logs api-e2e --tail 100 || true
+          exit 1
+        fi
+
+    - name: Verificar containers
+      run: |
+        echo "=== Containers rodando ==="
+        docker ps -a
+        echo ""
+        echo "=== Logs do container API (início) ==="
+        cd tests/e2e/fixtures
+        docker compose -f docker-compose.e2e.yml logs api-e2e --tail 30 || true
+
+    - name: Executar testes E2E
+      run: |
+        # Desabilita fail-under de cobertura para testes E2E (cobertura medida no CI principal)
+        poetry run pytest tests/e2e/ -v --tb=long --no-cov 2>&1 | tee /tmp/e2e-test-output.log
+      continue-on-error: true
+      id: e2e_tests
+
+    - name: Capturar logs dos containers
+      if: always()
+      run: |
+        cd tests/e2e/fixtures
+        echo "=== Logs completos do API ===" > /tmp/e2e-docker-logs.log
+        docker compose -f docker-compose.e2e.yml logs api-e2e >> /tmp/e2e-docker-logs.log 2>&1 || true
+        echo "" >> /tmp/e2e-docker-logs.log
+        echo "=== Status dos containers ===" >> /tmp/e2e-docker-logs.log
+        docker compose -f docker-compose.e2e.yml ps >> /tmp/e2e-docker-logs.log 2>&1 || true
+
+    - name: Limpeza
+      if: always()
+      run: |
+        cd tests/e2e/fixtures
+        docker compose -f docker-compose.e2e.yml down -v
+
+    - name: Upload de logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: e2e-logs
+        path: |
+          /tmp/e2e-test-output.log
+          /tmp/e2e-docker-logs.log
+        retention-days: 5
+
+    - name: Falhar se testes falharam
+      if: steps.e2e_tests.outcome == 'failure'
+      run: exit 1
