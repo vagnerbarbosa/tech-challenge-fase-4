@@ -1,8 +1,6 @@
 """
 Fixtures específicas para testes de rotas da API.
 """
-# Importar a aplicação
-import sys
 from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -10,9 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, '/home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src')
-
-from api.main import app
+from src.api.main import app
 
 
 @pytest.fixture(scope="session")
