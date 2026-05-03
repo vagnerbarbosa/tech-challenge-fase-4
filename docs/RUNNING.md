@@ -1,6 +1,6 @@
 # Como Executar a Aplicação Localmente
 
-> **Última Atualização**: 2026-05-01
+> **Última Atualização**: 2026-05-02
 
 Este guia explica como executar a Multimodal Health Analysis API em seu ambiente local.
 
