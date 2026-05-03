@@ -365,6 +365,7 @@ export PATH="$HOME/.local/bin:$PATH"
 | `./scripts/run-mock.sh` | Inicia com Docker + mocks |
 | `./scripts/stop-mock.sh` | Para todos os containers |
 | `./scripts/test-docker.sh` | Executa testes em Docker |
+| `./scripts/run-e2e.sh` | Executa testes E2E (end-to-end) |
 | `./scripts/setup.sh` | Configuração inicial |
 
 ---

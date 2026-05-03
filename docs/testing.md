@@ -22,6 +22,17 @@ A suite de testes está organizada em camadas que garantem qualidade em diferent
 
 ## Executando os Testes
 
+### Scripts Disponíveis
+
+O projeto inclui scripts automatizados para facilitar a execução de testes:
+
+| Script | Descrição | Quando usar |
+|--------|-----------|-------------|
+| `./scripts/test.sh` | Testes unitários locais com Poetry | Desenvolvimento rápido |
+| `./scripts/test-docker.sh` | Testes em Docker (reutiliza imagem) | Isolamento completo |
+| `./scripts/run-e2e.sh` | Testes E2E com Docker | Fluxos end-to-end |
+| `./scripts/run-mock.sh` | Inicia ambiente com mocks | Desenvolvimento |
+
 ### Testes Unitários e Integração
 
 ```bash
@@ -46,8 +57,13 @@ poetry run pytest tests/security/ -v
 Os testes E2E requerem Docker pois testam a aplicação completa em um ambiente isolado:
 
 ```bash
-# Via script (recomendado)
+# Via script (recomendado) - gerencia todo o ciclo de vida
 ./scripts/run-e2e.sh
+
+# Com opções adicionais
+./scripts/run-e2e.sh --logs      # Mostra logs após execução
+./scripts/run-e2e.sh --rebuild # Força rebuild da imagem
+./scripts/run-e2e.sh --stop      # Para containers E2E
 
 # Manualmente
 cd tests/e2e/fixtures
