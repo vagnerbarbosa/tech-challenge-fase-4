@@ -138,8 +138,9 @@ O vídeo demonstra:
 | ID | Feature | Status |
 |----|---------|--------|
 | 001-009 | Core + Deploy | ✅ Concluído |
-| 010 | Content Safety | ✅ Concluído |
-| 011 | Documentação Final | ⏳ Pendente |
+| 010 | Content Safety Multilíngue | ✅ Concluído |
+| 011 | Testing Strategy E2E | ✅ Concluído |
+| 012 | Documentação Final | ⏳ Pendente |
 
 ---
 
