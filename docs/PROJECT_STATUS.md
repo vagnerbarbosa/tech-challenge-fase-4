@@ -109,7 +109,7 @@ Sistema multimodal para identificação de sinais de violência doméstica e ris
 - [x] Collection/Environment atualizados
 - [ ] Domínio customizado (opcional - futuro)
 
-**Status**: ✅ DEPLOY CONCLUÍDO - API online em: http://20.201.42.143:8000
+**Status**: ✅ DEPLOY CONCLUÍDO - API online em: `http://<your-azure-ip>:8000` (substitua pelo IP atribuído pelo Azure)
 
 **Nota**: Deploy realizado com correções das PRs #51 (race condition áudio) e #52 (tags SHA).
 

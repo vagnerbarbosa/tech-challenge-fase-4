@@ -2,8 +2,9 @@
 
 **Feature Branch**: `[003-audio-analysis]`
 **Created**: 2026-04-11
-**Status**: Draft
-**Input**: User description: "Implementar endpoint de análise de áudio usando Azure Speech Services"
+**Updated**: 2026-05-03
+**Status**: ✅ COMPLETED (com Content Safety Integration)
+**Input**: User description: "Implementar endpoint de análise de áudio usando Azure Speech Services com Azure AI Content Safety para detecção multilíngue de risco"
 
 ---
 
@@ -12,10 +13,19 @@
 ### Session 2026-04-12
 
 - **Q**: Fallback quando Azure Speech falha → **A**: Retornar erro HTTP 503 quando Azure indisponível (requer Azure)
-- **Q**: Timeout de processamento → **A**: 30 segundos por requisição
+- **Q**: Timeout de processamento → **A**: 60 segundos por requisição (aumentado de 30s para acomodar Content Safety + Azure Speech)
 - **Q**: Limite de tamanho de arquivo → **A**: Hard limit - rejeitar arquivos >50MB com HTTP 400
 - **Q**: Storage temporário → **A**: Local filesystem (/tmp) com cleanup automático
 - **Q**: Desenvolvimento sem Azure → **A**: Modo mock com transcrição simulada + aviso no log
+
+### Session 2026-05-03 (Atualização - Content Safety Integration)
+
+- **Q**: Por que integrar Content Safety na análise de áudio?  
+  **A**: Durante testes funcionais, identificou-se que a transcrição de áudio precisa passar pelo Azure AI Content Safety (implementado na Spec 010) para garantir detecção robusta de riscos em múltiplos idiomas. A transcrição raw do Speech Services é processada pelo Content Safety antes do cálculo de risco.
+- **Q**: Como funciona o fluxo com Content Safety?  
+  **A**: 1) Azure Speech transcreve áudio → 2) Texto transcrito é analisado pelo MultilingualRiskDetector (Spec 010) combinando Content Safety + Keywords → 3) Resultado gera risco_violencia e risco_saude_mental
+- **Q**: Qual o benefício do Content Safety para áudio?  
+  **A**: Ver Spec 010 para detalhes completos. Em resumo: suporte a 100+ idiomas, detecção ML-based com severidade granular (0-6), e fallback para keywords quando indisponível
 
 ---
 
@@ -63,6 +73,23 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 1. **Given** arquivo de áudio enviado, **When** processamento completa, **Then** arquivo é deletado em até 24h
 2. **Given** falha no processamento, **When** erro ocorre, **Then** arquivo ainda é deletado
 
+### User Story 4 - Detecção de Risco na Transcrição (Priority: P1) ⭐ NOVO
+
+Como profissional de saúde, quero que o sistema detecte riscos de violência e saúde mental na transcrição do áudio em qualquer idioma.
+
+**Why this priority**: Durante testes funcionais, identificou-se que a transcrição precisa de análise de risco robusta. Utiliza o MultilingualRiskDetector da Spec 010 (Content Safety + Keywords).
+
+**Independent Test**: Áudio em espanhol, inglês ou português transcrito e analisado corretamente para risco.
+
+**Acceptance Scenarios**:
+
+1. **Given** áudio em português com indicação de risco, **When** transcrito, **Then** sistema detecta risco via Content Safety (Spec 010) ✅
+2. **Given** áudio em espanhol, **When** transcrito, **Then** detecção funciona sem configuração de idioma ✅
+3. **Given** Content Safety indisponível, **When** áudio transcrito, **Then** sistema usa keywords PT/EN como fallback (Spec 010) ✅
+4. **Given** áudio neutro sem risco, **When** transcrito, **Then** risco_violencia e risco_saude_mental são "baixo" ✅
+
+> **Nota**: Detalhes da implementação do Content Safety estão na Spec 010. Esta spec foca na integração no fluxo de áudio.
+
 ---
 
 ## Requirements
@@ -77,12 +104,16 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 - **FR-006**: Armazena arquivo temporariamente em filesystem local (/tmp) durante processamento
 - **FR-007**: Deleta arquivo após processamento (LGPD)
 - **FR-008**: Valida formato e tamanho do arquivo
+- **FR-009** ⭐ **NOVO**: Transcrição analisada via MultilingualRiskDetector (Spec 010) para detecção de risco
+- **FR-010** ⭐ **NOVO**: Timeout de 60s para acomodar processamento Speech + Content Safety
 
 ### Key Entities
 
 - **AudioAnalysisRequest**: multipart/form-data com audio, tipo_consulta, patient_id
 - **AudioAnalysisResponse**: { transcricao, idioma_detectado, sentimento, entonação, voz_tremida, pausas_suspeitas, duracao_segundos, risco_violencia, risco_saude_mental, metadata }
 - **AudioAnalysisService**: Upload, processamento, análise
+- **MultilingualRiskDetector**: Serviço da Spec 010 que processa transcrição via Content Safety + Keywords
+- **ProsodicFeatureExtractor**: Extrai features prosódicas (pitch, energia, pausas) via librosa
 
 ---
 
@@ -92,6 +123,8 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 - **SC-002**: Precisão de transcrição > 85% (pt-BR)
 - **SC-003**: Arquivos temporários deletados após processamento
 - **SC-004**: Campos obrigatórios sempre presentes
+- **SC-005** ⭐ **NOVO**: Detecção de risco na transcrição via MultilingualRiskDetector (Spec 010)
+- **SC-006** ⭐ **NOVO**: Timeout de 60s permite processamento Speech + Content Safety
 
 ---
 
@@ -107,9 +140,36 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 
 ## Technical Notes
 
-### Azure Speech SDK
-- Pacote: `azure-cognitiveservices-speech>=1.48.0`
+### Azure Speech SDK + Content Safety Integration
+- Pacote Speech: `azure-cognitiveservices-speech>=1.48.0`
 - Requer: Speech SDK nativo (instalado via apt no Dockerfile)
+- **⭐ Integração com Content Safety (Spec 010):**
+
+O fluxo de processamento do áudio utiliza o **MultilingualRiskDetector** implementado na Spec 010:
+
+```
+Áudio (WAV/MP3/OGG)
+       │
+       ▼
+Azure Speech Services
+(transcrição + auto-detect idioma)
+       │
+       ▼
+Texto Transcrito
+       │
+       ▼
+MultilingualRiskDetector (Spec 010)
+(Content Safety + Keywords PT/EN)
+       │
+       ▼
+   risco_violencia / risco_saude_mental
+```
+
+> **Ver Spec 010** para detalhes completos do Content Safety:
+> - Categorias detectadas (SelfHarm, Violence, Hate, Sexual)
+> - Escala de severidade (0-6)
+> - Configuração de variáveis de ambiente
+> - Tratamento de erros e fallback
 
 ### Processamento de Áudio
 - Extrair features prosódicas: pitch, energia, pausas

@@ -6,7 +6,7 @@ Guia rápido para deploy da API no Azure Container Instances (ACI).
 
 ✅ **DEPLOY CONCLUÍDO** (2026-05-01)
 
-**URL de Produção**: http://20.201.42.143:8000
+**URL de Produção**: `http://<your-azure-ip>:8000` (substitua pelo IP atribuído pelo Azure após deploy)
 
 ---
 
@@ -70,10 +70,12 @@ git push origin main
 
 | Endpoint | URL |
 |----------|-----|
-| API Base | http://20.201.42.143:8000 |
-| Health | http://20.201.42.143:8000/health |
-| Swagger | http://20.201.42.143:8000/docs |
-| ReDoc | http://20.201.42.143:8000/redoc |
+| API Base | `http://<your-azure-ip>:8000` |
+| Health | `http://<your-azure-ip>:8000/health` |
+| Swagger | `http://<your-azure-ip>:8000/docs` |
+| ReDoc | `http://<your-azure-ip>:8000/redoc` |
+
+> **Nota**: Substitua `<your-azure-ip>` pelo IP público atribuído pelo Azure Container Instances.
 
 ---
 
@@ -193,7 +195,7 @@ Importe o arquivo `docs/collection.json` no Postman/Insomnia:
 
 **Environments disponíveis:**
 - **Local**: http://localhost:8000 (api_key: test-api-key)
-- **Azure Production**: http://20.201.42.143:8000 (api_key: demo-api-key)
+- **Azure Production**: `http://<your-azure-ip>:8000` (api_key: demo-api-key)
 
 ---
 
