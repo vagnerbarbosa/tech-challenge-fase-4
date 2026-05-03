@@ -86,9 +86,31 @@ jobs:
           exit 1
         fi
 
+    - name: Verificar containers
+      run: |
+        echo "=== Containers rodando ==="
+        docker ps -a
+        echo ""
+        echo "=== Logs do container API (início) ==="
+        cd tests/e2e/fixtures
+        docker compose -f docker-compose.e2e.yml logs api-e2e --tail 30 || true
+
     - name: Executar testes E2E
       run: |
-        poetry run pytest tests/e2e/ -v --tb=short
+        # Desabilita fail-under de cobertura para testes E2E (cobertura medida no CI principal)
+        poetry run pytest tests/e2e/ -v --tb=long --no-cov 2>&1 | tee /tmp/e2e-test-output.log
+      continue-on-error: true
+      id: e2e_tests
+
+    - name: Capturar logs dos containers
+      if: always()
+      run: |
+        cd tests/e2e/fixtures
+        echo "=== Logs completos do API ===" > /tmp/e2e-docker-logs.log
+        docker compose -f docker-compose.e2e.yml logs api-e2e >> /tmp/e2e-docker-logs.log 2>&1 || true
+        echo "" >> /tmp/e2e-docker-logs.log
+        echo "=== Status dos containers ===" >> /tmp/e2e-docker-logs.log
+        docker compose -f docker-compose.e2e.yml ps >> /tmp/e2e-docker-logs.log 2>&1 || true
 
     - name: Limpeza
       if: always()
@@ -96,12 +118,16 @@ jobs:
         cd tests/e2e/fixtures
         docker compose -f docker-compose.e2e.yml down -v
 
-    - name: Upload de logs em caso de falha
-      if: failure()
+    - name: Upload de logs
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: e2e-logs
         path: |
-          /var/log/containers/
-          /tmp/e2e-*.log
+          /tmp/e2e-test-output.log
+          /tmp/e2e-docker-logs.log
         retention-days: 5
+
+    - name: Falhar se testes falharam
+      if: steps.e2e_tests.outcome == 'failure'
+      run: exit 1
