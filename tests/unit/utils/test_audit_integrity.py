@@ -195,16 +195,18 @@ class TestAuditIntegrity:
         """Test handling of OS errors when reading log files."""
         logger = temp_logger
 
-        with patch("src.utils.audit_logger.logger") as mock_logger:
-            with patch("builtins.open", side_effect=OSError("Permission denied")):
-                entries = logger._read_log_file(
-                    Path("/nonexistent/file.log"),
-                    None, None, None, None, False
-                )
-                assert entries == []
+        with (
+            patch("src.utils.audit_logger.logger") as mock_logger,
+            patch("builtins.open", side_effect=OSError("Permission denied"))
+        ):
+            entries = logger._read_log_file(
+                Path("/nonexistent/file.log"),
+                None, None, None, None, False
+            )
+            assert entries == []
 
-                # Error should be logged
-                mock_logger.error.assert_called_once()
+            # Error should be logged
+            mock_logger.error.assert_called_once()
 
     def test_read_archived_log_handles_corruption(self, temp_logger):
         """Test handling of corrupted archived log files."""
