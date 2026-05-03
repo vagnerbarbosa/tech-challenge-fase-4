@@ -14,7 +14,6 @@ import hashlib
 import json
 import time
 from pathlib import Path
-from typing import Any
 
 import pytest
 import requests
@@ -57,8 +56,9 @@ class TestE2ESecurity:
             f"Esperado 401 com auth invalida, obtido {response_invalid_auth.status_code}"
         )
 
-        # Teste 3: Verifica header WWW-Authenticate
-        assert "WWW-Authenticate" in response_invalid_auth.headers or True  # Opcional
+        # Teste 3: Verifica header WWW-Authenticate (opcional)
+        if "WWW-Authenticate" in response_invalid_auth.headers:
+            print(f"WWW-Authenticate: {response_invalid_auth.headers['WWW-Authenticate']}")
 
     def test_e2e_lgpd_patient_id_hash(self, e2e_client: requests.Session, api_url: str) -> None:
         """
@@ -105,7 +105,7 @@ class TestE2ESecurity:
         found_hashed = False
         found_raw = False
 
-        with open(log_file, "r", encoding="utf-8") as f:
+        with open(log_file, encoding="utf-8") as f:
             for line in f:
                 try:
                     entry = json.loads(line.strip())
@@ -124,7 +124,7 @@ class TestE2ESecurity:
             f"Esperado hash: {expected_hash}"
         )
         assert not found_raw, (
-            f"Patient ID em formato raw encontrado no audit log - violacao LGPD!"
+            "Patient ID em formato raw encontrado no audit log - violacao LGPD!"
         )
 
     def test_e2e_rate_limit_by_api_key(self, api_url: str) -> None:
@@ -189,10 +189,11 @@ class TestE2ESecurity:
                 error_data = rate_limited_response.json()
                 assert "error" in error_data or "detail" in error_data
                 assert "RateLimit" in str(error_data.get("error", "")) or \
-                       "rate limit" in str(error_data.get("message", "")).lower() or True
+                       "rate limit" in str(error_data.get("message", "")).lower()
 
-                # Verifica header Retry-After
-                assert "Retry-After" in rate_limited_response.headers or True
+                # Verifica header Retry-After (opcional)
+                if "Retry-After" in rate_limited_response.headers:
+                    assert int(rate_limited_response.headers["Retry-After"]) > 0
             else:
                 # Rate limit pode estar desabilitado para E2E - isso e aceitavel
                 # Verificamos apenas que as requisicoes foram processadas

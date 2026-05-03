@@ -1,12 +1,11 @@
 """
 Fixtures para testes E2E com Docker.
 """
-import pytest
 import subprocess
 import time
-import requests
-from typing import Generator, Dict
 
+import pytest
+import requests
 
 # Configurações E2E
 E2E_API_URL = "http://localhost:9000"
@@ -30,7 +29,7 @@ def docker_services():
 
     # Aguardar serviços ficarem prontos
     max_retries = 30
-    for i in range(max_retries):
+    for _ in range(max_retries):
         try:
             response = requests.get(f"{E2E_API_URL}/health", timeout=5)
             if response.status_code == 200:
@@ -72,7 +71,7 @@ def mock_server_url() -> str:
 
 
 @pytest.fixture
-def admin_headers() -> Dict[str, str]:
+def admin_headers() -> dict[str, str]:
     """
     Headers de autenticação admin para E2E.
     """
@@ -105,7 +104,7 @@ def sample_audio_path() -> str:
 
 
 @pytest.fixture
-def sample_text_payload() -> Dict:
+def sample_text_payload() -> dict:
     """
     Payload de exemplo para análise de texto.
     """
