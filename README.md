@@ -9,7 +9,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ff6b35?style=flat-square&logo=anthropic&logoColor=white)](https://claude.ai/code)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-[![Tests](https://github.com/vagnerbarbosa/tech-challenge-fase-4/workflows/Tests/badge.svg)](https://github.com/vagnerbarbosa/tech-challenge-fase-4/actions/workflows/ci.yml)
+[![Unit and Integration Tests](https://github.com/vagnerbarbosa/tech-challenge-fase-4/workflows/Unit%20and%20Integration%20Tests/badge.svg)](https://github.com/vagnerbarbosa/tech-challenge-fase-4/actions/workflows/ci.yml)
 [![E2E Tests](https://github.com/vagnerbarbosa/tech-challenge-fase-4/workflows/E2E%20Tests/badge.svg)](https://github.com/vagnerbarbosa/tech-challenge-fase-4/actions/workflows/e2e.yml)
 
 **Análise multimodal de saúde da mulher usando Azure AI Services e YOLOv8 local**
