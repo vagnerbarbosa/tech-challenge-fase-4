@@ -622,6 +622,81 @@ Para escala futura, a arquitetura monolítica atual pode evoluir para microservi
 
 > **Nota**: Sugestão de evolução caso surja a oportunidade de escala. Strangler Fig Pattern recomendado para transição gradual, se necessário.
 
+### Infrastructure Evolution
+
+Além da migração para microserviços, há componentes de infraestrutura que ficaram de fora do MVP e devem ser considerados para produção real:
+
+#### Redis (Rate Limiting Distribuído)
+
+| Aspecto | MVP (Local) | Future (Redis) |
+|---------|-------------|----------------|
+| **Implementação** | In-memory (QuotaManager local) | Redis Cluster |
+| **Escalabilidade** | Single instance | Multi-instance com sincronização |
+| **Persistência** | Volátil (reinício = perda de quotas) | Persistente |
+| **Caso de uso** | Rate limiting local | Rate limiting global, cache de análises |
+
+- **Status**: Container configurado mas `REDIS_ENABLED=false` por padrão
+- **Motivação**: Rate limiting distribuído quando houver múltiplas instâncias da API
+- **Custo**: ~R$ 50-200/mês (Azure Cache for Redis Basic)
+
+#### Azure SQL Database (Persistent Storage)
+
+| Aspecto | MVP (SQLite) | Future (Azure SQL) |
+|---------|--------------|-------------------|
+| **Persistência** | File-based local | Managed cloud database |
+| **Backup** | Manual | Automático (PITR - Point in Time Recovery) |
+| **Alta disponibilidade** | Não | 99.99% SLA |
+| **Escalabilidade** | Single user | Conexões simultâneas (100+) |
+| **LGPD Compliance** | Limitado | Full (encryption at rest, audit logs) |
+
+- **Status**: `DATABASE_URL=sqlite+aiosqlite:///./data/health_analysis.db` no MVP
+- **Motivação**: Persistência histórica de análises, dashboard de tendências, LGPD compliance
+- **Casos de uso futuros**:
+  - Histórico de análises por paciente (anonimizado)
+  - Tendências de risco ao longo do tempo
+  - Auditoria LGPD completa (quem acessou o quê e quando)
+- **Custo**: ~R$ 30-150/mês (Azure SQL Database Basic/Standard)
+
+#### Load Testing Strategy
+
+| Aspecto | MVP | Future |
+|---------|-----|--------|
+| **Testes de performance** | Unit/Integration/E2E funcionais | Load testing com Locust/k6 |
+| **Carga simulada** | N/A | 100-1000 usuários simultâneos |
+| **Métricas** | Pass/fail | Latência p95/p99, throughput, erro % |
+| **Bottleneck identification** | Manual | Automatizado com APM (Application Insights) |
+
+- **Status**: Testes E2E focam em funcionalidade, não performance sob carga
+- **Motivação**: Validar comportamento da API sob carga de produção (hospital com 50+ UTIs)
+- **Ferramentas sugeridas**: Locust (Python), k6 (JavaScript), Azure Load Testing
+- **Cenários críticos**:
+  - Pico de 100 análises simultâneas (emergência hospitalar)
+  - Sustained load de 10 req/s durante 1 hora
+  - Teste de recuperação após falha (resilience)
+
+#### Architecture Decision Summary
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                         Post-MVP Roadmap                               │
+├────────────────────────────────────────────────────────────────────────┤
+│ Phase 1 (6 months):                                                   │
+│   • Azure SQL Database (persistência histórica)                        │
+│   • Redis habilitado (rate limiting distribuído)                     │
+│   • Load testing automatizado (Locust + CI)                          │
+├────────────────────────────────────────────────────────────────────────┤
+│ Phase 2 (12 months):                                                  │
+│   • Extração de audit-service (Event Sourcing)                       │
+│   • Azure Monitor / Application Insights                              │
+├────────────────────────────────────────────────────────────────────────┤
+│ Phase 3 (18+ months):                                                 │
+│   • Migração para microserviços (se volume justificar)               │
+│   • Kubernetes (AKS) com auto-scaling                                │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+> **Nota**: Estas evoluções são opcionais e dependem do cenário de adoção. O MVP atual é suficiente para validação do produto e pequenos hospitais/clínicas.
+
 ---
 
 ## References
