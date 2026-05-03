@@ -116,7 +116,7 @@ class TestE2EAudioAnalysis:
 
         # Act
         files = {"audio": (filename, audio_bytes, content_type)}
-        data = {"patient_id": f"e2e-audio-wav"}
+        data = {"patient_id": "e2e-audio-wav"}
 
         response = e2e_client.post(
             f"{api_url}/analyze/audio",
@@ -130,10 +130,10 @@ class TestE2EAudioAnalysis:
             f"Formato {filename} falhou: {response.status_code} - {response.text}"
         )
 
-            result = response.json()
-            assert "transcricao" in result
-            assert "risco_violencia" in result
-            assert "risco_saude_mental" in result
+        result = response.json()
+        assert "transcricao" in result
+        assert "risco_violencia" in result
+        assert "risco_saude_mental" in result
 
     def test_e2e_audio_file_too_large(
         self, e2e_client: requests.Session, api_url: str
@@ -171,19 +171,19 @@ class TestE2EAudioAnalysis:
                     timeout=30,
                 )
 
-            # Assert
-            assert response.status_code == 413, (
-                f"Expected 413 (File Too Large), got {response.status_code}"
-            )
+                # Assert
+                assert response.status_code == 413, (
+                    f"Expected 413 (File Too Large), got {response.status_code}"
+                )
 
-            # Verificar mensagem de erro
-            result = response.json()
-            assert "detail" in result
-            error_message = result["detail"].lower()
-            assert any(
-                word in error_message
-                for word in ["tamanho", "grande", "size", "large", "50", "mb"]
-            ), f"Mensagem de erro não indica tamanho: {error_message}"
+                # Verificar mensagem de erro
+                result = response.json()
+                assert "detail" in result
+                error_message = result["detail"].lower()
+                assert any(
+                    word in error_message
+                    for word in ["tamanho", "grande", "size", "large", "50", "mb"]
+                ), f"Mensagem de erro não indica tamanho: {error_message}"
 
         finally:
             # Cleanup
