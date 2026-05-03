@@ -21,11 +21,11 @@
 ### Session 2026-05-03 (Atualização - Content Safety Integration)
 
 - **Q**: Por que integrar Content Safety na análise de áudio?  
-  **A**: Durante testes funcionais, identificou-se que a transcrição de áudio precisa passar pelo Azure AI Content Safety para garantir detecção robusta de riscos em múltiplos idiomas. A transcrição raw do Speech Services é processada pelo Content Safety antes do cálculo de risco.
+  **A**: Durante testes funcionais, identificou-se que a transcrição de áudio precisa passar pelo Azure AI Content Safety (implementado na Spec 010) para garantir detecção robusta de riscos em múltiplos idiomas. A transcrição raw do Speech Services é processada pelo Content Safety antes do cálculo de risco.
 - **Q**: Como funciona o fluxo com Content Safety?  
-  **A**: 1) Azure Speech transcreve áudio → 2) Texto transcrito é analisado pelo Content Safety (severidade 0-6) → 3) Keywords PT/EN são aplicados como fallback → 4) Resultado combinado gera risco_violencia e risco_saude_mental
+  **A**: 1) Azure Speech transcreve áudio → 2) Texto transcrito é analisado pelo MultilingualRiskDetector (Spec 010) combinando Content Safety + Keywords → 3) Resultado gera risco_violencia e risco_saude_mental
 - **Q**: Qual o benefício do Content Safety para áudio?  
-  **A**: Suporte a 100+ idiomas automaticamente (sem configurar language), detecção ML-based de SelfHarm, Violence, Hate, Sexual com severidade granular (0-6), e fallback automático para keywords quando indisponível
+  **A**: Ver Spec 010 para detalhes completos. Em resumo: suporte a 100+ idiomas, detecção ML-based com severidade granular (0-6), e fallback para keywords quando indisponível
 
 ---
 
@@ -73,20 +73,22 @@ Como sistema LGPD-compliant, quero que arquivos de áudio sejam deletados após 
 1. **Given** arquivo de áudio enviado, **When** processamento completa, **Then** arquivo é deletado em até 24h
 2. **Given** falha no processamento, **When** erro ocorre, **Then** arquivo ainda é deletado
 
-### User Story 4 - Detecção de Risco via Content Safety (Priority: P1) ⭐ NOVO
+### User Story 4 - Detecção de Risco na Transcrição (Priority: P1) ⭐ NOVO
 
 Como profissional de saúde, quero que o sistema detecte riscos de violência e saúde mental na transcrição do áudio em qualquer idioma.
 
-**Why this priority**: Durante testes funcionais, identificou-se que a transcrição precisa de análise de risco robusta. O Azure AI Content Safety fornece detecção ML-based em 100+ idiomas, essencial para atender mulheres de diversas nacionalidades.
+**Why this priority**: Durante testes funcionais, identificou-se que a transcrição precisa de análise de risco robusta. Utiliza o MultilingualRiskDetector da Spec 010 (Content Safety + Keywords).
 
 **Independent Test**: Áudio em espanhol, inglês ou português transcrito e analisado corretamente para risco.
 
 **Acceptance Scenarios**:
 
-1. **Given** áudio em português com indicação de risco, **When** transcrito, **Then** Content Safety detecta severidade alta (0-6) na transcrição ✅
-2. **Given** áudio em espanhol com conteúdo violento, **When** transcrito, **Then** Content Safety detecta risco sem necessidade de configuração de idioma ✅
-3. **Given** Content Safety indisponível, **When** áudio transcrito, **Then** sistema usa keywords PT/EN como fallback ✅
+1. **Given** áudio em português com indicação de risco, **When** transcrito, **Then** sistema detecta risco via Content Safety (Spec 010) ✅
+2. **Given** áudio em espanhol, **When** transcrito, **Then** detecção funciona sem configuração de idioma ✅
+3. **Given** Content Safety indisponível, **When** áudio transcrito, **Then** sistema usa keywords PT/EN como fallback (Spec 010) ✅
 4. **Given** áudio neutro sem risco, **When** transcrito, **Then** risco_violencia e risco_saude_mental são "baixo" ✅
+
+> **Nota**: Detalhes da implementação do Content Safety estão na Spec 010. Esta spec foca na integração no fluxo de áudio.
 
 ---
 
@@ -102,18 +104,15 @@ Como profissional de saúde, quero que o sistema detecte riscos de violência e 
 - **FR-006**: Armazena arquivo temporariamente em filesystem local (/tmp) durante processamento
 - **FR-007**: Deleta arquivo após processamento (LGPD)
 - **FR-008**: Valida formato e tamanho do arquivo
-- **FR-009** ⭐ **NOVO**: Transcrição analisada via Azure AI Content Safety para detecção de risco multilíngue
-- **FR-010** ⭐ **NOVO**: Content Safety detecta 4 categorias: SelfHarm, Violence, Hate, Sexual (severidade 0-6)
-- **FR-011** ⭐ **NOVO**: Keywords PT/EN usadas como complemento/fallback ao Content Safety
-- **FR-012** ⭐ **NOVO**: Suporte a 100+ idiomas na detecção de risco via Content Safety (auto-detect)
+- **FR-009** ⭐ **NOVO**: Transcrição analisada via MultilingualRiskDetector (Spec 010) para detecção de risco
+- **FR-010** ⭐ **NOVO**: Timeout de 60s para acomodar processamento Speech + Content Safety
 
 ### Key Entities
 
 - **AudioAnalysisRequest**: multipart/form-data com audio, tipo_consulta, patient_id
 - **AudioAnalysisResponse**: { transcricao, idioma_detectado, sentimento, entonação, voz_tremida, pausas_suspeitas, duracao_segundos, risco_violencia, risco_saude_mental, metadata }
 - **AudioAnalysisService**: Upload, processamento, análise
-- **MultilingualRiskDetector** ⭐ **NOVO**: Serviço combinado que processa transcrição via Content Safety + Keywords
-- **ContentSafetyClient** ⭐ **NOVO**: Cliente para Azure AI Content Safety API
+- **MultilingualRiskDetector**: Serviço da Spec 010 que processa transcrição via Content Safety + Keywords
 - **ProsodicFeatureExtractor**: Extrai features prosódicas (pitch, energia, pausas) via librosa
 
 ---
@@ -124,9 +123,8 @@ Como profissional de saúde, quero que o sistema detecte riscos de violência e 
 - **SC-002**: Precisão de transcrição > 85% (pt-BR)
 - **SC-003**: Arquivos temporários deletados após processamento
 - **SC-004**: Campos obrigatórios sempre presentes
-- **SC-005** ⭐ **NOVO**: Detecção de risco funciona com Content Safety em múltiplos idiomas
-- **SC-006** ⭐ **NOVO**: Fallback para keywords quando Content Safety indisponível
-- **SC-007** ⭐ **NOVO**: Timeout de 60s permite processamento Speech + Content Safety
+- **SC-005** ⭐ **NOVO**: Detecção de risco na transcrição via MultilingualRiskDetector (Spec 010)
+- **SC-006** ⭐ **NOVO**: Timeout de 60s permite processamento Speech + Content Safety
 
 ---
 
@@ -144,9 +142,10 @@ Como profissional de saúde, quero que o sistema detecte riscos de violência e 
 
 ### Azure Speech SDK + Content Safety Integration
 - Pacote Speech: `azure-cognitiveservices-speech>=1.48.0`
-- Pacote Content Safety: `azure-ai-contentsafety>=1.0.0`
 - Requer: Speech SDK nativo (instalado via apt no Dockerfile)
-- **⭐ NOVO - Fluxo de Processamento com Content Safety:**
+- **⭐ Integração com Content Safety (Spec 010):**
+
+O fluxo de processamento do áudio utiliza o **MultilingualRiskDetector** implementado na Spec 010:
 
 ```
 Áudio (WAV/MP3/OGG)
@@ -158,30 +157,19 @@ Azure Speech Services
        ▼
 Texto Transcrito
        │
-       ├──→ Azure AI Content Safety ──→ Severidade 0-6 (SelfHarm, Violence, Hate, Sexual)
-       │                                          │
-       └──→ Keywords PT/EN (fallback) ────────────┤
-                                                  │
-                                                  ▼
-                                       MultilingualRiskDetector
-                                       (max(CS, keywords))
-                                                  │
-                                                  ▼
-                                    risco_violencia / risco_saude_mental
+       ▼
+MultilingualRiskDetector (Spec 010)
+(Content Safety + Keywords PT/EN)
+       │
+       ▼
+   risco_violencia / risco_saude_mental
 ```
 
-**Benefícios do Content Safety na Análise de Áudio:**
-- **100+ Idiomas**: Detecção automática sem configurar language (essencial para áudios multilíngues)
-- **ML-Based**: Modelos treinados em conteúdo real, mais robustos que keywords simples
-- **Severidade Granular**: Escala 0-6 permite ações diferenciadas (threshold em 3-4 para risco alto)
-- **Fallback Transparente**: Keywords PT/EN sempre aplicados como complemento
-
-**Configuração de Variáveis de Ambiente:**
-```bash
-CONTENT_SAFETY_ENABLED=true
-AZURE_CONTENT_SAFETY_KEY=your_key_here
-AZURE_CONTENT_SAFETY_ENDPOINT=https://your-resource.cognitiveservices.azure.com/
-```
+> **Ver Spec 010** para detalhes completos do Content Safety:
+> - Categorias detectadas (SelfHarm, Violence, Hate, Sexual)
+> - Escala de severidade (0-6)
+> - Configuração de variáveis de ambiente
+> - Tratamento de erros e fallback
 
 ### Processamento de Áudio
 - Extrair features prosódicas: pitch, energia, pausas
