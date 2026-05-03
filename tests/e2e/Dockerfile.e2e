@@ -20,7 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copiar arquivos de dependencias
 # -------------------------------------------
 COPY pyproject.toml ./
-COPY README.md ./
+# README.md eh opcional - pyproject.toml pode referencia-lo
+# Se nao existir, criamos um vazio para nao quebrar o build
+RUN echo "# E2E Build" > README.md
+
 # poetry.lock pode nao existir - poetry install funciona sem ele
 
 # -------------------------------------------
@@ -28,7 +31,7 @@ COPY README.md ./
 # -------------------------------------------
 RUN pip install --no-cache-dir poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --without dev --no-interaction --no-ansi || \
+    poetry install --without dev --no-root --no-interaction --no-ansi || \
     (pip install \
         fastapi \
         uvicorn \
