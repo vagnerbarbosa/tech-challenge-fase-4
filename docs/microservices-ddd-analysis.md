@@ -752,15 +752,6 @@ Baseado em dados reais do [Hospital da UEM](https://www.parana.pr.gov.br/aen/Not
 | **500K análises** | **R$ 11.500** | **R$ 9.500** | **Local** (17% mais barato) |
 | 1M análises | R$ 22.000 | R$ 10.000 | **Local** (55% mais barato) |
 
-> **Nota:** Os valores apresentados são estimativas baseadas em pesquisas rápidas na web e têm caráter meramente didático. Na prática, os custos reais podem variar significativamente devido a:
-> - Flutuações cambiais (USD/BRL)
-> - Alterações nas políticas de preço dos provedores de cloud
-> - Configurações específicas de região e contrato
-> - Custos ocultos de networking, egress e compliance
-> - Necessidades de hardware e mão de obra no cenário local
->
-> Recomenda-se sempre realizar um orçamento detalhado com os provedores antes de decisões de arquitetura em produção.
-
 ##### TCO 3 Anos (Cenário Hospital 216K análises/mês)
 
 | Aspecto | Azure | Local |
@@ -826,6 +817,8 @@ vs **R$ 5.410** do Azure puro = **Economia de 79%**
 | **Produção Grande** (>500K/mês) | Local puro | Economia escala justifica investimento |
 
 > **Nota LGPD**: Videocâmeras de UTIs são dados sensíveis (saúde + localização). A arquitetura híbrida garante que imagens brutas NUNCA saiam do hospital, apenas metadados anonimizados vão para nuvem.
+
+> **Nota sobre Custos**: Os valores apresentados nesta seção são estimativas baseadas em pesquisas rápidas na web e têm caráter meramente didático. Na prática, os custos reais podem variar significativamente devido a flutuações cambiais (USD/BRL), alterações nas políticas de preço dos provedores de cloud, configurações específicas de região e contrato, custos ocultos de networking/egress/compliance, e necessidades particulares de hardware e mão de obra no cenário local. Recomenda-se sempre realizar um orçamento detalhado com os provedores antes de decisões de arquitetura em produção.
 
 ---
 
