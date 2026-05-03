@@ -9,6 +9,9 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ff6b35?style=flat-square&logo=anthropic&logoColor=white)](https://claude.ai/code)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
+[![CI](https://github.com/vagnerbarbosa/tech-challenge-fase-4/workflows/CI/badge.svg)](https://github.com/vagnerbarbosa/tech-challenge-fase-4/actions/workflows/ci.yml)
+[![E2E Tests](https://github.com/vagnerbarbosa/tech-challenge-fase-4/workflows/E2E%20Tests/badge.svg)](https://github.com/vagnerbarbosa/tech-challenge-fase-4/actions/workflows/e2e.yml)
+
 **Análise multimodal de saúde da mulher usando Azure AI Services e YOLOv8 local**
 
 > **📅 Atualizado**: 2026-05-02 | **Versão**: 0.9.0 | **Status**: Produção
