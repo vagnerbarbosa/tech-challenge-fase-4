@@ -1,0 +1,920 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.7, pytest-9.0.3, pluggy-1.6.0 -- /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4
+configfile: pyproject.toml
+testpaths: tests
+plugins: respx-0.23.1, mock-3.15.1, anyio-4.13.0, cov-7.1.0, locust-2.43.4, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 718 items
+
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_mock_mode PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_no_patient_id PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioEndpointValidation::test_invalid_extension_rejected PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioEndpointValidation::test_invalid_mime_type_rejected PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioEndpointValidation::test_file_too_large_rejected PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioFormatsEndpoint::test_get_audio_formats PASSED [  0%]
+tests/integration/test_audio_endpoint.py::TestAudioAzureErrors::test_quota_exceeded_returns_429 PASSED [  0%]
+tests/integration/test_audit_endpoints.py::TestAuditStatsEndpoint::test_get_stats_returns_success PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditStatsEndpoint::test_get_stats_returns_correct_structure PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditStatsEndpoint::test_get_stats_counts_files PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_requires_admin_access PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_ndjson_format PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_json_format PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_with_date_filter PASSED [  1%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_with_event_type_filter PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_invalid_format PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditVerifyEndpoint::test_verify_returns_success PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditVerifyEndpoint::test_verify_returns_correct_structure PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditVerifyEndpoint::test_verify_all_valid PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditVerifyEndpoint::test_verify_respects_limit PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditEntryImmutability::test_entries_have_checksum PASSED [  2%]
+tests/integration/test_audit_endpoints.py::TestAuditEntryImmutability::test_entries_in_anpd_format PASSED [  3%]
+tests/integration/test_audit_endpoints.py::TestAuditLogIntegration::test_analysis_creates_audit_entry PASSED [  3%]
+tests/integration/test_audit_endpoints.py::TestAuditEndpointSecurity::test_export_does_not_expose_raw_patient_ids PASSED [  3%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_anpd_format_compliance PASSED [  3%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_sensitive_data_hashing PASSED [  3%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_retention_period PASSED [  3%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_consent_tracking PASSED [  3%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_purpose_limitation PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_data_minimization_in_logs PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_audit_trail_completeness PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_export_for_regulatory_request PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_patient_data_access_logging PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_timestamp_accuracy PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_ndjson_export_format PASSED [  4%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_audit_log_integrity PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_entry_uniqueness PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDExportScenarios::test_export_includes_consent_events PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDExportScenarios::test_export_includes_deletion_events PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDExportScenarios::test_export_includes_export_events PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDExportScenarios::test_full_export_for_anpd_submission PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDExportScenarios::test_filter_by_patient PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDDataRetention::test_retention_date_calculated_correctly PASSED [  5%]
+tests/integration/test_audit_export.py::TestLGPDDataRetention::test_anpd_format_includes_retention PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_health_without_api_key PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_health_with_valid_api_key PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_analyze_text_without_api_key PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_analyze_text_with_invalid_api_key PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_analyze_text_with_valid_api_key PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_root_endpoint_public PASSED [  6%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_api_key_header_case_insensitive PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationEndpoints::test_api_key_header_missing_value PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationHeaders::test_www_authenticate_header_on_401 PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestAuthenticationHeaders::test_auth_error_message_format PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestRoleBasedAccess::test_admin_endpoint_without_admin_role PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestRoleBasedAccess::test_cache_clear_requires_auth PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestAuthConfiguration::test_security_config_defaults PASSED [  7%]
+tests/integration/test_auth_endpoints.py::TestAuthConfiguration::test_security_config_cors_origins_list PASSED [  8%]
+tests/integration/test_auth_endpoints.py::TestAuthConfiguration::test_security_config_is_production PASSED [  8%]
+tests/integration/test_azure_services.py::TestAzureTextCredentials::test_retorna_endpoint_e_key PASSED [  8%]
+tests/integration/test_azure_services.py::TestAzureTextCredentials::test_erro_quando_credenciais_ausentes PASSED [  8%]
+tests/integration/test_azure_services.py::TestAzureTextCredentials::test_erro_quando_endpoint_invalido PASSED [  8%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_retorna_resultado_quando_sucesso PASSED [  8%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_quota_exceeded_error_429 PASSED [  8%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_authentication_error_401 PASSED [  9%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_authentication_error_403 PASSED [  9%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_azure_service_error_outros_status PASSED [  9%]
+tests/integration/test_azure_services.py::TestSafeAzureCall::test_azure_connection_error PASSED [  9%]
+tests/integration/test_azure_services.py::TestTextAnalyticsClient::test_cliente_criado_com_retry_policy PASSED [  9%]
+tests/integration/test_azure_services.py::TestTextAnalyticsClient::test_singleton_retorna_mesma_instancia PASSED [  9%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_self_harm_detection_pt SKIPPED [  9%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_violence_detection_pt SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_self_harm_detection_en SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_violence_detection_en SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_safe_content SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_all_categories SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_content_safety_batch_analysis SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_pt_combined SKIPPED [ 10%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_en_combined SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_violence_pt SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_violence_en SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_mental_health_pt SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_mental_health_en SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_safe_content SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_batch_multilingual SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyMockIntegration::test_risk_detector_risk_levels SKIPPED [ 11%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyHealthEndpoint::test_mock_server_health_check SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_violence_domestica_pt SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_crise_suicida_pt SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_domestic_violence_en SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_suicidal_crisis_en SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_mixed_emotions_pt SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_safe_content_multilingual SKIPPED [ 12%]
+tests/integration/test_content_safety_integration.py::TestMultilingualDetectionScenarios::test_scenario_complex_mixed_risk SKIPPED [ 13%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyResultSerialization::test_result_to_dict_structure SKIPPED [ 13%]
+tests/integration/test_content_safety_integration.py::TestContentSafetyResultSerialization::test_risk_assessment_to_dict_structure SKIPPED [ 13%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_preflight_request PASSED [ 13%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_multiple_allowed_origins PASSED [ 13%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_rejects_disallowed_origin PASSED [ 13%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_simple_request_with_origin PASSED [ 13%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_post_request_with_origin PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_headers_in_response PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSOrigins::test_cors_origin_reflected PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSPreflight::test_preflight_health_endpoint PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSPreflight::test_preflight_with_custom_headers PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSPreflight::test_preflight_text_analysis_endpoint PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSPreflight::test_preflight_audio_endpoint PASSED [ 14%]
+tests/integration/test_cors_origins.py::TestCORSPreflight::test_preflight_video_endpoint PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSCredentials::test_cors_allow_credentials_header PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSCredentials::test_cors_with_authorization_header PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[GET] PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[POST] PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[PUT] PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[DELETE] PASSED [ 15%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[OPTIONS] PASSED [ 16%]
+tests/integration/test_cors_origins.py::TestCORSMethods::test_cors_methods_allowed[PATCH] PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSProductionSecurity::test_cors_star_warning_in_production PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSProductionSecurity::test_cors_specific_origins_required_in_production PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSProductionSecurity::test_cors_credentials_with_star_is_insecure PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSOriginValidation::test_cors_rejects_disallowed_origin PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSOriginValidation::test_cors_accepts_localhost_in_development PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSMiddlewareSecurity::test_cors_middleware_logs_blocked_origins PASSED [ 16%]
+tests/integration/test_cors_production.py::TestCORSMiddlewareSecurity::test_cors_middleware_validates_preflight PASSED [ 17%]
+tests/integration/test_cors_production.py::TestCORSProductionConfiguration::test_cors_no_star_with_credentials_in_production PASSED [ 17%]
+tests/integration/test_cors_production.py::TestCORSProductionConfiguration::test_cors_environment_detection PASSED [ 17%]
+tests/integration/test_cors_production.py::TestCORSProductionConfiguration::test_cors_development_environment PASSED [ 17%]
+tests/integration/test_cors_production.py::TestCORSSecurityHeaders::test_cors_security_headers_in_response PASSED [ 17%]
+tests/integration/test_cors_production.py::TestCORSSecurityHeaders::test_cors_vary_header_for_caching PASSED [ 17%]
+tests/integration/test_error_handling.py::TestErrorHandlingProduction::test_generic_error_message_in_production PASSED [ 17%]
+tests/integration/test_error_handling.py::TestErrorHandlingProduction::test_validation_error_sanitized PASSED [ 18%]
+tests/integration/test_error_handling.py::TestErrorHandlingProduction::test_method_not_allowed PASSED [ 18%]
+tests/integration/test_error_handling.py::TestErrorHandlingProduction::test_cors_preflight_allowed PASSED [ 18%]
+tests/integration/test_error_handling.py::TestSecurityHeadersInErrors::test_security_headers_on_404 PASSED [ 18%]
+tests/integration/test_error_handling.py::TestSecurityHeadersInErrors::test_security_headers_on_405 PASSED [ 18%]
+tests/integration/test_error_handling.py::TestSecurityHeadersInErrors::test_security_headers_on_422 PASSED [ 18%]
+tests/integration/test_error_handling.py::TestErrorResponseStructure::test_error_has_required_fields PASSED [ 18%]
+tests/integration/test_error_handling.py::TestErrorResponseStructure::test_error_id_in_internal_errors PASSED [ 19%]
+tests/integration/test_error_handling.py::TestContentTypeSecurity::test_nosniff_header_present PASSED [ 19%]
+tests/integration/test_error_handling.py::TestContentTypeSecurity::test_frame_options_header_present PASSED [ 19%]
+tests/integration/test_error_handling.py::TestDebugModeDifferences::test_debug_false_hides_details PASSED [ 19%]
+tests/integration/test_error_handling.py::TestDebugModeDifferences::test_production_error_message_generic PASSED [ 19%]
+tests/integration/test_error_handling.py::TestLGPDComplianceInErrors::test_no_pii_in_error_responses PASSED [ 19%]
+tests/integration/test_error_handling.py::TestLGPDComplianceInErrors::test_error_logging_doesnt_expose_data PASSED [ 19%]
+tests/integration/test_error_handling.py::TestExceptionHandlers::test_app_has_exception_handlers PASSED [ 20%]
+tests/integration/test_error_handling.py::TestExceptionHandlers::test_validation_error_handler PASSED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_endpoint_texto_apenas PASSED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_endpoint_texto_audio SKIPPED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_endpoint_3_modalidades SKIPPED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_endpoint_sem_modalidade PASSED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_campos_obrigatorios_resposta PASSED [ 20%]
+tests/integration/test_multimodal_endpoint.py::test_latencia_15s PASSED  [ 21%]
+tests/integration/test_multimodal_endpoint.py::test_endpoint_timeout PASSED [ 21%]
+tests/integration/test_placeholder.py::TestIntegrationSetup::test_integration_environment PASSED [ 21%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitHeaders::test_rate_limit_headers_present SKIPPED [ 21%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitHeaders::test_rate_limit_headers_values SKIPPED [ 21%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitHeaders::test_rate_limit_decreases SKIPPED [ 21%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitEnforcement::test_rate_limit_returns_429 SKIPPED [ 21%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitEnforcement::test_429_has_retry_after_header SKIPPED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitEnforcement::test_429_response_body SKIPPED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestAuthRateLimiting::test_auth_endpoint_rate_limited SKIPPED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestAuthRateLimiting::test_auth_rate_limit_headers SKIPPED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestAuthRateLimiting::test_auth_rate_limit_status_endpoint PASSED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestSkippedPaths::test_health_endpoint_skips_rate_limit PASSED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestSkippedPaths::test_docs_skips_rate_limit PASSED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestSkippedPaths::test_root_endpoint_skips_rate_limit PASSED [ 22%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitReset::test_rate_limit_resets_over_time PASSED [ 23%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitDifferentClients::test_different_ips_separate_limits PASSED [ 23%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitDifferentClients::test_api_key_based_limiting PASSED [ 23%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitErrorHandling::test_rate_limit_with_invalid_json SKIPPED [ 23%]
+tests/integration/test_rate_limit_endpoints.py::TestRateLimitErrorHandling::test_rate_limit_with_empty_body SKIPPED [ 23%]
+tests/integration/test_request_timeout.py::test_request_completes_within_timeout PASSED [ 23%]
+tests/integration/test_request_timeout.py::test_slow_endpoint_returns_504 PASSED [ 23%]
+tests/integration/test_request_timeout.py::test_upload_endpoint_uses_extended_timeout PASSED [ 24%]
+tests/integration/test_request_timeout.py::test_timeout_error_includes_correlation_id PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_strict_transport_security_header PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_x_content_type_options_header PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_x_frame_options_header PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_referrer_policy_header PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_content_security_policy_header PASSED [ 24%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_x_xss_protection_header PASSED [ 25%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_permissions_policy_header PASSED [ 25%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_security_headers_on_all_endpoints PASSED [ 25%]
+tests/integration/test_security_headers.py::TestSecurityHeaders::test_no_server_header_version_disclosure PASSED [ 25%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_endpoint_retorna_200_para_input_valido PASSED [ 25%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_response_contem_campos_obrigatorios PASSED [ 25%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_sentimento_valores_validos PASSED [ 25%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_risco_valores_validos PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_endpoint_retorna_400_para_texto_curto PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_endpoint_retorna_400_para_texto_longo PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_endpoint_retorna_400_para_tipo_invalido PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_tipo_aceita_valores_validos PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_score_dentro_do_intervalo PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_metadata_contem_correlation_id PASSED [ 26%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_metadata_contem_tempo_processamento PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_metadata_cache_hit PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_cache_segunda_requisicao_hit PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_palavras_chave_e_lista PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisEndpoint::test_indicadores_e_lista PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisCacheEndpoints::test_cache_stats_endpoint_opcional PASSED [ 27%]
+tests/integration/test_text_endpoint.py::TestTextAnalysisCacheEndpoints::test_clear_cache_endpoint_opcional PASSED [ 27%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_exe_disguised_as_mp3 PASSED [ 27%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_exe_disguised_as_wav PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_pdf_disguised_as_mp4 PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_path_traversal_in_filename PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_absolute_path_in_filename PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_null_byte_in_filename PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_dangerous_extension PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_php_extension PASSED [ 28%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_shell_script_extension PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_reserved_windows_name PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_extension_case_sensitivity PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_double_extension_trick PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_control_characters_in_filename PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_empty_filename PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_very_large_filename PASSED [ 29%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_special_chars_in_filename PASSED [ 30%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_video_path_traversal PASSED [ 30%]
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_video_exe_disguised PASSED [ 30%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointSuccess::test_analyze_video_mock_mode PASSED [ 30%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointSuccess::test_analyze_video_no_patient_id PASSED [ 30%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointSuccess::test_analyze_video_cache_hit PASSED [ 30%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointValidation::test_invalid_extension_rejected PASSED [ 30%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointValidation::test_invalid_mime_type_rejected PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointValidation::test_file_too_large_rejected PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoEndpointValidation::test_video_duration_exceeded PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoRequiredFields::test_response_contains_risco_violencia PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoRequiredFields::test_response_contains_risco_saude_mental PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoRateLimiting::test_quota_exceeded_returns_429 PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoRateLimiting::test_quota_check_called PASSED [ 31%]
+tests/integration/test_video_endpoint.py::TestVideoFormatsEndpoint::test_get_video_formats PASSED [ 32%]
+tests/integration/test_video_endpoint.py::TestVideoFormatsEndpoint::test_video_formats_contains_duration_limits PASSED [ 32%]
+tests/integration/test_video_endpoint.py::TestVideoCacheEndpoints::test_get_video_cache_stats PASSED [ 32%]
+tests/integration/test_video_endpoint.py::TestVideoCacheEndpoints::test_clear_video_cache PASSED [ 32%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitConcurrency::test_parallel_requests_respect_limit PASSED [ 32%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitConcurrency::test_parallel_requests_consistent_headers SKIPPED [ 32%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitConcurrency::test_burst_requests PASSED [ 32%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitConcurrency::test_auth_parallel_burst PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestAsyncRateLimitConcurrency::test_async_parallel_requests PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestAsyncRateLimitConcurrency::test_async_auth_parallel PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitRaceConditions::test_simultaneous_requests_no_overcount PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitRaceConditions::test_high_concurrency_stress PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitDistributed::test_different_clients_concurrent PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitDistributed::test_rate_limit_recovery PASSED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitHeadersUnderLoad::test_remaining_count_accuracy SKIPPED [ 33%]
+tests/load/test_rate_limit_parallel.py::TestRateLimitHeadersUnderLoad::test_reset_after_consistency SKIPPED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_validate_valid_key PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_validate_invalid_key PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_validate_empty_key PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_validate_none_key PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_validate_whitespace_key PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_get_security_context_valid PASSED [ 34%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_get_security_context_invalid PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_get_security_context_dev_mode PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestAPIKeyValidator::test_api_key_hash_not_stored_plain PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_has_role_true PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_has_role_false PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_require_role_success PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_require_role_failure PASSED [ 35%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_has_any_role_true PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_has_any_role_false PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestRBACValidator::test_roles_from_api_key PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestBOLAProtector::test_verify_ownership_match PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestBOLAProtector::test_verify_ownership_mismatch PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestBOLAProtector::test_verify_ownership_unauthenticated PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestBOLAProtector::test_verify_ownership_admin_bypass PASSED [ 36%]
+tests/security/test_api_key_validator.py::TestBOLAProtector::test_verify_ownership_with_none_owner PASSED [ 37%]
+tests/security/test_api_key_validator.py::TestSecurityIntegration::test_full_auth_flow_success PASSED [ 37%]
+tests/security/test_api_key_validator.py::TestSecurityIntegration::test_full_auth_flow_bola_violation PASSED [ 37%]
+tests/security/test_bola_protection.py::TestBOLAProtection::test_user_cannot_access_other_user_resource PASSED [ 37%]
+tests/security/test_bola_protection.py::TestBOLAProtection::test_user_can_access_own_resource PASSED [ 37%]
+tests/security/test_bola_protection.py::TestBOLAProtection::test_bypass_via_admin_role PASSED [ 37%]
+tests/security/test_bola_protection.py::TestBOLAProtection::test_unauthenticated_user_access_denied PASSED [ 37%]
+tests/security/test_bola_protection.py::TestBOLAProtection::test_bola_with_none_resource_owner PASSED [ 38%]
+tests/security/test_bola_protection.py::TestBOLAWithAPIEndpoints::test_endpoint_with_patient_id_in_path PASSED [ 38%]
+tests/security/test_bola_protection.py::TestResourceEnumeration::test_error_messages_do_not_leak_existence PASSED [ 38%]
+tests/security/test_bola_protection.py::TestBOLAEdgeCases::test_empty_resource_owner PASSED [ 38%]
+tests/security/test_bola_protection.py::TestBOLAEdgeCases::test_bola_with_write_role_only PASSED [ 38%]
+tests/security/test_bola_protection.py::TestBOLAEdgeCases::test_bola_multiple_roles PASSED [ 38%]
+tests/security/test_bola_protection.py::TestSecurityContextOwnership::test_context_with_no_api_key_hash PASSED [ 38%]
+tests/security/test_bola_protection.py::TestSecurityContextOwnership::test_context_is_frozen PASSED [ 38%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_uses_default_self PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_blocks_inline_scripts_in_production PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_blocks_eval PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_restricts_object_sources PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_has_base_uri_restriction PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_has_frame_ancestors PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_has_form_action PASSED [ 39%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_upgrade_insecure_requests_in_production PASSED [ 40%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_no_wildcard_sources PASSED [ 40%]
+tests/security/test_csp_policy.py::TestCSPPolicy::test_csp_report_only_not_enabled_by_default PASSED [ 40%]
+tests/security/test_secrets_in_logs.py::TestSecretsNotInLogs::test_api_keys_masked_in_strings PASSED [ 40%]
+tests/security/test_secrets_in_logs.py::TestSecretsNotInLogs::test_connection_strings_masked PASSED [ 40%]
+tests/security/test_secrets_in_logs.py::TestSecretsNotInLogs::test_azure_keys_masked PASSED [ 40%]
+tests/security/test_secrets_in_logs.py::TestSecretsNotInLogs::test_bearer_tokens_masked PASSED [ 40%]
+tests/security/test_secrets_in_logs.py::TestSecretsNotInLogs::test_private_keys_masked PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestPatientIdNotInPlaintext::test_patient_id_hashed_in_logs PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestPatientIdNotInPlaintext::test_patient_id_consistency PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestPatientIdNotInPlaintext::test_different_patients_different_hashes PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestAuditLogSanitization::test_media_content_redacted PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestAuditLogSanitization::test_patient_id_hashed_in_audit PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestGrepLikeVerification::test_grep_no_api_keys_in_masked_logs PASSED [ 41%]
+tests/security/test_secrets_in_logs.py::TestGrepLikeVerification::test_grep_no_passwords_in_masked_logs PASSED [ 42%]
+tests/security/test_secrets_in_logs.py::TestGrepLikeVerification::test_grep_no_patient_ids_in_hashed_logs PASSED [ 42%]
+tests/security/test_secrets_in_logs.py::TestErrorMessagesSanitized::test_error_messages_dont_contain_secrets PASSED [ 42%]
+tests/security/test_secrets_in_logs.py::TestErrorMessagesSanitized::test_azure_errors_masked PASSED [ 42%]
+tests/security/test_secrets_in_logs.py::TestSensitiveKeysDetection::test_all_sensitive_keys_masked PASSED [ 42%]
+tests/security/test_secrets_in_logs.py::TestSensitiveKeysDetection::test_case_insensitive_key_matching PASSED [ 42%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_create_cache_com_ttl PASSED [ 42%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_generate_key_consistente PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_generate_key_case_insensitive PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_generate_key_strip_whitespace PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_set_e_get PASSED  [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_get_nao_existente_retorna_none PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_get_expirado_retorna_none PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_expirado_e_removido PASSED [ 43%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_clear_expired PASSED [ 44%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_clear_all PASSED  [ 44%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_get_stats PASSED  [ 44%]
+tests/unit/core/test_cache.py::TestAnalysisCache::test_get_stats_limpa_expirados PASSED [ 44%]
+tests/unit/core/test_cache.py::TestGetCache::test_retorna_mesma_instancia PASSED [ 44%]
+tests/unit/core/test_cache.py::TestGetCache::test_instancia_analysis_cache PASSED [ 44%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_grande_volume_de_entradas PASSED [ 44%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_concorrencia_set PASSED [ 44%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_concorrencia_get PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_invalidate_expired_entries PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_clear_expired_performance PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheStress::test_memoria_com_muitas_entradas PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheInvalidation::test_clear_all_remove_tudo PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheInvalidation::test_geracao_chave_consistente PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheInvalidation::test_ttl_diferente_por_instancia PASSED [ 45%]
+tests/unit/core/test_cache_stress.py::TestCacheInvalidation::test_sobrescrever_entrada PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_simple_filename PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_filename_with_spaces PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_filename_with_dashes PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_detect_path_traversal_double_dot PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_detect_path_traversal_backslash PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_detect_absolute_path PASSED [ 46%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_detect_path_with_dot_prefix PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_null_byte_injection PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_control_characters PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_special_characters PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_block_dangerous_extension_exe PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_block_dangerous_extension_php PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_dangerous_extensions_list PASSED [ 47%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_reserved_windows_names PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_com_port_names PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_lpt_port_names PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_empty_filename PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_none_filename PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_filename_with_unicode PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_very_long_filename PASSED [ 48%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_dot_files PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_validate_extension_allowed PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_validate_extension_not_allowed PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_validate_extension_case_insensitive PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitization_result_dataclass PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_path_traversal_url_encoded PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_deeply_nested_path PASSED [ 49%]
+tests/unit/core/test_filename_sanitizer.py::TestFilenameSanitizer::test_sanitize_home_directory PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_azure_key PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_api_key PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_bearer_token PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_connection_string_password PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_none PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_dict_with_sensitive_keys PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_dict_nested PASSED [ 50%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_list PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestSecretMasker::test_mask_exception_message PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_hash_patient_id PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_hash_none PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_hash_different_ids PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_hash_patient_id_field PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_hash_patient_id_field_nested PASSED [ 51%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHasher::test_get_hash_prefix PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestLogSanitizer::test_sanitize_string PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestLogSanitizer::test_sanitize_dict PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestLogSanitizer::test_sanitize_list PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestLogSanitizer::test_sanitize_for_audit PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestLogSanitizer::test_sanitize_for_audit_nested PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestConvenienceFunctions::test_sanitize_log_data PASSED [ 52%]
+tests/unit/core/test_log_sanitizer.py::TestConvenienceFunctions::test_hash_patient_id_convenience PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestAzureKeyMasking::test_mask_azure_text_key PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestAzureKeyMasking::test_mask_azure_speech_key PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestAzureKeyMasking::test_mask_azure_vision_key PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestAzureKeyMasking::test_mask_connection_string PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHashingCompliance::test_patient_id_not_in_plaintext PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHashingCompliance::test_patient_id_correlation PASSED [ 53%]
+tests/unit/core/test_log_sanitizer.py::TestPatientIdHashingCompliance::test_hash_length PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_empty_file PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_wav_signature PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_mp3_signature PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_mp3_with_id3 PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_ogg_signature PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_mp4_signature PASSED [ 54%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_avi_signature PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_invalid_signature_mismatch PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_executable_disguised_as_mp3 PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_allowed_audio_types PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_allowed_video_types PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_magic_signatures_defined PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validation_result_dataclass PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validation_result_failure PASSED [ 55%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_without_extension PASSED [ 56%]
+tests/unit/core/test_magic_bytes_validator.py::TestMagicBytesValidator::test_validate_unknown_extension PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_save_temp_creates_file PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_cleanup_removes_file PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_cleanup_missing_file_no_error PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_singleton_pattern PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_get_pending_count PASSED [ 56%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManager::test_cleanup_all_removes_all_files PASSED [ 57%]
+tests/unit/core/test_temp_file_manager.py::TestTempFileManagerGlobal::test_global_instance_is_singleton PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestGetSpeechConfig::test_returns_none_when_key_missing PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestGetSpeechConfig::test_returns_config_when_key_present PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAzureSpeechClient::test_transcribe_returns_mock_when_no_config PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAzureSpeechClient::test_transcribe_success PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAzureSpeechClient::test_transcribe_no_match PASSED [ 57%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAzureSpeechClient::test_transcribe_with_retry_success PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestConvertToWav::test_wav_file_no_conversion PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestConvertToWav::test_mp3_conversion PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestConvertToWav::test_ogg_conversion PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestConvertToWav::test_conversion_fallback_on_error PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestConvertToWav::test_other_formats_return_unchanged PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAzureSpeechClientErrors::test_timeout_error PASSED [ 58%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAutoDetectLanguage::test_transcribe_with_auto_detect_language PASSED [ 59%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAutoDetectLanguage::test_transcribe_with_fixed_language PASSED [ 59%]
+tests/unit/infrastructure/test_azure_speech_client.py::TestAutoDetectLanguage::test_transcribe_with_custom_languages PASSED [ 59%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyResult::test_is_harmful_with_high_severity PASSED [ 59%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyResult::test_is_harmful_with_low_severity PASSED [ 59%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyResult::test_highest_category_self_harm PASSED [ 59%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyResult::test_highest_category_violence PASSED [ 59%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyResult::test_to_dict PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_init_missing_credentials PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_init_with_explicit_credentials PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_init_with_env_variables PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_init_removes_trailing_slash PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_text_success PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_text_quota_exceeded PASSED [ 60%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_text_authentication_error PASSED [ 61%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_text_connection_error PASSED [ 61%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_text_custom_categories PASSED [ 61%]
+tests/unit/infrastructure/test_content_safety_client.py::TestContentSafetyClient::test_analyze_batch PASSED [ 61%]
+tests/unit/infrastructure/test_content_safety_client.py::TestGetContentSafetyClient::test_returns_singleton PASSED [ 61%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_get_token_bucket_new_key PASSED [ 61%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_set_and_get_token_bucket PASSED [ 61%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_token_bucket_expiry PASSED [ 61%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_increment_counter PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_counter_expiry PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestMemoryRateLimiterBackend::test_get_counter_nonexistent PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_is_allowed_new_client PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_is_allowed_multiple_requests PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_rate_limit_exceeded PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_token_refill PASSED [ 62%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_different_clients_isolated PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_get_rate_limit_info PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_get_rate_limit_info_new_client PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_reset PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestTokenBucketRateLimiter::test_custom_tokens_consumption PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestRateLimiterCreation::test_create_rate_limiter_default PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestRateLimiterCreation::test_create_rate_limiter_custom_burst PASSED [ 63%]
+tests/unit/security/test_rate_limiter.py::TestRateLimiterCreation::test_get_rate_limiters_singleton PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestCheckRateLimit::test_check_rate_limit_allowed PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestCheckRateLimit::test_check_rate_limit_raises_exception PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestRedisRateLimiterBackend::test_redis_backend_initialization SKIPPED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestRedisRateLimiterBackend::test_redis_backend_without_redis_package PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestEdgeCases::test_zero_rate_limit PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestEdgeCases::test_negative_tokens_consumption PASSED [ 64%]
+tests/unit/security/test_rate_limiter.py::TestEdgeCases::test_rapid_requests PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestProsodicFeatures::test_creation PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestProsodicFeatureExtractor::test_extract_normal_voice PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestProsodicFeatureExtractor::test_extract_trembling_voice PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestProsodicFeatureExtractor::test_extract_agitated_voice PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestProsodicFeatureExtractor::test_extract_error_handling PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestAudioAnalysisService::test_analyze_success PASSED [ 65%]
+tests/unit/services/test_audio_analysis.py::TestAudioAnalysisService::test_analyze_no_transcription PASSED [ 66%]
+tests/unit/services/test_audio_analysis.py::TestAudioAnalysisService::test_analyze_risk_escalation PASSED [ 66%]
+tests/unit/services/test_audio_analysis.py::TestAudioAnalysisService::test_adjust_risk_increments PASSED [ 66%]
+tests/unit/services/test_audio_analysis.py::TestAudioAnalysisService::test_adjust_risk_no_factors PASSED [ 66%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_init_default_values PASSED [ 66%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_init_custom_values PASSED [ 66%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_no_bleeding_normal_image PASSED [ 66%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_no_bleeding_green_image PASSED [ 66%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_with_bleeding_red_image PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_partial_bleeding PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_grayscale_image PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_threshold_boundary PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_confidence_calculation PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_confidence_capped_at_1 PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_invalid_image_none PASSED [ 67%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_invalid_image_empty PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_invalid_image_shape PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_invalid_image_single_channel PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_bbox_normalization PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_bbox_no_contours PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_bbox_multiple_contours PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_small_red_spots PASSED [ 68%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_orange_not_counted_as_red PASSED [ 69%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_detect_dark_red PASSED [ 69%]
+tests/unit/services/test_bleeding_detector.py::TestBleedingDetector::test_result_format_consistency PASSED [ 69%]
+tests/unit/services/test_bleeding_detector.py::TestGetBleedingDetector::test_get_bleeding_detector_returns_instance PASSED [ 69%]
+tests/unit/services/test_bleeding_detector.py::TestGetBleedingDetector::test_get_bleeding_detector_singleton_behavior PASSED [ 69%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_overall_risk_with_content_safety PASSED [ 69%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_overall_risk_without_content_safety PASSED [ 69%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_risk_level_critical PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_risk_level_high PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_risk_level_medium PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_risk_level_low PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_risk_level_none PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestRiskAssessmentResult::test_to_dict PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_init_with_content_safety_disabled PASSED [ 70%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_init_with_content_safety_enabled PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_with_content_safety PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_with_keywords_only PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_english_keywords PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_violence_keywords PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_no_risk PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_text_content_safety_failure PASSED [ 71%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_analyze_batch PASSED [ 72%]
+tests/unit/services/test_multilingual_risk_detector.py::TestMultilingualRiskDetector::test_combined_risk_calculation PASSED [ 72%]
+tests/unit/services/test_multilingual_risk_detector.py::TestGetRiskDetector::test_returns_singleton PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_fusao_3_modalidades PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_ponderacao_por_confianca PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_alerta_2_riscos_altos PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_sem_alerta_1_risco_alto PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_rejeicao_confianca_zero PASSED [ 72%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_recomendacoes PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_fusao_2_modalidades PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestLateFusionCalculator::test_fusao_1_modalidade_fallback PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestFusionService::test_processamento_paralelo PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestFusionService::test_timeout PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestFusionService::test_falha_graciosa PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestFusionService::test_falha_total PASSED [ 73%]
+tests/unit/services/test_multimodal_fusion.py::TestFusionService::test_validacao_sem_modalidade PASSED [ 74%]
+tests/unit/services/test_multimodal_fusion.py::TestPerformanceTracker::test_register_and_total PASSED [ 74%]
+tests/unit/services/test_multimodal_fusion.py::TestPerformanceTracker::test_parallel_efficiency PASSED [ 74%]
+tests/unit/services/test_posture_analyzer.py::TestPostureAnalyzerInitialization::test_default_initialization PASSED [ 74%]
+tests/unit/services/test_posture_analyzer.py::TestPostureAnalyzerInitialization::test_custom_history_size PASSED [ 74%]
+tests/unit/services/test_posture_analyzer.py::TestPostureAnalyzerInitialization::test_initialization_with_history_size_1 PASSED [ 74%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_defensive_posture_low_aspect_ratio_and_low_position PASSED [ 74%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_defensive_posture_at_threshold_boundaries PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_not_defensive_posture_high_aspect_ratio PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_not_defensive_posture_low_position_but_high_aspect_ratio PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_not_defensive_posture_good_aspect_but_high_position PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestDefensivePostureDetection::test_defensive_posture_aspect_ratio_too_low PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestNormalPostureDetection::test_normal_posture_high_aspect_ratio PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestNormalPostureDetection::test_normal_posture_via_analyze_frame PASSED [ 75%]
+tests/unit/services/test_posture_analyzer.py::TestAgitationDetection::test_agitation_detected_high_movement PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestAgitationDetection::test_no_agitation_low_movement PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestAgitationDetection::test_agitation_at_threshold PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestAgitationDetection::test_agitation_indicator_in_frame_analysis PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestImmobilityDetection::test_immobility_detected_very_low_movement PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestImmobilityDetection::test_no_immobility_with_movement PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestImmobilityDetection::test_no_immobility_at_zero PASSED [ 76%]
+tests/unit/services/test_posture_analyzer.py::TestImmobilityDetection::test_immobility_at_exact_threshold PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestReclusivePositionDetection::test_reclusive_position_left_edge PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestReclusivePositionDetection::test_reclusive_position_right_edge PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestReclusivePositionDetection::test_reclusive_position_bottom_edge PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestReclusivePositionDetection::test_central_position_not_reclusive PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestReclusivePositionDetection::test_reclusive_position_at_exact_boundary PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestMovementHistory::test_history_updates_correctly PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestMovementHistory::test_movement_variance_calculation PASSED [ 77%]
+tests/unit/services/test_posture_analyzer.py::TestMovementHistory::test_movement_variance_no_history PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestMovementHistory::test_reset_clears_history PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_empty_frame_analyses PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_low_risk_with_normal_postures PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_medium_violence_risk_with_defensive_postures PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_mental_health_risk_with_agitation PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_high_mental_health_risk_with_immobility PASSED [ 78%]
+tests/unit/services/test_posture_analyzer.py::TestCalculatePostureRisk::test_combined_risk_indicators PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_with_person_detection PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_ignores_non_person_detections PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_with_empty_detections PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_multiple_persons PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_defensive_detection_included PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestAnalyzeFrame::test_analyze_frame_updates_history PASSED [ 79%]
+tests/unit/services/test_posture_analyzer.py::TestPostureMetrics::test_posture_metrics_creation PASSED [ 80%]
+tests/unit/services/test_posture_analyzer.py::TestFramePostureAnalysis::test_frame_analysis_creation PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCombineRiskLevels::test_alto_takes_priority_over_medio PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCombineRiskLevels::test_alto_takes_priority_over_baixo PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCombineRiskLevels::test_medio_takes_priority_over_baixo PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCombineRiskLevels::test_same_levels_return_same PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCombineRiskLevels::test_unknown_uses_fallback PASSED [ 80%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_empty_detections_returns_low_risk PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_person_detection_no_risk PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_sangramento_alto_confidence PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_sangramento_media_confidence PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_sangramento_baixa_confidence_no_risk PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_scissors_high_confidence PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_knife_high_confidence PASSED [ 81%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_knife_blade_detection PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_dangerous_object_low_confidence_no_alert PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_multiple_dangerous_objects_elevates_risk PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_sangramento_and_dangerous_objects PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_posture_analysis_integration PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_posture_elevates_existing_risk PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_class_case_insensitive PASSED [ 82%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_frame_reference_in_alerts PASSED [ 83%]
+tests/unit/services/test_risk_calculator_video.py::TestCalculateVideoRisk::test_detection_copy_with_posture PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestFindKeywords::test_encontra_palavras_chave_violencia PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestFindKeywords::test_nao_encontra_palavras_inexistentes PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestFindKeywords::test_encontra_multiplos_matches PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestScoreToRiskLevel::test_score_baixo_retorna_baixo PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestScoreToRiskLevel::test_score_medio_retorna_medio PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestScoreToRiskLevel::test_score_alto_retorna_alto PASSED [ 83%]
+tests/unit/services/test_risk_detector.py::TestCalculateRisk::test_risco_violencia_alto PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestCalculateRisk::test_risco_saude_mental_alto PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestCalculateRisk::test_texto_positivo_risco_baixo PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestCalculateRisk::test_retorna_indicadores_encontrados PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestCalculateRisk::test_retorna_scores_numericos PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestSanitizeTextInput::test_remove_caracteres_largura_zero PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestSanitizeTextInput::test_remove_caracteres_controle PASSED [ 84%]
+tests/unit/services/test_risk_detector.py::TestSanitizeTextInput::test_normaliza_espacos PASSED [ 85%]
+tests/unit/services/test_risk_detector.py::TestSanitizeTextInput::test_mantem_quebras_linha PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceInit::test_init_creates_cache PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceCache::test_cache_hit_returns_cached_response PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceCache::test_cache_miss_computes_analysis PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceErrors::test_empty_text_after_sanitization_raises_error PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceErrors::test_quota_exceeded_error PASSED [ 85%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceSentimentAnalysis::test_analyze_sentiment_without_client_returns_neutral PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceSentimentAnalysis::test_analyze_sentiment_with_azure_success PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceSentimentAnalysis::test_analyze_sentiment_empty_result_returns_neutral PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceSentimentAnalysis::test_analyze_sentiment_exception_returns_neutral PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceScoreCalculation::test_calculate_positive_score PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceScoreCalculation::test_calculate_negative_score PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceScoreCalculation::test_calculate_mixed_score PASSED [ 86%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceScoreCalculation::test_calculate_neutral_score PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceKeywords::test_extract_keywords_filters_stop_words PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceKeywords::test_extract_keywords_short_words_filtered PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceKeywords::test_extract_keywords_empty_text PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceKeywords::test_extract_keywords_respects_max_limit PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceGetClient::test_get_client_lazy_loading PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceGetClient::test_get_client_caches_client PASSED [ 87%]
+tests/unit/services/test_text_analysis.py::TestTextAnalysisServiceGetClient::test_get_client_configuration_error PASSED [ 88%]
+tests/unit/services/test_text_analysis.py::TestGetTextAnalysisService::test_singleton_returns_same_instance PASSED [ 88%]
+tests/unit/services/test_text_analysis.py::TestGetTextAnalysisService::test_singleton_creates_new_instance PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_service_initialization PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_get_logger_lazy_initialization PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_get_yolo_service_lazy_initialization PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_get_bleeding_detector_lazy_initialization PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_get_video_processor_lazy_initialization PASSED [ 88%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_successful_flow PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_with_frame_read_failure PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_with_bleeding_detection PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_frame_metadata_in_detections PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_multiple_yolo_detections PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_creates_frames_directory PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisService::test_analyze_processing_time PASSED [ 89%]
+tests/unit/services/test_video_analysis.py::TestVideoAnalysisServiceIntegration::test_analyze_with_real_dependencies_mocked_cv2 PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_calculate_extraction_fps_short_video PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_calculate_extraction_fps_long_video PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_frame_info_dataclass PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_extract_frames_file_not_found PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_get_video_duration_file_not_found PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessor::test_get_video_duration_invalid_file PASSED [ 90%]
+tests/unit/services/test_video_processor.py::TestVideoProcessorIntegration::test_extract_frames_integration PASSED [ 91%]
+tests/unit/services/test_video_processor.py::TestVideoProcessorIntegration::test_get_video_duration_integration PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_service_initialization PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_get_supported_classes PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_detect_with_empty_image PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_detect_with_valid_image PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_class_name_mapping PASSED [ 91%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8Service::test_confidence_filtering SKIPPED [ 92%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8ServiceMock::test_mock_detection PASSED [ 92%]
+tests/unit/services/test_yolo_service.py::TestYOLOv8ServiceMock::test_mock_bbox_format PASSED [ 92%]
+tests/unit/test_placeholder.py::TestPlaceholder::test_basic_assertion PASSED [ 92%]
+tests/unit/test_placeholder.py::TestPlaceholder::test_arithmetic PASSED  [ 92%]
+tests/unit/test_placeholder.py::TestPlaceholder::test_string_operations PASSED [ 92%]
+tests/unit/test_placeholder.py::TestHealthEndpoint::test_health_endpoint_exists PASSED [ 92%]
+tests/unit/utils/test_audit_logger.py::TestHashSensitiveData::test_hashes_string_correctly PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestHashSensitiveData::test_empty_string_returns_empty PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestHashSensitiveData::test_same_input_produces_same_hash PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestHashSensitiveData::test_different_inputs_produce_different_hashes PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerSingleton::test_returns_same_instance PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerSingleton::test_instance_is_audit_logger PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerInitialization::test_creates_log_directory PASSED [ 93%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerInitialization::test_uses_provided_settings PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_creates_entry PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_hashes_patient_id PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_hashes_user_id PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_hashes_ip_address PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_writes_to_file PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogEntry::test_log_includes_checksum PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogHelperMethods::test_log_auth_success PASSED [ 94%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogHelperMethods::test_log_auth_failure PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogHelperMethods::test_log_data_access PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogHelperMethods::test_log_analysis_created PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerLogHelperMethods::test_log_security_alert PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogIntegrity::test_verify_valid_entry PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogIntegrity::test_verify_tampered_entry PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogIntegrity::test_verify_missing_checksum PASSED [ 95%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogRetrieval::test_get_entries_returns_logged_entries PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogRetrieval::test_get_entries_filters_by_event_type PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogRetrieval::test_get_entries_respects_limit PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_ndjson_format PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_json_format PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_invalid_format_raises PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_filters_by_date PASSED [ 96%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerStats::test_get_stats_returns_dict PASSED [ 97%]
+tests/unit/utils/test_audit_logger.py::TestAuditLoggerStats::test_stats_counts_files PASSED [ 97%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogImmutability::test_audit_log_entry_is_frozen PASSED [ 97%]
+tests/unit/utils/test_audit_logger.py::TestAuditLogImmutability::test_model_config_frozen PASSED [ 97%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFile::test_valid_wav_file PASSED [ 97%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFile::test_invalid_extension_rejected PASSED [ 97%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFile::test_invalid_mime_type_rejected PASSED [ 97%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFile::test_seek_reset_after_validation PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestCheckFileSize::test_file_within_limit_ok PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestCheckFileSize::test_file_over_limit_rejected PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestValidateVideoFile::test_invalid_video_extension_rejected PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestValidateVideoFile::test_valid_mp4_extension PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestCheckUploadSize::test_file_with_size_attribute PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestCheckUploadSize::test_file_size_none_uses_streaming PASSED [ 98%]
+tests/unit/utils/test_file_validation.py::TestCheckUploadSizeStreaming::test_empty_file_rejected PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestCheckUploadSizeStreaming::test_large_file_rejected PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFileFallback::test_wav_validation_with_mock PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFileFallback::test_mp3_validation_with_mock PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFileFallback::test_ogg_validation_with_mock PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestValidateAudioFileFallback::test_invalid_signature_rejected PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestConstants::test_allowed_extensions PASSED [ 99%]
+tests/unit/utils/test_file_validation.py::TestConstants::test_max_file_size PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_mock_mode
+  /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/lib/python3.13/site-packages/audioread/rawread.py:16: DeprecationWarning: aifc was removed in Python 3.13. Please be aware that you are currently NOT using standard 'aifc', but instead a separately installed 'standard-aifc'.
+    import aifc
+
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_mock_mode
+  /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/lib/python3.13/site-packages/audioread/rawread.py:19: DeprecationWarning: sunau was removed in Python 3.13. Please be aware that you are currently NOT using standard 'sunau', but instead a separately installed 'standard-sunau'.
+    import sunau
+
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_mock_mode
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_no_patient_id
+tests/integration/test_audio_endpoint.py::TestAudioAzureErrors::test_quota_exceeded_returns_429
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_extension_case_sensitivity
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/services/audio_analysis.py:62: UserWarning: PySoundFile failed. Trying audioread instead.
+    y, sr = librosa.load(str(audio_path), sr=self.sample_rate, mono=True)
+
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_mock_mode
+tests/integration/test_audio_endpoint.py::TestAudioEndpointSuccess::test_analyze_audio_no_patient_id
+tests/integration/test_audio_endpoint.py::TestAudioAzureErrors::test_quota_exceeded_returns_429
+tests/integration/test_upload_security.py::TestUploadSecurity::test_upload_extension_case_sensitivity
+  /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/lib/python3.13/site-packages/librosa/core/audio.py:184: FutureWarning: librosa.core.audio.__audioread_load
+  	Deprecated as of librosa version 0.10.0.
+  	It will be removed in librosa version 1.0.
+    y, sr_native = __audioread_load(path, offset, duration, dtype)
+
+tests/integration/test_audio_endpoint.py: 1 warning
+tests/integration/test_audit_endpoints.py: 17 warnings
+tests/integration/test_audit_export.py: 20 warnings
+tests/integration/test_auth_endpoints.py: 1 warning
+tests/unit/utils/test_audit_logger.py: 25 warnings
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/utils/audit_logger.py:156: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
+tests/integration/test_audio_endpoint.py: 2 warnings
+tests/integration/test_audit_endpoints.py: 25 warnings
+tests/integration/test_audit_export.py: 48 warnings
+tests/integration/test_auth_endpoints.py: 2 warnings
+tests/integration/test_multimodal_endpoint.py: 4 warnings
+tests/integration/test_rate_limit_endpoints.py: 19 warnings
+tests/integration/test_text_endpoint.py: 16 warnings
+tests/integration/test_upload_security.py: 1 warning
+tests/integration/test_video_endpoint.py: 6 warnings
+tests/load/test_rate_limit_parallel.py: 250 warnings
+tests/unit/utils/test_audit_logger.py: 25 warnings
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/utils/audit_logger.py:317: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    retention_until = datetime.utcnow() + timedelta(days=365)
+
+tests/integration/test_audio_endpoint.py: 2 warnings
+tests/integration/test_audit_endpoints.py: 25 warnings
+tests/integration/test_audit_export.py: 48 warnings
+tests/integration/test_auth_endpoints.py: 2 warnings
+tests/integration/test_multimodal_endpoint.py: 4 warnings
+tests/integration/test_rate_limit_endpoints.py: 19 warnings
+tests/integration/test_text_endpoint.py: 16 warnings
+tests/integration/test_upload_security.py: 1 warning
+tests/integration/test_video_endpoint.py: 6 warnings
+tests/load/test_rate_limit_parallel.py: 250 warnings
+tests/unit/utils/test_audit_logger.py: 26 warnings
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/models/audit_log.py:81: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    default_factory=lambda: datetime.utcnow(),
+
+tests/integration/test_audio_endpoint.py::TestAudioEndpointValidation::test_file_too_large_rejected
+tests/integration/test_video_endpoint.py::TestVideoEndpointValidation::test_file_too_large_rejected
+  /usr/lib/python3.13/asyncio/events.py:89: DeprecationWarning: 'HTTP_413_REQUEST_ENTITY_TOO_LARGE' is deprecated. Use 'HTTP_413_CONTENT_TOO_LARGE' instead.
+    self._context.run(self._callback, *self._args)
+
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_with_date_filter
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/integration/test_audit_endpoints.py:208: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    past_date = (datetime.utcnow() - timedelta(days=2)).isoformat()
+
+tests/integration/test_audit_endpoints.py::TestAuditExportEndpoint::test_export_with_date_filter
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/integration/test_audit_endpoints.py:209: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    future_date = (datetime.utcnow() - timedelta(days=1)).isoformat()
+
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_timestamp_accuracy
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/integration/test_audit_export.py:301: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    before_log = datetime.utcnow()
+
+tests/integration/test_audit_export.py::TestLGPDCompliance::test_timestamp_accuracy
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/integration/test_audit_export.py:311: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    after_log = datetime.utcnow()
+
+tests/integration/test_auth_endpoints.py: 4 warnings
+tests/integration/test_cors_origins.py: 7 warnings
+tests/integration/test_cors_production.py: 5 warnings
+tests/integration/test_error_handling.py: 4 warnings
+tests/integration/test_rate_limit_endpoints.py: 100 warnings
+tests/integration/test_request_timeout.py: 4 warnings
+tests/integration/test_security_headers.py: 9 warnings
+tests/security/test_csp_policy.py: 8 warnings
+tests/unit/test_placeholder.py: 1 warning
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/api/routes/health.py:67: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(),
+
+tests/integration/test_error_handling.py::TestExceptionHandlers::test_validation_error_handler
+  /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/lib/python3.13/site-packages/httpx/_models.py:408: DeprecationWarning: Use 'content=<...>' to upload raw bytes/text content.
+    headers, stream = encode_request(
+
+tests/integration/test_multimodal_endpoint.py: 6 warnings
+tests/integration/test_rate_limit_endpoints.py: 1 warning
+tests/integration/test_text_endpoint.py: 12 warnings
+tests/integration/test_video_endpoint.py: 6 warnings
+tests/load/test_rate_limit_parallel.py: 67 warnings
+tests/unit/services/test_multimodal_fusion.py: 6 warnings
+tests/unit/services/test_text_analysis.py: 2 warnings
+  /home/vagner-barbosa/.cache/pypoetry/virtualenvs/multimodal-health-analysis-a0v-8Ugt-py3.13/lib/python3.13/site-packages/pydantic/main.py:263: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+
+tests/unit/utils/test_audit_logger.py::TestAuditLogIntegrity::test_verify_tampered_entry
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/unit/utils/test_audit_logger.py:327: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(),
+
+tests/unit/utils/test_audit_logger.py::TestAuditLogIntegrity::test_verify_missing_checksum
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/unit/utils/test_audit_logger.py:343: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat(),
+
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_filters_by_date
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/unit/utils/test_audit_logger.py:492: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    future_start = datetime.utcnow() + timedelta(days=1)
+
+tests/unit/utils/test_audit_logger.py::TestAuditLogExport::test_export_filters_by_date
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/tests/unit/utils/test_audit_logger.py:493: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    future_end = datetime.utcnow() + timedelta(days=2)
+
+tests/unit/utils/test_audit_logger.py::TestAuditLogImmutability::test_audit_log_entry_is_frozen
+  /home/vagner-barbosa/Documentos/DevZone/tech-challenge-fase-4/src/models/audit_log.py:134: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    default_factory=lambda: datetime.utcnow(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.7-final-0 ________________
+
+Name                                          Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------
+src/__init__.py                                   0      0   100%
+src/api/__init__.py                               0      0   100%
+src/api/main.py                                  97     25    74%   55, 63-68, 129-137, 202, 209-217, 230-241, 317-334, 349-376
+src/api/middleware/cors_security.py             114     20    82%   56-63, 123, 209-228, 323, 376
+src/api/middleware/rate_limit.py                 82     36    56%   75-114, 125-129, 147-165, 266, 292-308
+src/api/middleware/request_timeout.py            64      8    88%   195-234
+src/api/routes/__init__.py                        2      0   100%
+src/api/routes/admin.py                         105     43    59%   69, 76-82, 92-96, 150-206, 240-283, 403, 450-460, 520
+src/api/routes/audio.py                          85     19    78%   122-128, 160-165, 171-176, 182-187, 193-198, 302-305, 315-320
+src/api/routes/auth.py                           49     10    80%   35, 74-78, 98-110, 160-163
+src/api/routes/dependencies.py                   63     17    73%   66, 215-221, 247-250, 267-273, 293-297
+src/api/routes/health.py                         28      7    75%   32, 75-76, 104-112
+src/api/routes/multimodal.py                    111     51    54%   121-126, 141-161, 168-196, 229, 231, 262-280, 287, 289, 311-337
+src/api/routes/text.py                           36      7    81%   165-178, 217-220
+src/api/routes/video.py                          86      5    94%   255-273
+src/core/__init__.py                              0      0   100%
+src/core/cache.py                                58      0   100%
+src/core/config.py                              134     31    77%   26, 42-47, 376, 379, 381, 390, 397-405, 414-420, 431, 440, 445, 450, 455
+src/core/exceptions.py                           44     12    73%   35-36, 48-49, 61-63, 97-105, 118, 141-146
+src/core/logging_config.py                       45      8    82%   96, 152, 156-167
+src/core/rate_limit.py                           84     20    76%   52-56, 61-65, 113-119, 126-132, 144-145, 194-197
+src/core/security/__init__.py                     5      0   100%
+src/core/security/auth.py                       137     28    80%   52-53, 65-76, 88, 105-106, 193, 313, 344-345, 369-373, 462-466, 500-502, 512-514
+src/core/security/file_validator.py             172     36    79%   107-109, 120, 157-158, 194, 206-211, 255-287, 448, 500, 508, 523, 551-557, 561-572
+src/core/security/log_sanitizer.py              122     13    89%   117-120, 140-143, 210, 230, 246, 280, 321-331
+src/core/security/models.py                      23      7    70%   52, 62, 80-85
+src/core/security/rate_limiter.py               180     55    69%   33, 44, 57, 69, 121, 142-154, 158-169, 173-181, 185-194, 198-204, 382-387
+src/core/temp_file_manager.py                    50      4    92%   92-93, 105-106
+src/infrastructure/__init__.py                    2      0   100%
+src/infrastructure/azure_clients.py              49      0   100%
+src/infrastructure/azure_speech_client.py       129     24    81%   296-320, 329-333, 361, 363, 366, 375
+src/infrastructure/content_safety_client.py      68      1    99%   191
+src/models/__init__.py                            3      0   100%
+src/models/audit_log.py                          69     11    84%   143, 148-150, 157-161, 230, 238
+src/models/schemas.py                           100      4    96%   58, 375-377
+src/services/__init__.py                          4      0   100%
+src/services/audio_analysis.py                  102      2    98%   83, 87
+src/services/bleeding_detector.py                41      0   100%
+src/services/multilingual_risk_detector.py       85      2    98%   145-146
+src/services/multimodal_fusion.py               209     26    88%   65, 170, 273-306, 321-323, 361-369, 408, 427
+src/services/posture_analyzer.py                119      3    97%   94, 132, 195
+src/services/risk_calculator_video.py            51      0   100%
+src/services/risk_detector.py                    37      1    97%   108
+src/services/text_analysis.py                   104      4    96%   151, 156, 161, 166
+src/services/video_analysis.py                   98      2    98%   96, 213
+src/services/video_processor.py                  61      4    93%   86, 93, 122, 166
+src/services/yolo_service.py                     49      6    88%   49-50, 73, 84, 100, 106
+src/utils/__init__.py                             2      0   100%
+src/utils/audit_logger.py                       243     79    67%   138-143, 161, 186-210, 214-226, 275-276, 346-348, 359-360, 561-572, 605, 609-610, 628-632, 658-701, 751-752
+src/utils/file_validation.py                    133     52    61%   50-51, 64, 94-100, 106, 141-146, 215, 231-251, 305-311, 342-362, 381-424
+src/utils/text_utils.py                          23      8    65%   67, 80-81, 93-94, 108-110
+---------------------------------------------------------------------------
+TOTAL                                          3757    691    82%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+Required test coverage of 70% reached. Total coverage: 81.61%
+========== 675 passed, 43 skipped, 1125 warnings in 61.18s (0:01:01) ===========

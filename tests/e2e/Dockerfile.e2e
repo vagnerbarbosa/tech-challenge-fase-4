@@ -1,0 +1,78 @@
+# ===========================================
+# Dockerfile E2E - Slim sem YOLO/PyTorch (~3GB vs 13GB)
+# Spec 011 - Testing Strategy E2E
+# ===========================================
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# -------------------------------------------
+# Instalar dependencias do sistema (audio apenas)
+# -------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsndfile1 \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# -------------------------------------------
+# Copiar arquivos de dependencias
+# -------------------------------------------
+COPY pyproject.toml poetry.lock ./
+
+# -------------------------------------------
+# Instalar Poetry e dependencias (sem torch/yolo)
+# -------------------------------------------
+RUN pip install --no-cache-dir poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --without dev --no-interaction --no-ansi || \
+    (pip install \
+        fastapi \
+        uvicorn \
+        python-multipart \
+        librosa \
+        soundfile \
+        azure-cognitiveservices-speech \
+        azure-ai-textanalytics \
+        pydantic \
+        pydantic-settings \
+        python-dotenv \
+        httpx \
+        structlog \
+        pillow \
+        numpy \
+        sqlalchemy \
+        aiosqlite \
+        aiofiles \
+        python-magic)
+
+# -------------------------------------------
+# Copiar codigo fonte
+# -------------------------------------------
+COPY src/ ./src/
+
+# -------------------------------------------
+# Variaveis de ambiente padrao
+# -------------------------------------------
+ENV PYTHONPATH=/app
+ENV MOCK_MODE=true
+ENV LOG_LEVEL=INFO
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# -------------------------------------------
+# Expor porta
+# -------------------------------------------
+EXPOSE 8000
+
+# -------------------------------------------
+# Health check
+# -------------------------------------------
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# -------------------------------------------
+# Comando de execucao
+# -------------------------------------------
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
