@@ -807,6 +807,44 @@ Baseado em dados reais do [Hospital da UEM](https://www.parana.pr.gov.br/aen/Not
 
 vs **R$ 5.410** do Azure puro = **Economia de 79%**
 
+##### Componentes de Infraestrutura Adicionais (Produção Real)
+
+Além dos custos de processamento acima, um ambiente de produção hospitalar requer:
+
+**Redis (Rate Limiting Distribuído):**
+| Aspecto | MVP (Local) | Produção (Redis) |
+|---------|-------------|------------------|
+| Implementação | In-memory | Azure Cache for Redis |
+| Custo mensal | R$ 0 | R$ 50-200 |
+| Motivação | Single instance | Multi-instance, persistência de quotas |
+
+**Azure SQL Database (Persistência Histórica):**
+| Aspecto | MVP (SQLite) | Produção (Azure SQL) |
+|---------|--------------|---------------------|
+| Implementação | File-based | Managed cloud database |
+| Custo mensal | R$ 0 | R$ 30-150 |
+| Motivação | Local storage | Backup automático, alta disponibilidade, LGPD compliance |
+| Casos de uso | - | Histórico de análises, dashboard de tendências, auditoria completa |
+
+**Load Testing (Validação de Performance):**
+| Aspecto | MVP | Produção |
+|---------|-----|----------|
+| Ferramenta | pytest (funcional) | Locust/k6 + Azure Load Testing |
+| Custo mensal | R$ 0 | R$ 0-500 (variável) |
+| Motivação | Testes de funcionalidade | Validar carga: 100+ UTIs simultâneas, latência p95/p99 |
+| Execução | - | Periódica (pré-deploy de releases) |
+
+**Custo Total de Produção Real (mensal):**
+| Componente | Custo (R$) |
+|------------|-----------|
+| Processamento (híbrido) | R$ 1.130 |
+| Redis (Azure Cache) | R$ 100 |
+| Azure SQL Database | R$ 80 |
+| Load Testing (estimado) | R$ 100 |
+| **Total Produção Real** | **R$ 1.410** |
+
+> **Nota**: Mesmo com esses componentes adicionais, o custo de produção (R$ 1.410/mês) ainda é **74% mais barato** que o Azure puro (R$ 5.410/mês), mantendo o compliance LGPD com dados brutos no hospital.
+
 #### Conclusão
 
 | Cenário | Recomendação | Justificativa |
