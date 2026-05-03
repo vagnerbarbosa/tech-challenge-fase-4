@@ -752,6 +752,15 @@ Baseado em dados reais do [Hospital da UEM](https://www.parana.pr.gov.br/aen/Not
 | **500K análises** | **R$ 11.500** | **R$ 9.500** | **Local** (17% mais barato) |
 | 1M análises | R$ 22.000 | R$ 10.000 | **Local** (55% mais barato) |
 
+> **Nota:** Os valores apresentados são estimativas baseadas em pesquisas rápidas na web e têm caráter meramente didático. Na prática, os custos reais podem variar significativamente devido a:
+> - Flutuações cambiais (USD/BRL)
+> - Alterações nas políticas de preço dos provedores de cloud
+> - Configurações específicas de região e contrato
+> - Custos ocultos de networking, egress e compliance
+> - Necessidades de hardware e mão de obra no cenário local
+>
+> Recomenda-se sempre realizar um orçamento detalhado com os provedores antes de decisões de arquitetura em produção.
+
 ##### TCO 3 Anos (Cenário Hospital 216K análises/mês)
 
 | Aspecto | Azure | Local |
