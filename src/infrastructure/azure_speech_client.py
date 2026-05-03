@@ -265,15 +265,17 @@ class AzureSpeechClient:
 
             # Processa resultado (comum para ambos os modos)
             if result.reason == ResultReason.RecognizedSpeech:
+                # Confidence pode não estar disponível no modo auto-detect
+                confidence = getattr(result, 'confidence', 0.0) or 0.0
                 logger.info(
                     "azure_speech_transcribe_success",
                     text_length=len(result.text),
-                    confidence=result.confidence,
+                    confidence=confidence,
                     detected_language=detected_language,
                 )
                 return {
                     "transcricao": result.text,
-                    "confianca": result.confidence,
+                    "confianca": confidence,
                     "idioma_detectado": detected_language,
                     "sucesso": True,
                 }
