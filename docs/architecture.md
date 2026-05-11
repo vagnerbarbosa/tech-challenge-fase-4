@@ -144,6 +144,24 @@
 
 ## Risk Detection
 
+### Estratégia de Fusão Multimodal (Late Fusion)
+
+O sistema utiliza uma abordagem de **Late Fusion (Fusão Tardia)**, onde cada modalidade é processada independentemente e seus resultados são combinados na camada final.
+
+**Lógica de Cálculo**:
+A decisão final de risco é baseada em uma média ponderada das confianças de cada modalidade:
+$$Risco_{Final} = \\frac{\\sum (Peso_{modalidade} \\times Confiança_{modalidade})}{\\sum Pesos}$$
+
+**Critérios de Decisão**:
+1. **Independência**: Se apenas uma modalidade for fornecida, o risco é baseado apenas nela.
+2. **Reforço**: Se múltiplas modalidades indicam "Alto Risco", a confiança do resultado final é elevada.
+3. **Degradação Graciosa**: Se um serviço Azure falhar, o sistema ignora aquela modalidade e recalcula a fusão com as demais, emitindo um alerta nos metadados.
+
+**Por que Late Fusion?**
+- **Simplicidade**: Permite a evolução independente de cada modelo (ex: atualizar YOLOv8 sem afetar o processamento de texto).
+- **Robustez**: Evita que a falha de um único serviço (ex: Azure Speech) derrube toda a análise multimodal.
+- **Transparência**: É possível rastrear exatamente qual modalidade contribuiu para o alerta de risco.
+
 ### Violence Risk Keywords
 Located in `src/core/config.py` - `RISK_KEYWORDS["violencia"]`
 - Physical: bater, soco, chute, empurrar, tapa

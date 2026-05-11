@@ -1,7 +1,7 @@
 # Análise de Decomposição em Microserviços com DDD
 
 > **Data**: 2026-05-03  
-> **Versão**: 0.9.0  
+> **Versão**: 1.0.0  
 > **Escopo**: Análise estratégica - não implementar
 
 ---
