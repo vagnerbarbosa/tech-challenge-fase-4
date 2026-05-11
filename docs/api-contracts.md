@@ -30,7 +30,7 @@ Check system health and Azure quota status.
 ```json
 {
   "status": "healthy",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "timestamp": "2026-04-21T12:00:00Z",
   "services": {
     "text_analytics": "connected",

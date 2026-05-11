@@ -1,8 +1,8 @@
 # Análise de Conformidade - Tech Challenge Fase 4
 
 **Versão:** 2.0
-**Data:** 2026-05-02
-**Status:** Projeto Concluído - v0.9.0
+**Data**: 2026-05-02
+**Status**: Projeto Concluído - v1.0.0
 
 ---
 
@@ -18,7 +18,27 @@
 
 ---
 
-## 1. Estratégia YOLOv8 Local (Decisão Arquitetural)
+## 1. Detalhamento da Conformidade LGPD
+
+### 1.1 Fluxo de Dados e Anonimização
+
+Para garantir a privacidade dos pacientes, a API implementa o seguinte ciclo de vida de dados:
+
+1. **Ingestão**: O `patient_id` é recebido via request.
+2. **Anonimização Imediata**: O ID é processado via SHA-256 com salt para criar um identificador único anônimo.
+3. **Processamento**: Apenas o ID anônimo é utilizado para nomear arquivos temporários e logs de auditoria.
+4. **Armazenamento Temporário**: Arquivos de mídia são salvos em diretórios temporários com permissões restritas.
+5. **Limpeza Rigorosa**: Implementação de blocos `try...finally` em todos os serviços de análise, garantindo a deleção do arquivo independentemente do sucesso ou falha da requisição.
+6. **Auditoria**: Logs de auditoria registram *quem* acessou e *quando*, mas nunca o *conteúdo* da mídia ou PII em texto claro.
+
+### 1.2 Matriz de Responsabilidades (Privacy by Design)
+
+| Componente | Ação de Privacidade | Evidência no Código |
+|-----------|---------------------|-------------------|
+| `TempFileManager` | Auto-cleanup de arquivos | `src/core/temp_file_manager.py` |
+| `AuditLogger` | Hashing de IPs e IDs | `src/utils/audit_logger.py` |
+| `LogSanitizer` | Mascaramento de segredos | `src/core/security/log_sanitizer.py` |
+| `FastAPI Middleware` | Headers de segurança | `src/api/middleware/cors_security.py` |
 
 ### Por que YOLOv8 Local?
 
@@ -196,7 +216,7 @@
 | Tecnologias multimodais | ✅ Completo | YOLOv8 + Azure Vision listados |
 | Stack tecnológico | ✅ Completo | ultralytics, opencv incluídos |
 | Como executar | ✅ Completo | Docker, local, mocks documentados |
-| Versão atual | ✅ Completo | v0.9.0 refletida em todos os exemplos |
+| Versão atual | ✅ Completo | v1.0.0 refletida em todos os exemplos |
 
 ### CLAUDE.md
 
@@ -257,7 +277,7 @@
 
 ```
 Data de Conclusão: 2026-05-01
-Versão Final: 0.9.0
+Versão Final: 1.0.0
 Status: Produção
 
 Resumo da Entrega:
@@ -279,7 +299,7 @@ Links:
 
 ## 7. Recomendações
 
-### ✅ Entregues em v0.9.0
+### ✅ Entregues em v1.0.0
 
 1. ✅ **YOLOv8 Service** - Implementado segundo spec 004a
 2. ✅ **Endpoint `/analyze/audio`** - Com transcrição e prosódia

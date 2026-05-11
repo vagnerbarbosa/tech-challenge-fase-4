@@ -2,7 +2,7 @@
 
 import time
 import uuid
-from typing import Any, cast
+from typing import Any
 
 from azure.ai.textanalytics import TextAnalyticsClient
 
@@ -93,7 +93,7 @@ class TextAnalysisService:
             cached_result.metadata.tempo_processamento_ms = tempo_processamento_ms
             cached_result.metadata.cache_hit = True
             cached_result.metadata.azure_calls = 0
-            return cast(TextAnalysisResponse, cached_result)
+            return cached_result
 
         try:
             # Sanitiza entrada

@@ -40,11 +40,11 @@ class VisionAnalysisResponse(BaseModel):
 class ContentSafetyRequest(BaseModel):
     text: str
     categories: list[str] | None = None
-    outputType: str = "FourSeverityLevels"
+    output_type: str = "FourSeverityLevels"
 
 
 class ContentSafetyResponse(BaseModel):
-    categoriesAnalysis: list[dict[str, Any]]
+    categories_analysis: list[dict[str, Any]]
 
 
 # ==========================================

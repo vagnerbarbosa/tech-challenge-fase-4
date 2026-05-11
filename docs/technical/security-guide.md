@@ -204,9 +204,24 @@ class BOLAProtector:
 
 **Para Pleno**: O BOLA é validado em camada de serviço, não apenas no middleware. Isso garante proteção mesmo se o middleware for bypassado.
 
-#### 2.2.3 Rate Limiting
+#### 2.2.3 Rate Limiting e Proteção de Quota Azure
 
 **Algoritmo**: Token Bucket
+
+**Implementação do QuotaManager**:
+Para evitar custos inesperados no Azure Free Tier, o sistema implementa um `QuotaManager` persistente que controla o consumo diário e mensal de cada serviço:
+
+- **Text Analytics**: Limite de 160 requests/dia (5.000/mês).
+- **Speech Services**: Limite de 10 minutos/dia (300/mês).
+- **Computer Vision**: Limite de 160 requests/dia (5.000/mês).
+
+**Comportamento de "Hard Stop"**:
+Quando a quota é excedida, a API não faz a chamada ao Azure e retorna imediatamente:
+- **Status**: `HTTP 429 (Too Many Requests)`
+- **Header**: `Retry-After` indicando quando a quota será resetada.
+- **Log**: Registro de aviso com o `correlation_id` da tentativa.
+
+Esta estratégia garante que o projeto nunca gere cobranças inesperadas no cartão de crédito do proprietário da conta Azure.
 
 ```python
 # Configuração em src/core/config.py
@@ -215,6 +230,12 @@ class Settings:
     RATE_LIMIT_PER_MINUTE: int = 60      # Geral
     AUTH_RATE_LIMIT_PER_MINUTE: int = 5   # Auth endpoints
 ```
+
+**Lógica de Funcionamento**:
+1. **Interceptação**: O `QuotaManager` é invocado antes de cada chamada ao SDK do Azure.
+2. **Verificação**: Consulta o contador persistente (Redis ou arquivo) para o serviço solicitado.
+3. **Decisão**: Se `consumo_atual >= limite_diario`, dispara a exceção de quota excedida.
+4. **Atualização**: Após sucesso da chamada Azure, incrementa o contador de consumo.
 
 **Implementação**:
 ```python

@@ -14,7 +14,7 @@
 
 **Análise multimodal de saúde da mulher usando Azure AI Services e YOLOv8 local**
 
-> **📅 Atualizado**: 2026-05-02 | **Versão**: 0.9.0 | **Status**: Produção
+> **📅 Atualizado**: 2026-05-10 | **Versão**: 1.0.0 | **Status**: Produção
 
 ---
 
@@ -70,32 +70,74 @@ curl http://localhost:8000/health
 
 ---
 
-## 🔒 Segurança
+## 🔒 Segurança e Autenticação
 
 API com hardening completo (OWASP API Top 10 + LGPD):
 
-- ✅ **Autenticação**: API Key via header `X-API-Key`
-- ✅ **Rate Limiting**: Proteção contra DDoS
-- ✅ **Uploads**: Validação via magic bytes
-- ✅ **Logs**: Sanitização automática de PII
-- ✅ **Headers**: CSP, HSTS, X-Frame-Options
+### Como Autenticar
+Todas as requisições protegidas devem incluir a API Key no header:
+`X-API-Key: sua-api-key-aqui`
+
+- **Desenvolvimento**: Use `dev-api-key`.
+- **Produção**: Use chaves geradas via `/admin/api-key` ou configuradas no `.env`.
+
+### Camadas de Proteção
+- ✅ **Rate Limiting**: Proteção contra DDoS e abuso de quota Azure.
+- ✅ **Uploads**: Validação rigorosa via magic bytes.
+- ✅ **Logs**: Sanitização automática de PII (LGPD).
+- ✅ **Headers**: CSP, HSTS, X-Frame-Options.
 
 📖 Detalhes: [Guia de Segurança](docs/technical/security-guide.md)
 
 ---
 
-## 📡 Endpoints da API
+## 📡 Guia de Requisições (API Guide)
 
-| Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/health` | GET | Health check com quotas Azure |
-| `/analyze/text` | POST | Análise de texto + Content Safety |
-| `/analyze/audio` | POST | Transcrição + prosódia |
-| `/analyze/video` | POST | Análise YOLOv8 local |
-| `/analyze/multimodal` | POST | Fusão de modalidades |
-| `/docs` | GET | Swagger UI |
+### 1. Análise de Texto
+**Endpoint**: `POST /analyze/text`  
+**Payload**: `{"texto": "Sinto medo", "patient_id": "id123"}`
+```bash
+curl -X POST "http://localhost:8000/analyze/text" \
+     -H "X-API-Key: dev-api-key" \
+     -H "Content-Type: application/json" \
+     -d '{"texto": "Estou me sentindo muito ansiosa", "patient_id": "123"}'
+```
 
-📖 **Documentação completa**: [docs/api-contracts.md](docs/api-contracts.md)
+### 2. Análise de Áudio
+**Endpoint**: `POST /analyze/audio`  
+**Formatos**: WAV, MP3, OGG (Max 50MB)
+```bash
+curl -X POST "http://localhost:8000/analyze/audio" \
+     -H "X-API-Key: dev-api-key" \
+     -F "file=@audio.wav" \
+     -F "patient_id=123"
+```
+
+### 3. Análise de Vídeo
+**Endpoint**: `POST /analyze/video`  
+**Formatos**: MP4, AVI, MOV (Max 2min)
+```bash
+curl -X POST "http://localhost:8000/analyze/video" \
+     -H "X-API-Key: dev-api-key" \
+     -F "video=@video.mp4" \
+     -F "patient_id=123"
+```
+
+### 4. Análise Multimodal (Fusão)
+**Endpoint**: `POST /analyze/multimodal`
+```bash
+curl -X POST "http://localhost:8000/analyze/multimodal" \
+     -H "X-API-Key: dev-api-key" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "texto", "audio_file": "audio.wav"}'
+```
+
+### ⚠️ Tratamento de Erros
+| Código | Significado | Ação |
+|--------|-------------|-------|
+| `401` | Unauthorized | Verifique a `X-API-Key` |
+| `429` | Too Many Requests | Aguarde o tempo no header `Retry-After` |
+| `400` | Bad Request | Verifique o formato do payload/arquivo |
 
 ---
 
@@ -111,15 +153,27 @@ O vídeo demonstra:
 
 ---
 
-## 🛠️ Scripts
+## 🛠️ Scripts e Configuração
 
+### Scripts Disponíveis
 | Script | Descrição |
 |--------|-----------|
-| `./scripts/run-mock.sh` | Inicia com Docker + Mocks |
+| `./scripts/run-mock.sh` | Inicia com Docker + Mocks (Recomendado) |
 | `./scripts/run.sh` | Inicia localmente com Poetry |
 | `./scripts/test-docker.sh` | Executa testes via Docker |
 | `./scripts/lint.sh` | Verifica código (Ruff + mypy) |
 | `./scripts/check-azure.sh` | Verifica credenciais Azure |
+
+### Variáveis de Ambiente (`.env`)
+| Variável | Descrição | Padrão (Dev) |
+|----------|-----------|---------------|
+| `SECURITY_API_KEY` | Chave mestra de autenticação | `dev-api-key` |
+| `SECURITY_ENVIRONMENT` | Ambiente da aplicação | `development` |
+| `AZURE_TEXT_KEY` | Key do Azure Text Analytics | `your-key` |
+| `AZURE_TEXT_ENDPOINT` | Endpoint do Azure Text | `https://...` |
+| `AZURE_SPEECH_KEY` | Key do Azure Speech | `your-key` |
+| `AZURE_SPEECH_REGION` | Região do Azure Speech | `eastus` |
+| `CONTENT_SAFETY_ENABLED` | Habilita Azure Content Safety | `true` |
 
 ---
 
@@ -140,7 +194,7 @@ O vídeo demonstra:
 | 001-009 | Core + Deploy | ✅ Concluído |
 | 010 | Content Safety Multilíngue | ✅ Concluído |
 | 011 | Testing Strategy E2E | ✅ Concluído |
-| 012 | Documentação Final | ⏳ Pendente |
+| 012 | Documentação Final | ✅ Concluído |
 
 ---
 

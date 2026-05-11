@@ -1,7 +1,7 @@
 # Índice de Especificações
 
 **Projeto**: Tech Challenge Fase 4
-**Atualizado**: 2026-05-03
+**Atualizado**: 2026-05-10
 
 ---
 
@@ -48,10 +48,10 @@ specs/
 | 008 | Testes Automatizados | ✅ Concluído | `main` | P1 |
 | 009 | Deploy Azure | ✅ Concluído | `main` | P1 |
 | 010 | Content Safety Multilíngue | ✅ Concluído | `main` | P1 |
-| 011 | Testing Strategy E2E | 🔄 Em Progresso | `011-testing-strategy` | P1 |
-| 012 | Documentação Final | ⏳ Pendente | `main` | P1 |
+| 011 | Testing Strategy E2E | ✅ Concluído| `main` | P1 |
+| 012 | Documentação Final | ✅ Concluído | `main` | P1 |
 
-> **Nota**: Specs P0-P1 concluídas. Projeto na versão 0.9.0.
+> **Nota**: Specs P0-P1 concluídas. Projeto na versão 1.0.0.
 
 ---
 
