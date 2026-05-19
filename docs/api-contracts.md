@@ -4,7 +4,7 @@
 
 ```
 Development: http://localhost:8000
-Production:  (your-azure-deployment).azurewebsites.net
+Production: http://20.226.206.126:8000
 ```
 
 ## Authentication

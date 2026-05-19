@@ -12,9 +12,9 @@
 ## Summary
 
 ✅ Todas as tasks foram concluídas com sucesso. A aplicação está online em:
-- **URL**: `http://<your-azure-ip>:8000` (substitua pelo IP atribuído pelo Azure)
-- **Health**: `http://<your-azure-ip>:8000/health`
-- **Docs**: `http://<your-azure-ip>:8000/docs`
+- **URL**: `http://20.226.206.126:8000` (substitua pelo IP atribuído pelo Azure)
+- **Health**: `http://20.226.206.126:8000/health`
+- **Docs**: `http://20.226.206.126:8000/docs`
 
 ---
 
@@ -86,7 +86,7 @@
 - [X] T026 Configurar IP público no Container Instance
 - [X] T027 Configurar health check no workflow (endpoint `/health`)
 
-**Checkpoint**: US1 funcional - URL `http://<your-azure-ip>:8000` retorna health check 200 ✅
+**Checkpoint**: US1 funcional - URL `http://20.226.206.126:8000` retorna health check 200 ✅
 
 ---
 
@@ -166,7 +166,7 @@
    - Resource Group: `rg-tech-challenge-fase4`
    - Container Instance: `tech-challenge-api`
    - Azure AI Services: Text, Speech, Vision
-   - IP público: `<your-azure-ip>:8000` (substitua pelo IP real após deploy)
+   - IP público: `20.226.206.126:8000` (substitua pelo IP real após deploy)
 
 3. **Scripts de Suporte**
    - `scripts/check-azure.sh` - Diagnóstico e operações
