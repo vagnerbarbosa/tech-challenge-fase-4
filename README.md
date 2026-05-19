@@ -149,7 +149,7 @@ O vídeo demonstra:
 - Identificação de sinais de alerta
 - Deploy na Azure
 
-📹 **Link do vídeo**: [YouTube - Tech Challenge Fase 4](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+📹 **Link do vídeo**: [YouTube - Tech Challenge Fase 4](https://www.youtube.com/watch?v=4dPCyD-BsJ4)
 
 ---
 
